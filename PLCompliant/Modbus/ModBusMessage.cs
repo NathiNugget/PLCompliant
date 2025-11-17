@@ -11,22 +11,32 @@ namespace PLCompliant.Modbus
 {
     public class ModBusMessage : IProtocolMessage
     {
-        ModBusHeader header = new();
-        ModBusData data = new();
+        ModBusHeader _header = new();
+        ModBusData _data = new();
 
+
+        public ModBusHeader Header { get { return _header; } }
+        public ModBusData Data { get { return _data; } }
+
+
+        public ModBusMessage(ModBusHeader header, ModBusData data)
+        {
+            _header = header;
+            _data = data;
+        }
 
         public void AddData(UInt16 inputData)
         {
-            var newSize = data.payload.Length + Marshal.SizeOf<UInt16>();
-            Array.Resize(ref data.payload, newSize);
+            var newSize = _data.payload.Length + Marshal.SizeOf<UInt16>();
+            Array.Resize(ref _data.payload, newSize);
             byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
-            Array.Copy(bytes, data.payload, bytes.Length);
+            Array.Copy(bytes, _data.payload, bytes.Length);
         }
 
         public byte[] Serialize()
         {
-            byte[] headerData = header.Serialize();
-            byte[] payloadData = data.Serialize();
+            byte[] headerData = _header.Serialize();
+            byte[] payloadData = _data.Serialize();
             byte[] result = new byte[headerData.Length + payloadData.Length];
             Array.Copy(headerData, result, headerData.Length);
             Array.Copy(payloadData, 0, result, headerData.Length, payloadData.Length);
@@ -35,12 +45,12 @@ namespace PLCompliant.Modbus
         }
         public void DeserializeHeader(byte[] inputBuffer)
         {
-            header.Deserialize(inputBuffer);
+            _header.Deserialize(inputBuffer);
         }
         public void DeserializeData(byte[] inputBuffer)
         {
-            data.Deserialize(inputBuffer);
+            _data.Deserialize(inputBuffer);
         }
-        public int DataSize { get { return data.Size; } }
+        public int DataSize { get { return _data.Size; } }
     }
 }
