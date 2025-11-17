@@ -12,6 +12,7 @@ namespace PLCompliant.Interface
     public interface IProtocolMessage
     {
         public void AddData(UInt16 inputData);
+        public void AddData(byte inputData);
 
         public byte[] Serialize();
         public void DeserializeHeader(byte[] inputBuffer);
