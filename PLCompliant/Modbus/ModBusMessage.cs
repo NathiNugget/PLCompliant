@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PLCompliant.Modbus
 {
@@ -31,6 +32,14 @@ namespace PLCompliant.Modbus
             Array.Resize(ref _data.payload, newSize);
             byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
             Array.Copy(bytes, _data.payload, bytes.Length);
+        }
+
+        public void AddData(byte inputData)
+        {
+            var newSize = _data.payload.Length + Marshal.SizeOf<byte>();
+            Array.Resize(ref _data.payload, newSize);
+            _data.payload[newSize - 1] = inputData;
+
         }
 
         public byte[] Serialize()
