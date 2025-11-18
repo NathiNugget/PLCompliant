@@ -31,10 +31,11 @@ namespace PLCompliant.Modbus
 
         public void AddData(UInt16 inputData)
         {
+            var oldSize = _data.PayloadSize;
             var newSize = _data._payload.Length + Marshal.SizeOf<UInt16>();
             Array.Resize(ref _data._payload, newSize);
             byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
-            Array.Copy(bytes, _data._payload, bytes.Length);
+            Array.Copy(bytes,0, _data._payload,oldSize, bytes.Length);
             _header.length += sizeof(UInt16);
         }
 
@@ -44,6 +45,21 @@ namespace PLCompliant.Modbus
             Array.Resize(ref _data._payload, newSize);
             _data._payload[newSize - 1] = inputData;
             _header.length += sizeof(byte); 
+        }
+
+        public void AddData(byte[] stringData)
+        {
+            if (stringData.Length > byte.MaxValue)
+            {
+                throw new ArgumentException("Input length was greater than allowed in a byte"); 
+            }
+            byte stringSize = (byte)stringData.Length;
+            if(stringSize == 0) { return; }
+            var oldSize = Data._payload.Length;
+            var newSize = _data._payload.Length + stringSize;
+            Array.Resize(ref _data._payload, newSize);
+            Array.Copy(stringData,0, _data._payload,oldSize, stringSize);
+            _header.length += (ushort)stringSize;
         }
 
         public byte[] Serialize()
@@ -74,6 +90,8 @@ namespace PLCompliant.Modbus
             return (Data.Equals(other_msg.Data) && Header.Equals(other_msg.Header));
             
         }
+
+        
 
         
     }

@@ -10,15 +10,17 @@ namespace PLCompliant.Modbus
 {
     public static class ModBusResponseParsing
     {
-        public static bool HandleReponseError(ModBusMessage msg, IPAddress address)
+        public static bool HandleReponseError(ModBusMessage msg, out byte errCode)
         {
             byte functionCode = msg.Data._functionCode;
-            bool err = (functionCode & 0b1000000) != 0;
+            bool err = (functionCode & 0b1000_0000) != 0;
+            
             if(!err)
             {
+                errCode = 0;
                 return true;
             }
-            byte errCode = msg.Data._payload[0];
+            errCode = msg.Data._payload[0];
             // write it into log or something TODO
             return false;
         }

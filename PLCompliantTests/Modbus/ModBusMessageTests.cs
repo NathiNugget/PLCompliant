@@ -14,13 +14,13 @@ namespace PLCompliant.Modbus.Tests
     [TestClass()]
     public class ModBusMessageTests
     {
-        
+
 
         //Crete
         [TestMethod()]
         public void ModBusMessageExists()
         {
-            ModBusMessage msg = new(new (), new()); 
+            ModBusMessage msg = new(new(), new());
             Assert.IsNotNull(msg);
 
         }
@@ -28,18 +28,19 @@ namespace PLCompliant.Modbus.Tests
         [TestMethod()]
         [DataRow(ushort.MinValue, byte.MinValue, ushort.MinValue, byte.MinValue)]
         [DataRow(ushort.MaxValue, byte.MaxValue, ushort.MaxValue, byte.MaxValue)]
-        [DataRow((ushort)(ushort.MaxValue/2), (byte)(byte.MaxValue/2), (ushort)(ushort.MaxValue/2), (byte)(byte.MaxValue / 2))]
-        [DataRow((ushort)10, (byte)0x10, (ushort) 10, (byte)0x10)]
+        [DataRow((ushort)(ushort.MaxValue / 2), (byte)(byte.MaxValue / 2), (ushort)(ushort.MaxValue / 2), (byte)(byte.MaxValue / 2))]
+        [DataRow((ushort)10, (byte)0x10, (ushort)10, (byte)0x10)]
         [DataRow(ushort.MinValue, byte.MaxValue, ushort.MaxValue, byte.MinValue)]
         [DataRow(ushort.MaxValue, byte.MinValue, ushort.MinValue, byte.MaxValue)]
+        [DataRow((ushort)0, (byte)0xF, (ushort)255, (byte)0xFF)]
 
         public void AddDataTest(ushort param_1, byte param_2, ushort param_3, byte param_4)
         {
-            ushort expected_length = 2; 
+            ushort expected_length = 2;
             ModBusMessage msg = new(new(), new());
             msg.AddData(param_1);
-            expected_length += (ushort)Marshal.SizeOf(param_1); 
-            Assert.AreEqual(msg.Header.length, expected_length); 
+            expected_length += (ushort)Marshal.SizeOf(param_1);
+            Assert.AreEqual(msg.Header.length, expected_length);
 
 
             msg.AddData(param_2);
@@ -51,9 +52,56 @@ namespace PLCompliant.Modbus.Tests
             msg.AddData(param_4);
             expected_length += (ushort)Marshal.SizeOf(param_4);
             Assert.AreEqual(msg.Header.length, expected_length);
-            Assert.AreEqual(msg.Data.Size, expected_length-1);
+            Assert.AreEqual(msg.Data.Size, expected_length - 1);
+            ushort param_1_actual = BitConverter.ToUInt16(msg.Data._payload, 0);
+            byte param_2_acutal = msg.Data._payload[2];
+            ushort param_3_actual = BitConverter.ToUInt16(msg.Data._payload, 3); 
+            byte param_4_acutal = msg.Data._payload[5];
+            Assert.AreEqual(param_1, param_1_actual);
+            Assert.AreEqual(param_2, param_2_acutal);
+            Assert.AreEqual(param_3, param_3_actual);
+            Assert.AreEqual(param_4, param_4_acutal);
+
 
         }
+
+        [TestMethod]
+        [DataRow((uint)0)]
+        [DataRow((uint)255)]
+        public void AddDataByteArrayTest(uint size)
+        {
+            uint expectedlength = size + 2; 
+            ModBusMessage msg = new(new(), new());
+            byte[] arr = new byte[size];
+            msg.AddData(arr);
+            Assert.AreEqual(msg.Header.length, expectedlength);
+            Assert.AreEqual(msg.Data.Size, (int)expectedlength-1);
+
+            //Repeat
+            expectedlength += size; 
+            msg.AddData(arr);
+            Assert.AreEqual(msg.Header.length, expectedlength);
+            Assert.AreEqual(msg.Data.Size, (int)expectedlength - 1);
+
+
+        }
+
+        [TestMethod]
+        [DataRow((uint)256)]
+        [DataRow((uint)500000)]
+
+        public void AddDataByteArrayTooLargeTest(uint size)
+        {
+            uint expectedlength = size + 2;
+            ModBusMessage msg = new(new(), new());
+            byte[] arr = new byte[size];
+
+            Assert.ThrowsException<ArgumentException>(() => msg.AddData(arr)); 
+
+
+        }
+
+
 
         [TestMethod()]
         public void ModbusFactoryCreateDeviceWhatever()
@@ -65,13 +113,13 @@ namespace PLCompliant.Modbus.Tests
             expected.AddData(0x0E);
             expected.AddData(productid);
             expected.AddData(0x0);
-
+            
             ModBusMessage actual = factory.CreateReadDeviceInformation(new(), productid);
             Assert.AreEqual(expected, actual);
- 
+
 
         }
-        
+
         [TestMethod()]
         [DataRow((ushort)1, (ushort)0xFF, (byte)0xA, (byte)0xA, (ushort)3, (byte)5, (ushort)6)]
         [DataRow(ushort.MaxValue, (ushort)0xFF, (byte)0xA, byte.MaxValue, (ushort)3, byte.MaxValue, ushort.MaxValue)]
@@ -81,7 +129,7 @@ namespace PLCompliant.Modbus.Tests
         [DataRow((ushort)4, (ushort)0xFF, byte.MinValue, (byte)0xBA, (ushort)3, (byte)5, (ushort)6)]
         [DataRow((ushort)5, (ushort)0xFF, byte.MaxValue, (byte)0xA9, (ushort)3, (byte)5, (ushort)6)]
 
-        public void SerializeDeserializeTest(ushort transmodifier, ushort protidentifier, byte unitid, byte functioncode, ushort param_1, byte param_2, ushort param_3) 
+        public void SerializeDeserializeTest(ushort transmodifier, ushort protidentifier, byte unitid, byte functioncode, ushort param_1, byte param_2, ushort param_3)
         {
             ModBusMessage msg = new(new(transmodifier, protidentifier, unitid), new());
             msg.AddData(param_1);
@@ -106,8 +154,24 @@ namespace PLCompliant.Modbus.Tests
             Assert.AreEqual(msg, response);
         }
 
-        
+        [TestMethod]
+        public void TestModBusMessageEqualsWithNullAndFactory()
+        {
+            ModBusMessage msg = new(new(), new());
+            Assert.IsFalse(msg.Equals(null));
+            Assert.IsFalse(msg.Equals(new ModBusMessageFactory())); 
+        }
 
-        
+        [TestMethod]
+        [DataRow(byte.MaxValue)]
+        [DataRow((byte)(byte.MaxValue/2))]
+        [DataRow(byte.MinValue)]
+        public void ModBusMessageSizeAndTotalSize(byte param_1)
+        {
+            ModBusMessage msg = new(new(), new());
+            msg.AddData(param_1);
+            int expectedsize = 7 + +1 + 1; //Header + function code + data
+            Assert.AreEqual(expectedsize, msg.TotalSize); 
+        }
     }
 }
