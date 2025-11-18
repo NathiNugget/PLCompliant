@@ -22,11 +22,11 @@ namespace PLCompliant.Modbus
         public void Deserialize(byte[] inputBuffer)
         {
             var index = 0;
-            transactionIdentifier = BitConverter.ToUInt16(inputBuffer, index);
+            transactionIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index)) ;
             index += sizeof(UInt16);
-            protocolIdentifier = BitConverter.ToUInt16(inputBuffer, index);
+            protocolIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index));
             index += sizeof(UInt16);
-            length = BitConverter.ToUInt16(inputBuffer, index);
+            length = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index));
             index += sizeof(UInt16);
             unitID = inputBuffer[index];
 

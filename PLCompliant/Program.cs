@@ -1,5 +1,6 @@
 using System.Net.Sockets;
-using PLCompliant.Modbus; 
+using System.Runtime.InteropServices;
+using PLCompliant.Modbus;
 
 namespace PLCompliant
 {
@@ -39,16 +40,16 @@ namespace PLCompliant
             {
                 ModBusHeader header = new();
                 header.length = 5;
-                header.unitID = 0xFF; 
+                header.unitID = 0xFF;
                 header.transactionIdentifier = (ushort)identifier;
                 ModBusData data = new();
-                data.functionCode = 0x2B; 
+                data.functionCode = 0x2B;
 
                 ModBusMessage msg = new(header, data);
                 msg.AddData((byte)0xE);
                 msg.AddData((byte)0x2);
                 msg.AddData((byte)0x0);
-                
+
 
 
 
@@ -59,32 +60,46 @@ namespace PLCompliant
 
                 byte[] buffer = msg.Serialize();
 
-                try
+
+                var stream = client.GetStream();
+
+                stream.Write(buffer, 0, buffer.Length);
+
+                byte[] returnbytes = new byte[1024];
+                int readbytes = 0;
+                while (readbytes == 0)
                 {
-                    var stream = client.GetStream();
 
-                    stream.Write(buffer, 0, buffer.Length);
-
-                    byte[] returnbytes = new byte[1024];
-                    int readbytes = 0;
-                    while (readbytes == 0)
-                    {
-                        readbytes = stream.Read(returnbytes, 0, 1);
-
-                    }
-
-                    Console.WriteLine(returnbytes);
-                    ModBusMessage response = new(new ModBusHeader(), new ModBusData()); 
-                    response.DeserializeData(returnbytes);
-                    
-
+                    readbytes = stream.Read(returnbytes);
 
                 }
 
-                catch
-                {
+                Console.WriteLine(returnbytes);
 
-                }
+
+                ModBusMessage response = new(new ModBusHeader(), new ModBusData());
+                byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
+                Array.Copy(returnbytes, 0, header_bytes, 0, header_bytes.Length);
+                response.DeserializeHeader(header_bytes);
+
+                byte[] payload_data = new byte[response.Header.length-1];
+                Array.Copy(returnbytes, Marshal.SizeOf<ModBusHeader>(), payload_data, 0, payload_data.Length);
+
+
+
+
+
+                response.DeserializeData(payload_data);
+                var output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, System.Net.IPAddress.Parse("192.168.123.100"));
+                var CSV_data = output.ToCSV();
+                Console.WriteLine(CSV_data);
+
+
+
+
+
+
+
                 address += 64;
                 identifier++;
                 Thread.Sleep(100);

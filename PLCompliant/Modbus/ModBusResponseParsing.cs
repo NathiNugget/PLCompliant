@@ -10,7 +10,7 @@ namespace PLCompliant.Modbus
 {
     public static class ModBusResponseParsing
     {
-        static bool HandleReponseError(ModBusMessage msg, IPAddress address)
+        public static bool HandleReponseError(ModBusMessage msg, IPAddress address)
         {
             byte functionCode = msg.Data.functionCode;
             bool err = (functionCode & 0b1000000) != 0;
@@ -22,7 +22,7 @@ namespace PLCompliant.Modbus
             // write it into log or something TODO
             return false;
         }
-        static ReadDeviceInformationData ParseReadDeviceInformationResponse(ModBusMessage msg, IPAddress address)
+        public static ReadDeviceInformationData ParseReadDeviceInformationResponse(ModBusMessage msg, IPAddress address)
         {
             var result = new ReadDeviceInformationData();
             result.IPAddr = address;

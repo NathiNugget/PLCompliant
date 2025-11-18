@@ -12,7 +12,7 @@ namespace PLCompliant.Response
   
         public byte noOfObjects { get; set; }
 
-        public Dictionary<int, string> Objects { get; set; }
+        public Dictionary<int, string> Objects { get; set; } = new Dictionary<int, string>();
 
         public override string ToCSV()
         {
