@@ -9,7 +9,7 @@ namespace PLCompliant.Modbus
 {
     public class ModBusMessageFactory
     {
-        ModBusMessage CreateReadDeviceInformation(ModBusHeader header, byte productID )
+        public ModBusMessage CreateReadDeviceInformation(ModBusHeader header, byte productID )
         {
             var data = new ModBusData { functionCode = (byte)ModBusCommandType.read_device_information, payload = [] };
             var msg = new ModBusMessage(header,  data);
@@ -19,7 +19,7 @@ namespace PLCompliant.Modbus
             return msg;
 
         }
-        ModBusMessage CreateGetSlaveID(ModBusHeader header, byte productID)
+        public ModBusMessage CreateGetSlaveID(ModBusHeader header, byte productID)
         {
             var data = new ModBusData { functionCode = (byte)ModBusCommandType.get_slave_id, payload = [] };
             var msg = new ModBusMessage(header, data);

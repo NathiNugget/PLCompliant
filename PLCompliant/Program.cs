@@ -76,6 +76,8 @@ namespace PLCompliant
                     Console.WriteLine(returnbytes);
                     ModBusMessage response = new(new ModBusHeader(), new ModBusData()); 
                     response.DeserializeData(returnbytes);
+                    
+
 
                 }
 
