@@ -17,7 +17,21 @@ namespace PLCompliant.Modbus
         [FieldOffset(4)] public UInt16 length;
         [FieldOffset(6)] public byte unitID;
 
-        public int Size { get { return 7; } }
+        public ModBusHeader(ushort transmodifier, ushort protidentifier, byte unitid)
+        {
+            unitID = unitid;
+            transactionIdentifier = transmodifier;
+            protocolIdentifier = protidentifier;
+            length = 2;
+        }
+
+        public ModBusHeader()
+        {
+            length = 2; 
+        }
+
+
+        public int Size { get { return Marshal.SizeOf<ModBusHeader>(); } }
 
         public void Deserialize(byte[] inputBuffer)
         {

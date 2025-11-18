@@ -12,13 +12,13 @@ namespace PLCompliant.Modbus
     {
         public static bool HandleReponseError(ModBusMessage msg, IPAddress address)
         {
-            byte functionCode = msg.Data.functionCode;
+            byte functionCode = msg.Data._functionCode;
             bool err = (functionCode & 0b1000000) != 0;
             if(!err)
             {
                 return true;
             }
-            byte errCode = msg.Data.payload[0];
+            byte errCode = msg.Data._payload[0];
             // write it into log or something TODO
             return false;
         }
@@ -26,20 +26,20 @@ namespace PLCompliant.Modbus
         {
             var result = new ReadDeviceInformationData();
             result.IPAddr = address;
-            byte subfunction_code = msg.Data.payload[0];
-            byte productID = msg.Data.payload[1];
-            byte conformity_level = msg.Data.payload[2];
-            byte reserved_1 = msg.Data.payload[3];
-            byte reserved_2 = msg.Data.payload[4];
-            result.noOfObjects = msg.Data.payload[5];
+            byte subfunction_code = msg.Data._payload[0];
+            byte productID = msg.Data._payload[1];
+            byte conformity_level = msg.Data._payload[2];
+            byte reserved_1 = msg.Data._payload[3];
+            byte reserved_2 = msg.Data._payload[4];
+            result.noOfObjects = msg.Data._payload[5];
             int index = 6;
             for (int i = 0; i < result.noOfObjects; i++)
             {
-                byte id = msg.Data.payload[index];
+                byte id = msg.Data._payload[index];
                 index++;
-                byte length = msg.Data.payload[index];
+                byte length = msg.Data._payload[index];
                 index++;
-                string content = Encoding.UTF8.GetString(msg.Data.payload, index, length);
+                string content = Encoding.UTF8.GetString(msg.Data._payload, index, length);
                 result.Objects.Add(id, content);
                 index += length;
 

@@ -10,29 +10,47 @@ namespace PLCompliant.Modbus
 {
     public class ModBusData : IProtocolData
     {
-        public byte functionCode;
-        public byte[] payload = [];
+        public byte _functionCode;
+        public byte[] _payload = [];
 
         public ModBusData()
         {
         }
 
+        public ModBusData(byte functionCode, byte[] payload)
+        {
+            _functionCode = functionCode;
+            _payload = payload;
+
+        }
+
+
         public byte[] Serialize()
         {
-            byte[] buffer = new byte[Marshal.SizeOf(functionCode) + payload.Length];
-            buffer[0] = functionCode;
-            Array.Copy(payload, 0, buffer, 1, payload.Length);
+            byte[] buffer = new byte[Marshal.SizeOf(_functionCode) + _payload.Length];
+            buffer[0] = _functionCode;
+            Array.Copy(_payload, 0, buffer, 1, _payload.Length);
             return buffer;
         }
         public void Deserialize(byte[] inputBuffer)
         {
             var index = 0;
-            functionCode = inputBuffer[index];
+            _functionCode = inputBuffer[index];
             index += sizeof(byte);
-            Array.Resize(ref payload, inputBuffer.Length - index);
-            Array.Copy(inputBuffer, index, payload, 0, inputBuffer.Length - index);
+            Array.Resize(ref _payload, inputBuffer.Length - index);
+            Array.Copy(inputBuffer, index, _payload, 0, inputBuffer.Length - index);
         }
-        public int Size { get { return payload.Length + Marshal.SizeOf(functionCode); } }
+        public int Size { get { return PayloadSize + Marshal.SizeOf(_functionCode); } }
+        public ushort PayloadSize { get => (ushort)_payload.Length;  }
+
+        public override bool Equals(object? other)
+        {
+            if (other is null || other is not ModBusData) return false;
+            ModBusData other_data = (ModBusData)other;
+            return (Size == other_data.Size && _functionCode == other_data._functionCode && _payload.SequenceEqual(other_data._payload));
+        }
 
     }
+
+    
 }

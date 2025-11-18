@@ -11,7 +11,7 @@ namespace PLCompliant.Modbus
     {
         public ModBusMessage CreateReadDeviceInformation(ModBusHeader header, byte productID )
         {
-            var data = new ModBusData { functionCode = (byte)ModBusCommandType.read_device_information, payload = [] };
+            var data = new ModBusData { _functionCode = (byte)ModBusCommandType.read_device_information, _payload = [] };
             var msg = new ModBusMessage(header,  data);
             msg.AddData(0x0E);
             msg.AddData(productID);
@@ -21,7 +21,7 @@ namespace PLCompliant.Modbus
         }
         public ModBusMessage CreateGetSlaveID(ModBusHeader header, byte productID)
         {
-            var data = new ModBusData { functionCode = (byte)ModBusCommandType.get_slave_id, payload = [] };
+            var data = new ModBusData { _functionCode = (byte)ModBusCommandType.get_slave_id, _payload = [] };
             var msg = new ModBusMessage(header, data);
             return msg;
 

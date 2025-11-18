@@ -14,10 +14,13 @@ namespace PLCompliant.Modbus
     {
         ModBusHeader _header = new();
         ModBusData _data = new();
+        
 
 
         public ModBusHeader Header { get { return _header; } }
         public ModBusData Data { get { return _data; } }
+        public ushort PayloadSize { get => (ushort)_data.PayloadSize; }
+        public ushort TotalSize { get => (ushort)(Data.Size + Header.Size); }
 
 
         public ModBusMessage(ModBusHeader header, ModBusData data)
@@ -28,18 +31,19 @@ namespace PLCompliant.Modbus
 
         public void AddData(UInt16 inputData)
         {
-            var newSize = _data.payload.Length + Marshal.SizeOf<UInt16>();
-            Array.Resize(ref _data.payload, newSize);
+            var newSize = _data._payload.Length + Marshal.SizeOf<UInt16>();
+            Array.Resize(ref _data._payload, newSize);
             byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
-            Array.Copy(bytes, _data.payload, bytes.Length);
+            Array.Copy(bytes, _data._payload, bytes.Length);
+            _header.length += sizeof(UInt16);
         }
 
         public void AddData(byte inputData)
         {
-            var newSize = _data.payload.Length + Marshal.SizeOf<byte>();
-            Array.Resize(ref _data.payload, newSize);
-            _data.payload[newSize - 1] = inputData;
-
+            var newSize = _data._payload.Length + Marshal.SizeOf<byte>();
+            Array.Resize(ref _data._payload, newSize);
+            _data._payload[newSize - 1] = inputData;
+            _header.length += sizeof(byte); 
         }
 
         public byte[] Serialize()
@@ -60,6 +64,17 @@ namespace PLCompliant.Modbus
         {
             _data.Deserialize(inputBuffer);
         }
-        public int DataSize { get { return _data.Size; } }
+        public int DataSize { get { return Data.Size; } }
+
+        public override bool Equals(object? other)
+        {
+            if (other == null) return false;
+            if (other is not ModBusMessage) return false;
+            ModBusMessage other_msg = (ModBusMessage)other;
+            return (Data.Equals(other_msg.Data) && Header.Equals(other_msg.Header));
+            
+        }
+
+        
     }
 }

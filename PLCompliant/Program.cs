@@ -1,6 +1,6 @@
+using PLCompliant.Modbus;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using PLCompliant.Modbus;
 
 namespace PLCompliant
 {
@@ -39,11 +39,11 @@ namespace PLCompliant
             while (address < 64)
             {
                 ModBusHeader header = new();
-                header.length = 5;
+               
                 header.unitID = 0xFF;
                 header.transactionIdentifier = (ushort)identifier;
                 ModBusData data = new();
-                data.functionCode = 0x2B;
+                data._functionCode = 0x2B;
 
                 ModBusMessage msg = new(header, data);
                 msg.AddData((byte)0xE);
