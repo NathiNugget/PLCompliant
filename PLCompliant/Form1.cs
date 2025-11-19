@@ -1,11 +1,14 @@
 using PLCompliant.Utilities;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace PLCompliant
 {
+    [ExcludeFromCodeCoverage]
     public partial class Form1 : Form
     {
+        bool running = false; 
         public Form1()
         {
             InitializeComponent();
@@ -14,11 +17,11 @@ namespace PLCompliant
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            maskedTextBox1.LostFocus += new EventHandler(IPAddressValidationHandling);
+            maskedTextBox1.LostFocus += new EventHandler(IPAddressValidationHandling!);
             maskedTextBox1.MouseClick += new MouseEventHandler(IPAddressOnClick);
             maskedTextBox1.KeyDown += new KeyEventHandler(ControlField);
 
-            maskedTextBox2.LostFocus += new EventHandler(IPAddressValidationHandling);
+            maskedTextBox2.LostFocus += new EventHandler(IPAddressValidationHandling!);
             maskedTextBox2.MouseClick += new MouseEventHandler(IPAddressOnClick);
             maskedTextBox2.KeyDown += new KeyEventHandler(ControlField);
 
@@ -31,32 +34,45 @@ namespace PLCompliant
         {
             MaskedTextBox textbox = (MaskedTextBox)sender!;
             int index = textbox.SelectionStart;
+            string text = textbox.Text;
+            int textlength = textbox.Text.Length;
+            char[] chararr = textbox.Text.ToCharArray(); 
+            List<char> charlist = chararr.ToList();
+            
+
 
             if (e.KeyCode == Keys.OemPeriod || e.KeyCode == Keys.Oemcomma || e.KeyCode == Keys.Right)
             {
+                var range = charlist.GetRange(index, charlist.Count - index);
+                if (range.Count == 0) {
+                    int nextindex = text.LastIndexOf('.');
 
-                if (index < textbox.Text.Length && (textbox.Text.ToCharArray().ToList().IndexOf('.', index) != -1 && textbox.Text.ToCharArray()[index+1] == ' '))
+                    if (nextindex != -1) textbox.Select(nextindex, 0);
+                }
+
+                else if (index < textlength && (charlist.IndexOf('.', index) != -1 && 
+                    charlist.GetRange(index, charlist.Count-index).TakeWhile(x => x != ' ').ToList().Count != 1))
                 {
 
-                    int nextindex = textbox.Text.IndexOf('.', index);
+                    int nextindex = text.IndexOf('.', index);
 
                     if (nextindex != -1) textbox.Select(nextindex, 0);
                 }
             }
             else if (e.KeyCode == Keys.Left)
             {
-                if (index > textbox.Text.Length)
+                if (index > textlength)
                 {
-                    int tosubtract = index - textbox.Text.Length;
+                    int tosubtract = index - textlength;
                     index -= tosubtract; 
                 }
-                if (index != 0 && (textbox.Text.ToCharArray()[index - 1] == ' ' || textbox.Text.ToCharArray()[index - 1] == '.'))
+                if (index != 0 && (chararr[index - 1] == ' ' || chararr[index - 1] == '.'))
                 {
-                    int nextindex = textbox.Text.PreviousIndexOf('.', index);
+                    int previousindex = text.PreviousIndexOf('.', index);
 
-                    if (nextindex != -1)
+                    if (previousindex != -1)
                     {
-                        textbox.Select(nextindex, 0);
+                        textbox.Select(previousindex, 0);
                     }
                     else textbox.Select(0, 0);
                 }
@@ -88,17 +104,21 @@ namespace PLCompliant
 
 
 
-            if (!IPAddress.TryParse(input, out IPAddress? address))
+            if (!IPAddress.TryParse(input, out IPAddress? _))
             {
                 toolTip1.ToolTipTitle = "Dårlig IP";
-                toolTip1.Show("Du har indtastet en ikke-valid IP-addresse", maskedTextBox1, 0, -40, 5000);
-            }
-            Console.WriteLine(address);
+                toolTip1.Show("Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være et før og efter hvert punktum", maskedTextBox1, 0, -40, 5000);
+            } 
+
+                
 
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            Button button = (Button)sender;
+            button.Text = running ? "Stop" : "Start";
+            running = !running; 
 
         }
 
@@ -169,7 +189,7 @@ namespace PLCompliant
 
         private void toolTip1_Popup(object sender, PopupEventArgs e)
         {
-
+            
         }
     }
 }

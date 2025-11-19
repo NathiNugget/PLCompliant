@@ -40,6 +40,7 @@
             maskedTextBox1 = new MaskedTextBox();
             toolTip1 = new ToolTip(components);
             maskedTextBox2 = new MaskedTextBox();
+            toolTip2 = new ToolTip(components);
             SuspendLayout();
             // 
             // button1
@@ -188,5 +189,6 @@
         private MaskedTextBox maskedTextBox1;
         private ToolTip toolTip1;
         private MaskedTextBox maskedTextBox2;
+        private ToolTip toolTip2;
     }
 }
