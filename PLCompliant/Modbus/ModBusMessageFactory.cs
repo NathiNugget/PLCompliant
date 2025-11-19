@@ -19,7 +19,7 @@ namespace PLCompliant.Modbus
             return msg;
 
         }
-        public ModBusMessage CreateGetSlaveID(ModBusHeader header, byte productID)
+        public ModBusMessage CreateGetSlaveID(ModBusHeader header)
         {
             var data = new ModBusData { _functionCode = (byte)ModBusCommandType.get_slave_id, _payload = [] };
             var msg = new ModBusMessage(header, data);

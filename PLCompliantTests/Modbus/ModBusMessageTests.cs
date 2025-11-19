@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PLCompliant.Modbus;
+using PLCompliant.Uilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PLCompliant.Modbus.Tests
 {
@@ -53,9 +55,10 @@ namespace PLCompliant.Modbus.Tests
             expected_length += (ushort)Marshal.SizeOf(param_4);
             Assert.AreEqual(msg.Header.length, expected_length);
             Assert.AreEqual(msg.Data.Size, expected_length - 1);
-            ushort param_1_actual = BitConverter.ToUInt16(msg.Data._payload, 0);
+            // Converted manually to extract data simulating network extraction because they are wrapped for network when they are added. 
+            ushort param_1_actual = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.Data._payload, 0)); 
             byte param_2_acutal = msg.Data._payload[2];
-            ushort param_3_actual = BitConverter.ToUInt16(msg.Data._payload, 3); 
+            ushort param_3_actual = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.Data._payload, 3)); 
             byte param_4_acutal = msg.Data._payload[5];
             Assert.AreEqual(param_1, param_1_actual);
             Assert.AreEqual(param_2, param_2_acutal);
@@ -98,7 +101,6 @@ namespace PLCompliant.Modbus.Tests
 
             Assert.ThrowsException<ArgumentException>(() => msg.AddData(arr)); 
 
-
         }
 
 
@@ -120,6 +122,22 @@ namespace PLCompliant.Modbus.Tests
 
         }
 
+        [TestMethod]
+
+        public void ModBusMessageEqualsWithNullAndFactory() {
+            var data = new ModBusData { _functionCode = (byte)ModBusCommandType.get_slave_id, _payload = [] };
+            var expected = new ModBusMessage(new(1, 2, 3), data);
+
+            ModBusMessageFactory factory = new(); 
+            ModBusMessage actual = factory.CreateGetSlaveID(new(1,2,3));
+
+
+            
+
+            Assert.AreEqual(expected, actual);
+
+        }
+
         [TestMethod()]
         [DataRow((ushort)1, (ushort)0xFF, (byte)0xA, (byte)0xA, (ushort)3, (byte)5, (ushort)6)]
         [DataRow(ushort.MaxValue, (ushort)0xFF, (byte)0xA, byte.MaxValue, (ushort)3, byte.MaxValue, ushort.MaxValue)]
@@ -137,19 +155,14 @@ namespace PLCompliant.Modbus.Tests
             msg.AddData(param_3);
 
             byte[] returnbytes = msg.Serialize();
-
+            //header
             ModBusMessage response = new(new ModBusHeader(), new ModBusData());
             byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
             Array.Copy(returnbytes, 0, header_bytes, 0, header_bytes.Length);
             response.DeserializeHeader(header_bytes);
-
+            //data
             byte[] payload_data = new byte[response.Header.length - 1];
             Array.Copy(returnbytes, Marshal.SizeOf<ModBusHeader>(), payload_data, 0, payload_data.Length);
-
-
-
-
-
             response.DeserializeData(payload_data);
             Assert.AreEqual(msg, response);
         }
@@ -173,5 +186,7 @@ namespace PLCompliant.Modbus.Tests
             int expectedsize = 7 + +1 + 1; //Header + function code + data
             Assert.AreEqual(expectedsize, msg.TotalSize); 
         }
+
+   
     }
 }

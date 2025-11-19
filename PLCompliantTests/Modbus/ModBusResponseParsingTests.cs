@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PLCompliant.Modbus;
 using PLCompliant.Response;
+using PLCompliantTests;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -20,8 +21,6 @@ namespace PLCompliant.Modbus.Tests
         [DataRow((byte)0x1)]
         [DataRow((byte)0b0111_1111)]
         [DataRow((byte)0x0)]
-
-
         public void HandleResponseFailTest(byte param_1)
         {
             ModBusMessage exceptionresponse = new(new(), new(((byte)ModBusCommandType.read_device_information | 0b1000_0000), []));
@@ -45,35 +44,17 @@ namespace PLCompliant.Modbus.Tests
         [TestMethod()]
         public void ParseReadDeviceInformationResponseTest()
         {
-            ModBusMessage msg = new(new(0, 0, 255), new((byte)ModBusCommandType.read_device_information, []));
+            ModBusMessage msg = UtilityMethodTests.CreateExampleReadDeviceInformationResponse();
             int expectedobjectcount = 3; //We will be inserting 3 objects; 
-            string obj1 = "Schneider Electric";
-            string obj2 = "BMX NOE 0100";
-            string obj3 = "V2.30"; 
-            msg.AddData(0xe);
-            msg.AddData(0x2);
-            msg.AddData(0x81);
-            msg.AddData(0x00);
-            msg.AddData(0x00);
-            msg.AddData(0x03);
-
-            msg.AddData(0x0); 
-            msg.AddData(0x12);
-            msg.AddData(Encoding.UTF8.GetBytes(obj1));
-
-            msg.AddData(0x1);
-            msg.AddData(0xc);
-            msg.AddData(Encoding.UTF8.GetBytes(obj2));
-
-            msg.AddData(0x2);
-            msg.AddData(0x5);
-            msg.AddData(Encoding.UTF8.GetBytes(obj3));
+            string expected1 = "Schneider Electric";
+            string expected2 = "BMX NOE 0100";
+            string expected3 = "V2.30";
 
             ReadDeviceInformationData response = ModBusResponseParsing.ParseReadDeviceInformationResponse(msg, System.Net.IPAddress.Parse("192.168.123.100"));
             Assert.AreEqual(response.noOfObjects, expectedobjectcount);
-            Assert.AreEqual(response.Objects[0], obj1); 
-            Assert.AreEqual(response.Objects[1], obj2);
-            Assert.AreEqual(response.Objects[2], obj3); 
+            Assert.AreEqual(response.Objects[0], expected1); 
+            Assert.AreEqual(response.Objects[1], expected2);
+            Assert.AreEqual(response.Objects[2], expected3); 
 
 
         }

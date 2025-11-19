@@ -36,7 +36,6 @@ public class ModBusHeaderTests
         ModBusHeader header = new ModBusHeader(0, 0, 0);
         int expected = 7; //Because the struct should be 7 bytes according to spec
         Assert.AreEqual(expected, header.Size);
-
     }
 
 
