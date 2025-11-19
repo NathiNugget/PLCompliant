@@ -38,17 +38,8 @@ namespace PLCompliant
 
             while (address < 64)
             {
-                ModBusHeader header = new();
-               
-                header.unitID = 0xFF;
-                header.transactionIdentifier = (ushort)identifier;
-                ModBusData data = new();
-                data._functionCode = 0x2B;
-
-                ModBusMessage msg = new(header, data);
-                msg.AddData((byte)0xE);
-                msg.AddData((byte)0x2);
-                msg.AddData((byte)0x0);
+                ModBusMessageFactory factory = new ModBusMessageFactory();
+                ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
                  
 
 
