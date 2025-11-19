@@ -46,9 +46,9 @@ namespace PLCompliant.Modbus.Tests
         {
             ModBusMessage msg = UtilityMethodTests.CreateExampleReadDeviceInformationResponse();
             int expectedobjectcount = 3; //We will be inserting 3 objects; 
-            string expected1 = "Schneider Electric";
-            string expected2 = "BMX NOE 0100";
-            string expected3 = "V2.30";
+            string expected1 = UtilityMethodTests.getDeviceInfoObject1; 
+            string expected2 = UtilityMethodTests.getDeviceInfoObject2;
+            string expected3 = UtilityMethodTests.getDeviceInfoObject3; 
 
             ReadDeviceInformationData response = ModBusResponseParsing.ParseReadDeviceInformationResponse(msg, System.Net.IPAddress.Parse("192.168.123.100"));
             Assert.AreEqual(response.noOfObjects, expectedobjectcount);
