@@ -8,7 +8,7 @@ namespace PLCompliant
     [ExcludeFromCodeCoverage]
     public partial class Form1 : Form
     {
-        bool running = false; 
+        bool running = false;
         public Form1()
         {
             InitializeComponent();
@@ -36,22 +36,21 @@ namespace PLCompliant
             int index = textbox.SelectionStart;
             string text = textbox.Text;
             int textlength = textbox.Text.Length;
-            char[] chararr = textbox.Text.ToCharArray(); 
+            char[] chararr = textbox.Text.ToCharArray();
             List<char> charlist = chararr.ToList();
-            
-
 
             if (e.KeyCode == Keys.OemPeriod || e.KeyCode == Keys.Oemcomma || e.KeyCode == Keys.Right)
             {
                 var range = charlist.GetRange(index, charlist.Count - index);
-                if (range.Count == 0) {
+                if (range.Count == 0)
+                {
                     int nextindex = text.LastIndexOf('.');
 
                     if (nextindex != -1) textbox.Select(nextindex, 0);
                 }
 
-                else if (index < textlength && (charlist.IndexOf('.', index) != -1 && 
-                    charlist.GetRange(index, charlist.Count-index).TakeWhile(x => x != ' ').ToList().Count != 1))
+                else if (index < textlength && (charlist.IndexOf('.', index) != -1 &&
+                    charlist.GetRange(index, charlist.Count - index).TakeWhile(x => x != ' ').ToList().Count != 1))
                 {
 
                     int nextindex = text.IndexOf('.', index);
@@ -64,7 +63,7 @@ namespace PLCompliant
                 if (index > textlength)
                 {
                     int tosubtract = index - textlength;
-                    index -= tosubtract; 
+                    index -= tosubtract;
                 }
                 if (index != 0 && (chararr[index - 1] == ' ' || chararr[index - 1] == '.'))
                 {
@@ -76,12 +75,7 @@ namespace PLCompliant
                     }
                     else textbox.Select(0, 0);
                 }
-                
-
             }
-
-
-
         }
 
         private void IPAddressOnClick(object? sender, EventArgs e)
@@ -108,9 +102,9 @@ namespace PLCompliant
             {
                 toolTip1.ToolTipTitle = "Dårlig IP";
                 toolTip1.Show("Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være et før og efter hvert punktum", maskedTextBox1, 0, -40, 5000);
-            } 
+            }
 
-                
+
 
         }
 
@@ -118,7 +112,7 @@ namespace PLCompliant
         {
             Button button = (Button)sender;
             button.Text = running ? "Stop" : "Start";
-            running = !running; 
+            running = !running;
 
         }
 
@@ -140,8 +134,7 @@ namespace PLCompliant
                 textBox1.Text = folderpath;
 
             }
-            Console.WriteLine(size); // <-- Shows file size in debugging mode.
-            Console.WriteLine(result); // <-- For debugging use.
+           
 
         }
 
@@ -189,7 +182,12 @@ namespace PLCompliant
 
         private void toolTip1_Popup(object sender, PopupEventArgs e)
         {
-            
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
