@@ -41,6 +41,8 @@
             toolTip1 = new ToolTip(components);
             maskedTextBox2 = new MaskedTextBox();
             toolTip2 = new ToolTip(components);
+            label4 = new Label();
+            label5 = new Label();
             SuspendLayout();
             // 
             // button1
@@ -120,7 +122,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(928, 155);
+            label3.Location = new Point(928, 209);
             label3.Name = "label3";
             label3.Size = new Size(122, 15);
             label3.TabIndex = 7;
@@ -154,11 +156,32 @@
             maskedTextBox2.TabIndex = 11;
             maskedTextBox2.TabStop = false;
             // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(928, 234);
+            label4.Name = "label4";
+            label4.Size = new Size(23, 15);
+            label4.TabIndex = 12;
+            label4.Text = "Fra";
+            label4.Click += label4_Click;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(928, 318);
+            label5.Name = "label5";
+            label5.Size = new Size(20, 15);
+            label5.TabIndex = 13;
+            label5.Text = "Til";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1264, 681);
+            Controls.Add(label5);
+            Controls.Add(label4);
             Controls.Add(maskedTextBox2);
             Controls.Add(maskedTextBox1);
             Controls.Add(label3);
@@ -190,5 +213,7 @@
         private ToolTip toolTip1;
         private MaskedTextBox maskedTextBox2;
         private ToolTip toolTip2;
+        private Label label4;
+        private Label label5;
     }
 }
