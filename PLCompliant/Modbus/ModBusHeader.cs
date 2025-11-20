@@ -9,14 +9,24 @@ using System.Threading.Tasks;
 
 namespace PLCompliant.Modbus
 {
+    /// <summary>
+    /// This struct is the header of a Modbus message sent over TCP. Because of the protcol, we have to specify order of the bytes as well
+    /// as specifying the size to be 7 bytes explicitely
+    /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 7, CharSet = CharSet.Ansi)]
     public struct ModBusHeader : IProtocolHeader
     {
+        
         [FieldOffset(0)] public UInt16 transactionIdentifier;
         [FieldOffset(2)] public UInt16 protocolIdentifier;
         [FieldOffset(4)] public UInt16 length;
         [FieldOffset(6)] public byte unitID;
-
+        /// <summary>
+        /// The normal constructor of a header
+        /// </summary>
+        /// <param name="transmodifier">The transaction modifier/counter</param>
+        /// <param name="protidentifier">Protocol identifier which always has to be 0x0</param>
+        /// <param name="unitid">x</param>
         public ModBusHeader(ushort transmodifier, ushort protidentifier, byte unitid)
         {
             unitID = unitid;

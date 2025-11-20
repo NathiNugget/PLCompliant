@@ -23,7 +23,7 @@ namespace PLCompliant.Interface
         /// <summary>
         /// Deserialization of network bytes to be a human readable header
         /// </summary>
-        /// <param name="inputBuffer">The bytes from the network</param>
+        /// <param name="inputBuffer">The header in bytes received from the network</param>
         public void Deserialize(byte[] inputBuffer);
     }
 }
