@@ -61,8 +61,6 @@ namespace PLCompliant.Modbus
             length = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index));
             index += sizeof(UInt16);
             unitID = inputBuffer[index];
-
-
         }
         #endregion
 

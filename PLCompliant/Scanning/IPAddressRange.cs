@@ -26,6 +26,25 @@ namespace PLCompliant.Scanning
             Reset();
         }
 
+        public IPAddressRange(IPAddress from, IPAddress to)
+        {
+            long start = EndianConverter.FromNetworkToHost((uint)from.Address);
+            long end = EndianConverter.FromNetworkToHost((uint)to.Address);
+
+
+            if (start > uint.MaxValue || end > uint.MaxValue)
+            {
+                throw new InvalidIPVersionException("IPv6 is not supported");
+            }
+            if (start > end)
+            {
+                throw new ArgumentOutOfRangeException("Start IP cannot be greater than end IP");
+            }
+            _start = start;
+            _end = end;
+            Reset();
+        }
+
         public long Count { get { return _end - _start + 1; } }
 
         public IPAddress Current
