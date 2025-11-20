@@ -1,10 +1,5 @@
 ﻿using PLCompliant.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Modbus
 {
@@ -13,6 +8,7 @@ namespace PLCompliant.Modbus
     /// </summary>
     public class ModBusData : IProtocolData
     {
+        #region instance fields
         /// <summary>
         /// The function code to run on the PLC
         /// </summary>
@@ -21,7 +17,9 @@ namespace PLCompliant.Modbus
         /// The data to send converted to bytes
         /// </summary>
         public byte[] _payload = [];
+        #endregion
 
+        #region constructors
         /// <summary>
         /// Empty constructor for easing construction for either unit tests or other cases where an empty constructor should be used
         /// </summary>
@@ -41,15 +39,16 @@ namespace PLCompliant.Modbus
 
         }
 
-      
+        #endregion
 
+        #region methods
         /// <summary>
         /// Serialize the function code and data for network transmission
         /// </summary>
         /// <returns>Bytes for network transmission</returns>
         public byte[] Serialize()
         {
-            byte[] buffer = new byte[Marshal.SizeOf(_functionCode) + _payload.Length]; 
+            byte[] buffer = new byte[Marshal.SizeOf(_functionCode) + _payload.Length];
             buffer[0] = _functionCode;
             Array.Copy(_payload, 0, buffer, Marshal.SizeOf(_functionCode), _payload.Length);
             return buffer;
@@ -67,9 +66,11 @@ namespace PLCompliant.Modbus
             Array.Resize(ref _payload, inputBuffer.Length - index);
             Array.Copy(inputBuffer, index, _payload, 0, inputBuffer.Length - index);
         }
-        public int Size { get { return PayloadSize + Marshal.SizeOf(_functionCode); } }
-        public ushort PayloadSize { get => (ushort)_payload.Length;  }
-
+        /// <summary>
+        /// Override equals to compare to another data-packet
+        /// </summary>
+        /// <param name="other">Other ModBusData to compare to</param>
+        /// <returns>If the objects are equal or not</returns>
         public override bool Equals(object? other)
         {
             if (other is null || other is not ModBusData) return false;
@@ -77,7 +78,19 @@ namespace PLCompliant.Modbus
             return (Size == other_data.Size && _functionCode == other_data._functionCode && _payload.SequenceEqual(other_data._payload));
         }
 
+        #endregion
+
+        #region properties
+        /// <summary>
+        /// Property to get the Size of the data + function code in bytes
+        /// </summary>
+        public int Size { get { return PayloadSize + Marshal.SizeOf(_functionCode); } }
+        /// <summary>
+        /// 
+        /// </summary>
+        public ushort PayloadSize { get { return (ushort)_payload.Length; } }
+        #endregion
     }
 
-    
+
 }

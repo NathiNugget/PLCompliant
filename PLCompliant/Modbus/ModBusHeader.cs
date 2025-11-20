@@ -1,11 +1,6 @@
 ﻿using PLCompliant.Interface;
 using PLCompliant.Uilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Modbus
 {
@@ -16,11 +11,14 @@ namespace PLCompliant.Modbus
     [StructLayout(LayoutKind.Explicit, Size = 7, CharSet = CharSet.Ansi)]
     public struct ModBusHeader : IProtocolHeader
     {
-        
+
         [FieldOffset(0)] public UInt16 transactionIdentifier;
         [FieldOffset(2)] public UInt16 protocolIdentifier;
         [FieldOffset(4)] public UInt16 length;
         [FieldOffset(6)] public byte unitID;
+
+
+        #region constructors
         /// <summary>
         /// The normal constructor of a header
         /// </summary>
@@ -34,19 +32,29 @@ namespace PLCompliant.Modbus
             protocolIdentifier = protidentifier;
             length = 2;
         }
-
+        /// <summary>
+        /// Empty constructor mostly used for tests and other standard initialization
+        /// </summary>
         public ModBusHeader()
         {
-            length = 2; 
+            length = 2;
         }
 
+        #endregion
 
+        #region properties
+        /// <summary>
+        /// Size of the header struct in bytes
+        /// </summary>
         public int Size { get { return Marshal.SizeOf<ModBusHeader>(); } }
-
+        /// <summary>
+        /// Deserialize the struct from bytes to human readable header-data
+        /// </summary>
+        /// <param name="inputBuffer">Header bytes received from the network</param>
         public void Deserialize(byte[] inputBuffer)
         {
             var index = 0;
-            transactionIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index)) ;
+            transactionIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index));
             index += sizeof(UInt16);
             protocolIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index));
             index += sizeof(UInt16);
@@ -56,7 +64,14 @@ namespace PLCompliant.Modbus
 
 
         }
+        #endregion
 
+        #region methods
+
+        /// <summary>
+        /// Serialize the header data to bytes
+        /// </summary>
+        /// <returns>The header data as bytes for network transmission, so endianness is set to network order</returns>
         public byte[] Serialize()
         {
             byte[] buffer = new byte[Marshal.SizeOf(this)];
@@ -76,6 +91,8 @@ namespace PLCompliant.Modbus
 
             return buffer;
         }
+
+        #endregion
 
     }
 }

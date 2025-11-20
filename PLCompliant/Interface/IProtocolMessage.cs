@@ -1,12 +1,4 @@
 ﻿using PLCompliant.Modbus;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PLCompliant.Interface
 {
@@ -15,6 +7,7 @@ namespace PLCompliant.Interface
     /// </summary>
     public interface IProtocolMessage
     {
+        #region methods
         /// <summary>
         /// Add data to the data field of the protcol. Also converts to network endianness 
         /// </summary>
@@ -45,8 +38,10 @@ namespace PLCompliant.Interface
         /// </summary>
         /// <param name="inputBuffer">The bytes received from the network</param>
         public void DeserializeData(byte[] inputBuffer);
-     
-       
+
+        #endregion
+
+        #region Properties
         /// <summary>
         /// Size of the Data in bytes
         /// </summary>
@@ -55,6 +50,6 @@ namespace PLCompliant.Interface
         /// The Data-field of the Message
         /// </summary>
         public ModBusData Data { get; }
-       
+        #endregion
     }
 }

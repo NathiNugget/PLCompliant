@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PLCompliant.Interface
+﻿namespace PLCompliant.Interface
 {
 
     /// <summary>
@@ -13,10 +6,15 @@ namespace PLCompliant.Interface
     /// </summary>
     public interface IProtocolData
     {
+        #region properties
         /// <summary>
         /// The size for of the data in bytes
         /// </summary>
         public int Size { get; }
+
+        #endregion
+
+        #region methods
         /// <summary>
         /// Serialize the contained data to a byte array ready for network transmission
         /// </summary>
@@ -27,5 +25,7 @@ namespace PLCompliant.Interface
         /// </summary>
         /// <param name="inputBuffer">The serialized data from the network</param>
         public void Deserialize(byte[] inputBuffer);
+
+        #endregion
     }
 }
