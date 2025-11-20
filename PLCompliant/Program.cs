@@ -1,4 +1,5 @@
 using PLCompliant.Modbus;
+using PLCompliant.Scanning;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
@@ -12,6 +13,8 @@ namespace PLCompliant
         [STAThread]
         static void Main()
         {
+            Scanner scanner = new Scanner(new IPAddressRange(0, uint.MaxValue));
+            scanner.FindIPs();
             /*
             TcpClient client = new TcpClient("192.168.123.100", 502);
 

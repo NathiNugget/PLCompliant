@@ -11,6 +11,6 @@ namespace PLCompliant.Events
     {
         EventArgs _argument;
         public EventArgs Argument { get { return _argument; } }
-        public void ExecuteEvent(Form context);
+        public abstract void ExecuteEvent(Form context);
     }
 }

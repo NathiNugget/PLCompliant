@@ -75,7 +75,7 @@ namespace PLCompliant.Scanning
         public bool MoveNext()
         {
             _current++;
-            return ( _current > _end );
+            return ( _current < _end );
         }
 
         public void Reset()
