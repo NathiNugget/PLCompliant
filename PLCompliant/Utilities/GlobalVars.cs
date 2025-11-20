@@ -2,6 +2,6 @@
 {
     public static class GlobalVars
     {
-        public const char CSV_SEPERATOR = ';';
+        public const char CSV_SEPARATOR = ';';
     }
 }

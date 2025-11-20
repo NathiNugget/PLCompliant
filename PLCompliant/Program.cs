@@ -1,3 +1,6 @@
+using PLCompliant.Scanning;
+using System.Net;
+
 namespace PLCompliant
 {
     internal static class Program
@@ -6,10 +9,16 @@ namespace PLCompliant
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static async Task Main()
         {
-            NetworkScanner scanner = new NetworkScanner(new IPAddressRange(1, 2000));
-            scanner.FindIPs();
+            IPAddress from = IPAddress.Parse("192.167.1.1");
+            IPAddress to = IPAddress.Parse("192.167.9.255");
+
+
+            IPAddressRange range = new IPAddressRange(from, to);
+            NetworkScanner scanner = new NetworkScanner(range);
+            Console.WriteLine(range.Count); //2569 virker til at være max acceptable
+            await scanner.FindIPsAsync();
             /*
             TcpClient client = new TcpClient("192.168.123.100", 502);
 

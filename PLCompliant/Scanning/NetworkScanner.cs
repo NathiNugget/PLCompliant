@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Scanning
 {
@@ -25,34 +20,37 @@ namespace PLCompliant.Scanning
             _scanRange.Reset();
         }
 
-        public void FindIPs()
+        public async Task FindIPsAsync()
         {
             List<Task> tasks = new List<Task>();
-            foreach(IPAddress ip in _scanRange)
+
+            foreach (IPAddress ip in _scanRange)
             {
-                
-                    Task task = new Task(() =>
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
                     {
-                        try
+                        using (Ping ping = new Ping())
                         {
-                            Ping ping = new Ping();
-                            PingReply reply = ping.Send(ip, TIMEOUT);
+                            PingReply reply = await ping.SendPingAsync(ip, TIMEOUT);
                             if (reply.Status == IPStatus.Success)
                             {
+
                                 _viableIPs.Add(ip);
+
                             }
                         }
-                        catch
-                        {
-                            Console.WriteLine(ip);
-                        }
-                    });
-                    tasks.Add(task);
-                    task.Start();
-                
-              
+                    }
+                    catch
+                    {
+                        Console.WriteLine(ip);
+                    }
+                }));
             }
-            Task.WaitAll(tasks);
+
+            await Task.WhenAll(tasks);
+
+            Console.WriteLine();
         }
 
     }

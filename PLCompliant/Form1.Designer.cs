@@ -51,10 +51,10 @@
             button1.Location = new Point(106, 499);
             button1.Name = "button1";
             button1.Size = new Size(75, 42);
-            button1.TabIndex = 0;
+            button1.TabIndex = 4;
             button1.Text = "Start";
             button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            button1.Click += StartStopButtonClick;
             // 
             // label1
             // 
@@ -73,10 +73,10 @@
             button2.Margin = new Padding(3, 3, 3, 0);
             button2.Name = "button2";
             button2.Size = new Size(75, 23);
-            button2.TabIndex = 2;
+            button2.TabIndex = 3;
             button2.Text = "Browse";
             button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            button2.Click += ChooseSafeFilePath;
             // 
             // textBox1
             // 
@@ -84,7 +84,7 @@
             textBox1.Location = new Point(84, 384);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(525, 23);
-            textBox1.TabIndex = 3;
+            textBox1.TabIndex = 2;
             textBox1.TextChanged += textBox1_TextChanged_1;
             // 
             // label2
@@ -104,7 +104,7 @@
             radioButton1.Location = new Point(146, 153);
             radioButton1.Name = "radioButton1";
             radioButton1.Size = new Size(129, 19);
-            radioButton1.TabIndex = 5;
+            radioButton1.TabIndex = 0;
             radioButton1.TabStop = true;
             radioButton1.Text = "Modbus TCP/IP 502";
             radioButton1.UseVisualStyleBackColor = true;
@@ -115,7 +115,8 @@
             radioButton2.Location = new Point(146, 240);
             radioButton2.Name = "radioButton2";
             radioButton2.Size = new Size(101, 19);
-            radioButton2.TabIndex = 6;
+            radioButton2.TabIndex = 1;
+            radioButton2.TabStop = true;
             radioButton2.Text = "Siemens Step7";
             radioButton2.UseVisualStyleBackColor = true;
             // 
@@ -137,8 +138,7 @@
             maskedTextBox1.Name = "maskedTextBox1";
             maskedTextBox1.PromptChar = ' ';
             maskedTextBox1.Size = new Size(100, 23);
-            maskedTextBox1.TabIndex = 10;
-            maskedTextBox1.TabStop = false;
+            maskedTextBox1.TabIndex = 5;
             maskedTextBox1.MaskInputRejected += maskedTextBox1_MaskInputRejected;
             // 
             // toolTip1
@@ -153,8 +153,7 @@
             maskedTextBox2.Name = "maskedTextBox2";
             maskedTextBox2.PromptChar = ' ';
             maskedTextBox2.Size = new Size(100, 23);
-            maskedTextBox2.TabIndex = 11;
-            maskedTextBox2.TabStop = false;
+            maskedTextBox2.TabIndex = 6;
             // 
             // label4
             // 

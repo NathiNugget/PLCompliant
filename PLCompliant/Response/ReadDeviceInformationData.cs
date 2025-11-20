@@ -25,17 +25,17 @@ namespace PLCompliant.Response
         {
             StringBuilder sb = new StringBuilder(64);
             sb.Append(IPAddr.ToString());
-            sb.Append(GlobalVars.CSV_SEPERATOR);
+            sb.Append(GlobalVars.CSV_SEPARATOR);
             if (Objects.ContainsKey(0))
             {
                 sb.Append(Objects[0]);
             }
-            sb.Append(GlobalVars.CSV_SEPERATOR);
+            sb.Append(GlobalVars.CSV_SEPARATOR);
             if (Objects.ContainsKey(1))
             {
                 sb.Append(Objects[1]);
             }
-            sb.Append(GlobalVars.CSV_SEPERATOR);
+            sb.Append(GlobalVars.CSV_SEPARATOR);
             if (Objects.ContainsKey(2))
             {
                 sb.Append(Objects[2]);
