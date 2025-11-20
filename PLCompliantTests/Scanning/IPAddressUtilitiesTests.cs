@@ -1,4 +1,5 @@
 using PLCompliant.Scanning;
+using PLCompliant.Uilities;
 using System.Net;
 
 namespace PLCompliantTests;
@@ -32,11 +33,13 @@ public class IPAddressUtilitiesTests
         uint increment = 0;
         foreach(IPAddress actual in range)
         {
-            byte[] addressBytes = actual.GetAddressBytes();
-            uint ipAsUint = BitConverter.ToUInt32(addressBytes, 0);
-            var nextAddress = BitConverter.GetBytes(ipAsUint + increment);
-            IPAddress expected = new IPAddress(nextAddress);
+            // Yes its deprecated, i know
+            long addr = EndianConverter.FromNetworkToHost( (uint)IPAddress.Parse(from).Address);
+            long newAddr = addr + increment;
+
+            IPAddress expected = new IPAddress(EndianConverter.FromHostToNetwork( (uint)newAddr));
             Assert.AreEqual(expected, actual);
+            increment++;
         }
     }
 }

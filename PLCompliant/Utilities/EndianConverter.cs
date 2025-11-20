@@ -43,6 +43,15 @@ namespace PLCompliant.Uilities
             return val;
         
         }
+        public static long FromHostToNetwork(long val)
+        {
+            if (BitConverter.IsLittleEndian)
+            {
+                val = BinaryPrimitives.ReverseEndianness(val);
+            }
+            return val;
+
+        }
 
 
 
@@ -78,6 +87,16 @@ namespace PLCompliant.Uilities
             }
             return val;
         }
+
+        public static long FromNetworkToHost(long val)
+        {
+            if (BitConverter.IsLittleEndian)
+            {
+                val = BinaryPrimitives.ReverseEndianness(val);
+            }
+            return val;
+        }
+
 
     }
 }

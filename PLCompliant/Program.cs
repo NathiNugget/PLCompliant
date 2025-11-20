@@ -13,7 +13,7 @@ namespace PLCompliant
         [STAThread]
         static void Main()
         {
-            Scanner scanner = new Scanner(new IPAddressRange(0, uint.MaxValue));
+            NetworkScanner scanner = new NetworkScanner(new IPAddressRange(1, 2000));
             scanner.FindIPs();
             /*
             TcpClient client = new TcpClient("192.168.123.100", 502);

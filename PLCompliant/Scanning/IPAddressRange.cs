@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Exceptions;
+using PLCompliant.Uilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,11 +39,11 @@ namespace PLCompliant.Scanning
             {
                 if(_current < 0 )
                 {
-                    return new IPAddress(_current + 1);
+                    return new IPAddress(EndianConverter.FromHostToNetwork((uint)(_current + 1)));
                 }
                 else
                 {
-                    return new IPAddress(_current);
+                    return new IPAddress(EndianConverter.FromHostToNetwork((uint)_current));
                 }
             }
         }
@@ -53,11 +54,11 @@ namespace PLCompliant.Scanning
             {
                 if (_current < 0)
                 {
-                    return new IPAddress(_current + 1);
+                    return new IPAddress(EndianConverter.FromHostToNetwork((uint)(_current + 1)));
                 }
                 else
                 {
-                    return new IPAddress(_current);
+                    return new IPAddress(EndianConverter.FromHostToNetwork((uint)_current));
                 }
             }
         }
