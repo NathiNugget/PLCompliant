@@ -1,14 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PLCompliant.Modbus;
-using PLCompliant.Response;
+﻿using PLCompliant.Response;
 using PLCompliantTests;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Modbus.Tests
 {
@@ -25,7 +18,7 @@ namespace PLCompliant.Modbus.Tests
         {
             ModBusMessage exceptionresponse = new(new(), new(((byte)ModBusCommandType.read_device_information | 0b1000_0000), []));
             exceptionresponse.AddData(param_1);
-            Assert.IsFalse(ModBusResponseParsing.HandleReponseError(exceptionresponse, out byte err)); 
+            Assert.IsFalse(ModBusResponseParsing.TryHandleReponseError(exceptionresponse, out byte err));
             Assert.AreEqual(param_1, err);
         }
 
@@ -37,7 +30,7 @@ namespace PLCompliant.Modbus.Tests
             int expected = 0; // We expect error code to be 0 if no expection is thrown within handling method.
             ModBusMessage exceptionresponse = new(new(), new(((byte)ModBusCommandType.read_device_information), []));
             exceptionresponse.AddData(param_1);
-            Assert.IsTrue(ModBusResponseParsing.HandleReponseError(exceptionresponse, out byte err));
+            Assert.IsTrue(ModBusResponseParsing.TryHandleReponseError(exceptionresponse, out byte err));
             Assert.AreEqual(expected, err);
         }
 
@@ -46,15 +39,15 @@ namespace PLCompliant.Modbus.Tests
         {
             ModBusMessage msg = UtilityMethodTests.CreateExampleReadDeviceInformationResponse();
             int expectedobjectcount = 3; //We will be inserting 3 objects; 
-            string expected1 = UtilityMethodTests.getDeviceInfoObject1; 
+            string expected1 = UtilityMethodTests.getDeviceInfoObject1;
             string expected2 = UtilityMethodTests.getDeviceInfoObject2;
-            string expected3 = UtilityMethodTests.getDeviceInfoObject3; 
+            string expected3 = UtilityMethodTests.getDeviceInfoObject3;
 
             ReadDeviceInformationData response = ModBusResponseParsing.ParseReadDeviceInformationResponse(msg, System.Net.IPAddress.Parse("192.168.123.100"));
             Assert.AreEqual(response.noOfObjects, expectedobjectcount);
-            Assert.AreEqual(response.Objects[0], expected1); 
+            Assert.AreEqual(response.Objects[0], expected1);
             Assert.AreEqual(response.Objects[1], expected2);
-            Assert.AreEqual(response.Objects[2], expected3); 
+            Assert.AreEqual(response.Objects[2], expected3);
 
 
         }

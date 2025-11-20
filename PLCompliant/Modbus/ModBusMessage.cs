@@ -1,66 +1,107 @@
 ﻿using PLCompliant.Interface;
 using PLCompliant.Uilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PLCompliant.Modbus
 {
+    /// <summary>
+    /// This class represents a full Modbus packet wrapped in TCP, so it has to contains all the header fields as well as the data that follows
+    /// </summary>
     public class ModBusMessage : IProtocolMessage
     {
-        ModBusHeader _header = new();
-        ModBusData _data = new();
-        
+        #region instance fields
 
 
+        private ModBusHeader _header;
+        private ModBusData _data;
+
+        #endregion
+
+        #region properties
+        /// <summary>
+        /// Property to get the Header member
+        /// </summary>
         public ModBusHeader Header { get { return _header; } }
+        /// <summary>
+        /// Property to get the Data member
+        /// </summary>
         public ModBusData Data { get { return _data; } }
+        /// <summary>
+        /// Property to get the payload size in bytes
+        /// </summary>
         public ushort PayloadSize { get => (ushort)_data.PayloadSize; }
+        /// <summary>
+        /// Property to get the total size of the Data and Header in bytes
+        /// </summary>
         public ushort TotalSize { get => (ushort)(Data.Size + Header.Size); }
 
+        /// <summary>
+        /// Normal constructor for the class with header and data passed
+        /// </summary>
+        /// <param name="header">The header for the packet</param>
+        /// <param name="data">The data for the packet</param>
+        /// 
+        #endregion
 
+        #region constructors
         public ModBusMessage(ModBusHeader header, ModBusData data)
         {
             _header = header;
             _data = data;
         }
 
+        /// <summary>
+        /// Empty constructor for easy initialization; 
+        /// </summary>
+        public ModBusMessage()
+        {
+            _header = new();
+            _data = new();
+        }
+        #endregion
+
+        #region methods
+        /// <summary>
+        /// Addition of a ushort/UInt16, which is then converted to bytes and endianness is made into network order if host-machine is little endian
+        /// </summary>
+        /// <param name="inputData">The ushort to add</param>
         public void AddData(UInt16 inputData)
         {
             var oldSize = _data.PayloadSize;
             var newSize = _data._payload.Length + Marshal.SizeOf<UInt16>();
             Array.Resize(ref _data._payload, newSize);
             byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
-            Array.Copy(bytes,0, _data._payload,oldSize, bytes.Length);
+            Array.Copy(bytes, 0, _data._payload, oldSize, bytes.Length);
             _header.length += sizeof(UInt16);
         }
 
+
+        /// <inheritdoc/>
         public void AddData(byte inputData)
         {
             var newSize = _data._payload.Length + Marshal.SizeOf<byte>();
             Array.Resize(ref _data._payload, newSize);
             _data._payload[newSize - 1] = inputData;
-            _header.length += sizeof(byte); 
+            _header.length += sizeof(byte);
         }
 
+        /// <inheritdoc/>
         public void AddData(byte[] stringData)
         {
             if (stringData.Length > byte.MaxValue)
             {
-                throw new ArgumentException("Input length was greater than allowed in a byte"); 
+                throw new ArgumentException("Input length was greater than allowed in a byte");
             }
             byte stringSize = (byte)stringData.Length;
-            if(stringSize == 0) { return; }
+            if (stringSize == 0) { return; }
             var oldSize = Data._payload.Length;
             var newSize = _data._payload.Length + stringSize;
             Array.Resize(ref _data._payload, newSize);
-            Array.Copy(stringData,0, _data._payload,oldSize, stringSize);
+            Array.Copy(stringData, 0, _data._payload, oldSize, stringSize);
             _header.length += (ushort)stringSize;
         }
+
+        /// <inheritdoc/>
 
         public byte[] Serialize()
         {
@@ -72,27 +113,34 @@ namespace PLCompliant.Modbus
             return result;
 
         }
+        /// <inheritdoc/>
+
         public void DeserializeHeader(byte[] inputBuffer)
         {
             _header.Deserialize(inputBuffer);
         }
+        /// <inheritdoc/>
+
         public void DeserializeData(byte[] inputBuffer)
         {
             _data.Deserialize(inputBuffer);
         }
+
+        /// <inheritdoc/>
         public int DataSize { get { return Data.Size; } }
 
+        /// <inheritdoc/>
         public override bool Equals(object? other)
         {
             if (other == null) return false;
             if (other is not ModBusMessage) return false;
             ModBusMessage other_msg = (ModBusMessage)other;
             return (Data.Equals(other_msg.Data) && Header.Equals(other_msg.Header));
-            
+
         }
+        #endregion
 
-        
 
-        
+
     }
 }

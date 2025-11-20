@@ -1,9 +1,4 @@
-﻿using System;
-using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Buffers.Binary;
 
 
 namespace PLCompliant.Uilities
@@ -12,7 +7,7 @@ namespace PLCompliant.Uilities
     {
         public static uint FromHostToNetwork(uint val)
         {
-            if(BitConverter.IsLittleEndian)
+            if (BitConverter.IsLittleEndian)
             {
                 val = BinaryPrimitives.ReverseEndianness(val);
             }
@@ -41,7 +36,7 @@ namespace PLCompliant.Uilities
                 val = BinaryPrimitives.ReverseEndianness(val);
             }
             return val;
-        
+
         }
 
 

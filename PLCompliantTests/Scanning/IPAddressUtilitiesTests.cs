@@ -15,7 +15,7 @@ public class IPAddressUtilitiesTests
     {
         IPAddress ip1 = IPAddress.Parse(from);
         IPAddress ip2 = IPAddress.Parse(to);
-        uint actual = IPAddressUtilities.GetRangeCountIPv4(ip1 , ip2);
+        uint actual = IPAddressUtilities.GetRangeCountIPv4(ip1, ip2);
         Assert.AreEqual(expectedCount, actual);
     }
 

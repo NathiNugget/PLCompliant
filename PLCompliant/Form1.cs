@@ -1,5 +1,4 @@
 using PLCompliant.Utilities;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
@@ -8,15 +7,13 @@ namespace PLCompliant
     [ExcludeFromCodeCoverage]
     public partial class Form1 : Form
     {
-        bool running = false;
+        bool running;
+        System.Windows.Forms.Timer _timer;
+        Queue<int> _queue;
         public Form1()
         {
+            running = false;
             InitializeComponent();
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
             maskedTextBox1.LostFocus += new EventHandler(IPAddressValidationHandling!);
             maskedTextBox1.MouseClick += new MouseEventHandler(IPAddressOnClick);
             maskedTextBox1.KeyDown += new KeyEventHandler(ControlField);
@@ -26,9 +23,28 @@ namespace PLCompliant
             maskedTextBox2.KeyDown += new KeyEventHandler(ControlField);
 
 
+            _timer = new System.Windows.Forms.Timer();
+            _timer.Tick += new EventHandler(HandleScannerEvent!); //TODO: Make actual eventhandler for ticks when queue is added; 
+            _timer.Interval = 100;
+            _timer.Start();
+            _queue = new Queue<int>(Enumerable.Range(0, 100));
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
 
 
         }
+
+        private void HandleScannerEvent(object? sender, EventArgs args)
+        {
+            label1.Text = _queue.Count.ToString();
+            if (_queue.Count > 0) _queue.Dequeue();
+        }
+
+
+
 
         private void ControlField(object? sender, KeyEventArgs e)
         {
@@ -95,13 +111,14 @@ namespace PLCompliant
             MaskedTextBox maskedTextBox = (MaskedTextBox)sender!;
             string input = maskedTextBox.Text.Replace(" ", "");
 
-
+            
 
 
             if (!IPAddress.TryParse(input, out IPAddress? _))
             {
                 toolTip1.ToolTipTitle = "Dårlig IP";
-                toolTip1.Show("Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være et før og efter hvert punktum", maskedTextBox1, 0, -40, 5000);
+                toolTip1.Show("Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være et før og efter hvert punktum", maskedTextBox, 0, -40, 5000);
+                
             }
 
 
@@ -111,7 +128,8 @@ namespace PLCompliant
         private void button1_Click(object sender, EventArgs e)
         {
             Button button = (Button)sender;
-            button.Text = running ? "Stop" : "Start";
+            button.Text = running ? "Start" : "Stop";
+            label1.Visible = !label1.Visible;
             running = !running;
 
         }
@@ -134,7 +152,7 @@ namespace PLCompliant
                 textBox1.Text = folderpath;
 
             }
-           
+
 
         }
 
@@ -169,6 +187,8 @@ namespace PLCompliant
 
 
         }
+
+
 
         private void label1_Click(object sender, EventArgs e)
         {

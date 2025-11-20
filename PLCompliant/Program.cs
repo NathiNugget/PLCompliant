@@ -1,8 +1,3 @@
-using PLCompliant.Modbus;
-using PLCompliant.Scanning;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-
 namespace PLCompliant
 {
     internal static class Program

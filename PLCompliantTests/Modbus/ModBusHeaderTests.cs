@@ -1,6 +1,5 @@
 using PLCompliant.Modbus;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 
 namespace PLCompliantTests;
 
@@ -8,11 +7,11 @@ namespace PLCompliantTests;
 [TestClass]
 public class ModBusHeaderTests
 {
-    
+
     [TestMethod]
     [DataRow(ushort.MinValue, ushort.MinValue, byte.MinValue)]
     [DataRow(ushort.MaxValue, ushort.MaxValue, byte.MaxValue)]
-    [DataRow((ushort)(ushort.MaxValue/2), (ushort)(ushort.MaxValue/2), (byte)(byte.MaxValue/2))]
+    [DataRow((ushort)(ushort.MaxValue / 2), (ushort)(ushort.MaxValue / 2), (byte)(byte.MaxValue / 2))]
 
     public void ModBusHeaderAreEqual(ushort transmodifier, ushort protidentifier, byte unitid)
     {
@@ -29,7 +28,7 @@ public class ModBusHeaderTests
         Assert.IsFalse(header.Equals(null));
 
     }
-    
+
     [TestMethod]
     public void ModBusHeaderSizeShouldBeSeven()
     {

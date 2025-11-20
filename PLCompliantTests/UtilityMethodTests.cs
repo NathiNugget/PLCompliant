@@ -1,10 +1,6 @@
 ﻿using PLCompliant.Modbus;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliantTests
 {
@@ -39,7 +35,7 @@ namespace PLCompliantTests
             msg.AddData(0x5);
             msg.AddData(Encoding.UTF8.GetBytes(getDeviceInfoObject3));
 
-            return msg; 
+            return msg;
         }
     }
 }
