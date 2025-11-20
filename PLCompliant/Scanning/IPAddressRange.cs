@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PLCompliant.Scanning
 {
-    public struct IPAddressRange : IEnumerator<IPAddress>
+    public struct IPAddressRange : IEnumerator<IPAddress>, IEnumerable<IPAddress>
     {
         long _start;
         long _end;
@@ -32,13 +32,44 @@ namespace PLCompliant.Scanning
 
         public long Count { get { return _end - _start + 1; } }
 
-        public IPAddress Current { get { return new IPAddress( _current ); } }
+        public IPAddress Current
+        {
+            get
+            {
+                if(_current < 0 )
+                {
+                    return new IPAddress(_current + 1);
+                }
+                else
+                {
+                    return new IPAddress(_current);
+                }
+            }
+        }
 
-        object IEnumerator.Current { get { return new IPAddress(_current); } }
+        object IEnumerator.Current
+        {
+            get
+            {
+                if (_current < 0)
+                {
+                    return new IPAddress(_current + 1);
+                }
+                else
+                {
+                    return new IPAddress(_current);
+                }
+            }
+        }
 
         public void Dispose()
         {
             
+        }
+
+        public IEnumerator<IPAddress> GetEnumerator()
+        {
+            return (IEnumerator<IPAddress>)this;
         }
 
         public bool MoveNext()
@@ -50,6 +81,11 @@ namespace PLCompliant.Scanning
         public void Reset()
         {
             _current = _start - 1;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (IEnumerator)this;
         }
     }
 }
