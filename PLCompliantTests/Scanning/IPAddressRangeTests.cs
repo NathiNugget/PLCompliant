@@ -20,7 +20,7 @@ public class IPAddressRangeTests
     public void IPAddressCTORFailStartIsHigherThanEnd()
     {
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => new IPAddressRange(1234, 1233));
-        
+
     }
     [TestMethod]
     public void IPAddressCTORFailIPv6AddressNotSupported()

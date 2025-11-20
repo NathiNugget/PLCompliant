@@ -1,6 +1,5 @@
 ﻿using PLCompliant.Exceptions;
 using PLCompliant.Uilities;
-using System;
 using System.Collections;
 using System.Net;
 
@@ -51,7 +50,7 @@ namespace PLCompliant.Scanning
         {
             get
             {
-                if(_current < 0 )
+                if (_current < 0)
                 {
                     return new IPAddress(EndianConverter.FromHostToNetwork((uint)(_current + 1)));
                 }
@@ -79,7 +78,7 @@ namespace PLCompliant.Scanning
 
         public void Dispose()
         {
-            
+
         }
 
         public IEnumerator<IPAddress> GetEnumerator()
@@ -90,7 +89,7 @@ namespace PLCompliant.Scanning
         public bool MoveNext()
         {
             _current++;
-            return ( _current < _end );
+            return (_current < _end);
         }
 
         public void Reset()

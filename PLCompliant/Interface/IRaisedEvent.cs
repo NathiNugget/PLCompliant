@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PLCompliant.Interface
+﻿namespace PLCompliant.Interface
 {
     /// <summary>
     /// Interface for a raised event, for use in the IEventQueue

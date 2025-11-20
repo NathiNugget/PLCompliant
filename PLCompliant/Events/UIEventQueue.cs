@@ -1,10 +1,5 @@
 ﻿using PLCompliant.Interface;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
@@ -21,13 +16,13 @@ namespace PLCompliant.Events
         /// <summary>
         /// Gets the global instance
         /// </summary>
-        public static UIEventQueue Instance {  get { return _instance; } }
+        public static UIEventQueue Instance { get { return _instance; } }
 
         public UIEventQueue()
         {
             _queue = new();
         }
-    
+
         public bool Empty { get { return _queue.IsEmpty; } }
 
         public void Push(IRaisedEvent<Form, EventArgs> item)
@@ -35,7 +30,7 @@ namespace PLCompliant.Events
             _queue.Enqueue(item);
         }
 
-        public bool Pop( out IRaisedEvent<Form, EventArgs> item)
+        public bool Pop(out IRaisedEvent<Form, EventArgs> item)
         {
             return _queue.TryDequeue(out item);
         }

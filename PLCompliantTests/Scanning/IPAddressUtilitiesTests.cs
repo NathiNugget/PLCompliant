@@ -29,15 +29,15 @@ public class IPAddressUtilitiesTests
     {
         IPAddress ip1 = IPAddress.Parse(from);
         IPAddress ip2 = IPAddress.Parse(to);
-        IPAddressRange range = IPAddressUtilities.GetRangeIPsIPv4(ip1 , ip2);
+        IPAddressRange range = IPAddressUtilities.GetRangeIPsIPv4(ip1, ip2);
         uint increment = 0;
-        foreach(IPAddress actual in range)
+        foreach (IPAddress actual in range)
         {
             // Yes its deprecated, i know
-            long addr = EndianConverter.FromNetworkToHost( (uint)IPAddress.Parse(from).Address);
+            long addr = EndianConverter.FromNetworkToHost((uint)IPAddress.Parse(from).Address);
             long newAddr = addr + increment;
 
-            IPAddress expected = new IPAddress(EndianConverter.FromHostToNetwork( (uint)newAddr));
+            IPAddress expected = new IPAddress(EndianConverter.FromHostToNetwork((uint)newAddr));
             Assert.AreEqual(expected, actual);
             increment++;
         }

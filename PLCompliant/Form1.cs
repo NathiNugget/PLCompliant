@@ -111,14 +111,14 @@ namespace PLCompliant
             MaskedTextBox maskedTextBox = (MaskedTextBox)sender!;
             string input = maskedTextBox.Text.Replace(" ", "");
 
-            
+
 
 
             if (!IPAddress.TryParse(input, out IPAddress? _))
             {
                 toolTip1.ToolTipTitle = "Dårlig IP";
                 toolTip1.Show("Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være et før og efter hvert punktum", maskedTextBox, 0, -40, 5000);
-                
+
             }
 
 

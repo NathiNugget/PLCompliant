@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PLCompliant.Interface
+﻿namespace PLCompliant.Interface
 {
     /// <summary>
     /// Interface for an Event Queue. 
@@ -29,6 +22,6 @@ namespace PLCompliant.Interface
         /// </summary>
 
         bool Pop(out IRaisedEvent<T, A> item);
-        
+
     }
 }
