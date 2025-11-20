@@ -12,7 +12,7 @@ namespace PLCompliant
         [STAThread]
         static void Main()
         {
-
+            /*
             TcpClient client = new TcpClient("192.168.123.100", 502);
 
 
@@ -105,7 +105,7 @@ namespace PLCompliant
 
 
             client.Close();
-
+            */
 
 
 
