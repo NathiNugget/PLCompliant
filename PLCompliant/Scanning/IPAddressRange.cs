@@ -27,8 +27,8 @@ namespace PLCompliant.Scanning
 
         public IPAddressRange(IPAddress from, IPAddress to)
         {
-            long start = EndianConverter.FromNetworkToHost((uint)from.Address);
-            long end = EndianConverter.FromNetworkToHost((uint)to.Address);
+            long start = EndianConverter.FromNetworkToHost((uint)from.GetIPv4Addr());
+            long end = EndianConverter.FromNetworkToHost((uint)to.GetIPv4Addr());
 
 
             if (start > uint.MaxValue || end > uint.MaxValue)

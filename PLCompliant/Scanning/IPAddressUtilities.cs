@@ -32,6 +32,21 @@ namespace PLCompliant.Scanning
             return new IPAddressRange(fromAddr, toAddr);
 
         }
+        /// <summary>
+        /// Gets the raw IPv4 address, in network order
+        /// </summary>
+        /// <param name="ip">The IP to get the raw address from</param>
+        /// <returns></returns>
+        public static long GetIPv4Addr(this IPAddress ip)
+        {
+            var ipBytes = ip.GetAddressBytes();
+            if(ipBytes.Length != 4)
+            {
+                throw new InvalidIPVersionException("IP Version 6 is not supported");
+            } 
+            var ipUint = BitConverter.ToUInt32(ipBytes, 0);
+            return (long)ipUint;
+        }
 
     }
 }

@@ -33,8 +33,7 @@ public class IPAddressUtilitiesTests
         uint increment = 0;
         foreach (IPAddress actual in range)
         {
-            // Yes its deprecated, i know
-            long addr = EndianConverter.FromNetworkToHost((uint)IPAddress.Parse(from).Address);
+            long addr = EndianConverter.FromNetworkToHost((uint)IPAddress.Parse(from).GetIPv4Addr());
             long newAddr = addr + increment;
 
             IPAddress expected = new IPAddress(EndianConverter.FromHostToNetwork((uint)newAddr));
