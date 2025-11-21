@@ -9,7 +9,7 @@ namespace PLCompliant.Events
 {
     public class UpdateThreadContext
     {
-        public NetworkScanner scanner;
+        public NetworkScanner scanner = new NetworkScanner();
 
     }
 }

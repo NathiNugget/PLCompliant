@@ -154,43 +154,53 @@ namespace PLCompliant
 
         private void StartStopButtonClick(object sender, EventArgs e)
         {
-
-
-
             if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
             {
-                Button button = (Button)sender;
-                button.Text = running ? "Start" : "Stop";
+                var addrRange = new IPAddressRange(from, to);
+                UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new UpdateThreadArgs(addrRange)));
                 label1.Visible = !label1.Visible;
-                Thread t = new Thread(() =>
-                {
-                    if (!running)
-                    {
-
-
-                        IPAddressRange range = new IPAddressRange(from, to);
-                        NetworkScanner scanner = new NetworkScanner(range);
-                        scanner.FindIPs();
-                    }
-
-
-
-                    running = !running;
-                }); 
-                t.Start();
-                
-                
-                
-                
+                running = !running;
             }
-
-
             else
             {
-
                 ShowIPWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
-
             }
+            
+
+            //if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
+            //{
+            //    Button button = (Button)sender;
+            //    button.Text = running ? "Start" : "Stop";
+            //    label1.Visible = !label1.Visible;
+            //    Thread t = new Thread(() =>
+            //    {
+            //        if (!running)
+            //        {
+
+
+            //            IPAddressRange range = new IPAddressRange(from, to);
+            //            NetworkScanner scanner = new NetworkScanner(range);
+            //            scanner.FindIPs();
+            //        }
+
+
+
+            //        running = !running;
+            //    }); 
+            //    t.Start();
+                
+                
+                
+                
+            //}
+
+
+            //else
+            //{
+
+            //    ShowIPWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
+
+            //}
 
         }
 

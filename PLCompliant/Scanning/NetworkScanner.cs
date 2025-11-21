@@ -24,6 +24,10 @@ namespace PLCompliant.Scanning
         {
             _scanRange = scanRange;
         }
+        public NetworkScanner()
+        {
+            _scanRange = new IPAddressRange(1, 1);
+        }
         public bool ScanInProgress { get { return _scanInProgress; } }
         public bool AbortIPScan { get { return _abortIPScan; } }
         public bool AbortPLCScan { get { return _abortPLCScan; } }
@@ -32,6 +36,10 @@ namespace PLCompliant.Scanning
         {
             _viableIPs.Clear();
             _scanRange.Reset();
+        }
+        public void SetIPRange(IPAddressRange range)
+        {
+            _scanRange = range;
         }
         public void StopIPScan()
         {
