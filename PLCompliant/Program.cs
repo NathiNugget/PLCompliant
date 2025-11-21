@@ -120,7 +120,7 @@ namespace PLCompliant
                 {
                     while (!UpdateEventQueue.Instance.Empty)
                     {
-                        if (UpdateEventQueue.Instance.Pop(out var evt))
+                        if (UpdateEventQueue.Instance.TryPop(out var evt))
                         {
                             evt.ExecuteEvent(context);
                         }

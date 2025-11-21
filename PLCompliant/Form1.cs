@@ -53,7 +53,7 @@ namespace PLCompliant
             UIEventQueue queue = UIEventQueue.Instance;
             while (!queue.Empty)
             {
-                if (queue.Pop(out var evt))
+                if (queue.TryPop(out var evt))
                 {
                     evt.ExecuteEvent(this);
 
@@ -103,7 +103,7 @@ namespace PLCompliant
                 }
                 if (index != 0 && (chararr[index - 1] == ' ' || chararr[index - 1] == '.'))
                 {
-                    int previousindex = text.PreviousIndexOf('.', index);
+                    int previousindex = text.PreviousIndexOfAndFixToSeparator('.', index);
 
                     if (previousindex != -1)
                     {

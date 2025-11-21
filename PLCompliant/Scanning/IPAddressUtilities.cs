@@ -4,8 +4,18 @@ using System.Net;
 
 namespace PLCompliant.Scanning
 {
+    /// <summary>
+    /// Contains utilities related to IPAddresses
+    /// </summary>
     public static class IPAddressUtilities
     {
+        /// <summary>
+        /// Gets the count of how many IPs are between (both inclusive) from and to IP addresses
+        /// </summary>
+        /// <param name="fromIp">From IP</param>
+        /// <param name="toIp">To IP</param>
+        /// <returns>Count of the range</returns>
+        /// <exception cref="InvalidIPVersionException">Thrown if an IPv6 address is somehow passed</exception>
         public static uint GetRangeCountIPv4(IPAddress fromIp, IPAddress toIp)
         {
             byte[] fromBytes = fromIp.GetAddressBytes();
@@ -19,6 +29,14 @@ namespace PLCompliant.Scanning
             return (uint)new IPAddressRange(fromAddr, toAddr).Count;
 
         }
+
+        /// <summary>
+        /// Get an IPAdressRange based on form and to IPs (both inclusive)
+        /// </summary>
+        /// <param name="fromIp">From IP</param>
+        /// <param name="toIp">To IP</param>
+        /// <returns>Range of IP addresses</returns>
+        /// <exception cref="InvalidIPVersionException">Thrown if an IPv6 address is somehow passed</exception>
         public static IPAddressRange GetRangeIPsIPv4(IPAddress fromIp, IPAddress toIp)
         {
             byte[] fromBytes = fromIp.GetAddressBytes();
