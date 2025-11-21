@@ -1,4 +1,6 @@
+using PLCompliant.Events;
 using PLCompliant.Scanning;
+using PLCompliant.Utilities;
 using System.Net;
 
 namespace PLCompliant
@@ -11,13 +13,13 @@ namespace PLCompliant
         [STAThread]
         static async Task Main()
         {
-            
 
 
-            
-            
-           
-            
+
+
+
+
+
             /*
             TcpClient client = new TcpClient("192.168.123.100", 502);
 
@@ -112,8 +114,23 @@ namespace PLCompliant
 
             client.Close();
             */
+            UpdateThreadContext context = new UpdateThreadContext();
 
+            Thread updateThread = new Thread( () =>
+            {
+                while(!GlobalVars.ABORT)
+                {
+                    while(!UpdateEventQueue.Instance.Empty)
+                    {
+                        if(UpdateEventQueue.Instance.Pop(out var evt))
+                        {
+                            evt.ExecuteEvent(context);
+                        }
+                    }
+                    Thread.Sleep(100);
+                }
 
+            });
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
