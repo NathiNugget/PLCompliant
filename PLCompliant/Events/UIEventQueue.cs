@@ -6,10 +6,10 @@ namespace PLCompliant.Events
     /// <summary>
     /// This singleton handles sending events FROM the worker threads, to the UI thread.
     /// </summary>
-    public class UIEventQueue : IEventQueue<Form, EventArgs>
+    public class UIEventQueue : IEventQueue<Form, Tuple<int, int>>
     {
 
-        ConcurrentQueue<IRaisedEvent<Form, EventArgs>> _queue;
+        ConcurrentQueue<IRaisedEvent<Form, Tuple<int, int>>> _queue;
 
 
         private static UIEventQueue _instance = new UIEventQueue();
@@ -25,12 +25,12 @@ namespace PLCompliant.Events
 
         public bool Empty { get { return _queue.IsEmpty; } }
 
-        public void Push(IRaisedEvent<Form, EventArgs> item)
+        public void Push(IRaisedEvent<Form, Tuple<int, int>> item)
         {
             _queue.Enqueue(item);
         }
 
-        public bool Pop(out IRaisedEvent<Form, EventArgs> item)
+        public bool Pop(out IRaisedEvent<Form, Tuple<int, int>> item)
         {
             return _queue.TryDequeue(out item);
         }

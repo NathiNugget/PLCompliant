@@ -1,3 +1,5 @@
+using PLCompliant.Events;
+using PLCompliant.Interface;
 using PLCompliant.Scanning;
 using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
@@ -14,9 +16,9 @@ namespace PLCompliant
         /// </summary>
         bool running;
         System.Windows.Forms.Timer _timer;
-        Queue<int> _queue;
         public Form1()
         {
+
             running = false;
             InitializeComponent();
             maskedTextBox1.LostFocus += new EventHandler(IPAddressValidationHandling!);
@@ -29,10 +31,9 @@ namespace PLCompliant
 
 
             _timer = new System.Windows.Forms.Timer();
-            _timer.Tick += new EventHandler(HandleScannerEvent!); //TODO: Make actual eventhandler for ticks when queue is added; 
+            _timer.Tick += new EventHandler(UIOnTick!); //TODO: Make actual eventhandler for ticks when queue is added; 
             _timer.Interval = 100;
             _timer.Start();
-            _queue = new Queue<int>(Enumerable.Range(0, 100));
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -42,10 +43,17 @@ namespace PLCompliant
 
         }
 
-        private void HandleScannerEvent(object? sender, EventArgs args)
+        private void UIOnTick(object? sender, EventArgs args)
         {
-            label1.Text = _queue.Count.ToString();
-            if (_queue.Count > 0) _queue.Dequeue();
+            UIEventQueue queue = UIEventQueue.Instance;
+            while (!queue.Empty) {
+                if (queue.Pop(out var evt)) {
+                    evt.ExecuteEvent(this); 
+
+                }
+            }
+
+
         }
 
 
@@ -154,19 +162,26 @@ namespace PLCompliant
                 Button button = (Button)sender;
                 button.Text = running ? "Start" : "Stop";
                 label1.Visible = !label1.Visible;
-                label1.BackColor = Color.Green; 
-                if (!running)
+                Thread t = new Thread(() =>
                 {
-                    
-                    
-                    IPAddressRange range = new IPAddressRange(from, to);
-                    NetworkScanner scanner = new NetworkScanner(range);
-                    scanner.FindIPs();
-                }
+                    if (!running)
+                    {
+
+
+                        IPAddressRange range = new IPAddressRange(from, to);
+                        NetworkScanner scanner = new NetworkScanner(range);
+                        scanner.FindIPs();
+                    }
+
+
+
+                    running = !running;
+                }); 
+                t.Start();
                 
                 
                 
-                running = !running;
+                
             }
 
 

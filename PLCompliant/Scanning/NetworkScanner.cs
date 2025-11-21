@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using PLCompliant.Events;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -24,7 +25,7 @@ namespace PLCompliant.Scanning
         public void FindIPs()
         {
             List<Thread> threads = new List<Thread>();
-
+            int ipspinged = 0; 
             foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
             {
                 foreach (IPAddress ip in chunk)
@@ -48,6 +49,8 @@ namespace PLCompliant.Scanning
                         {
                             Console.WriteLine(ip);
                         }
+                        Interlocked.Increment(ref ipspinged);
+                        UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new Tuple<int, int>((int)_scanRange.Count, ipspinged))); 
                     }));
                     
                 }
