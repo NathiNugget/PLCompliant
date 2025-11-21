@@ -102,9 +102,13 @@ namespace PLCompliant
         private void MaskedTextBoxOnClick(object? sender, EventArgs e)
         {
             MaskedTextBox box = (MaskedTextBox)sender!;
-            int index = box.Text.IndexOf(" ");
+            //Console.WriteLine(box.Location.X);
+            //Console.WriteLine(e);
+            // TODO: Make logic about where they click maybe
 
-            box.Select(index, 0);
+            int index = box.Text.IndexOf("   ");
+
+            if (index == -1) box.Select(box.Text.LastIndexOf(".")+1, 0); else box.Select(index, 0);
 
 
 
@@ -148,9 +152,20 @@ namespace PLCompliant
             if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
             {
                 Button button = (Button)sender;
-                IPAddressRange range = new IPAddressRange(from, to);
                 button.Text = running ? "Start" : "Stop";
                 label1.Visible = !label1.Visible;
+                label1.BackColor = Color.Green; 
+                if (!running)
+                {
+                    
+                    
+                    IPAddressRange range = new IPAddressRange(from, to);
+                    NetworkScanner scanner = new NetworkScanner(range);
+                    scanner.FindIPs();
+                }
+                
+                
+                
                 running = !running;
             }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Globalization;
 using System.Net;
 using System.Net.NetworkInformation;
 
@@ -20,37 +21,50 @@ namespace PLCompliant.Scanning
             _scanRange.Reset();
         }
 
-        public async Task FindIPsAsync()
+        public void FindIPs()
         {
-            List<Task> tasks = new List<Task>();
+            List<Thread> threads = new List<Thread>();
 
-            foreach (IPAddress ip in _scanRange)
+            foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
             {
-                tasks.Add(Task.Run(async () =>
+                foreach (IPAddress ip in chunk)
                 {
-                    try
+                    threads.Add(new Thread(() =>
                     {
-                        using (Ping ping = new Ping())
+                        try
                         {
-                            PingReply reply = await ping.SendPingAsync(ip, TIMEOUT);
-                            if (reply.Status == IPStatus.Success)
+                            using (Ping ping = new Ping())
                             {
+                                PingReply reply = ping.Send(ip, TIMEOUT);
+                                if (reply.Status == IPStatus.Success)
+                                {
 
-                                _viableIPs.Add(ip);
+                                    _viableIPs.Add(ip);
 
+                                }
                             }
                         }
-                    }
-                    catch
-                    {
-                        Console.WriteLine(ip);
-                    }
-                }));
+                        catch
+                        {
+                            Console.WriteLine(ip);
+                        }
+                    }));
+                    
+                }
+                foreach (Thread t in threads)
+                {
+                    t.Start(); 
+                }
+                threads.ForEach(t => t.Join());
+                threads.Clear(); 
             }
+            
 
-            await Task.WhenAll(tasks);
+            
+            
 
-            Console.WriteLine();
+            
+            File.WriteAllText("./hello.txt", _viableIPs.Count.ToString());
         }
 
     }

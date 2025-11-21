@@ -11,14 +11,13 @@ namespace PLCompliant
         [STAThread]
         static async Task Main()
         {
-            IPAddress from = IPAddress.Parse("192.167.1.1");
-            IPAddress to = IPAddress.Parse("192.167.9.255");
+            
 
 
-            IPAddressRange range = new IPAddressRange(from, to);
-            NetworkScanner scanner = new NetworkScanner(range);
-            Console.WriteLine(range.Count); //2569 virker til at være max acceptable
-            await scanner.FindIPsAsync();
+            
+            
+           
+            
             /*
             TcpClient client = new TcpClient("192.168.123.100", 502);
 
