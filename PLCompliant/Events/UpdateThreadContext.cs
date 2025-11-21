@@ -1,15 +1,10 @@
 ﻿using PLCompliant.Scanning;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
     public class UpdateThreadContext
     {
-        public NetworkScanner scanner;
+        public NetworkScanner scanner = new NetworkScanner();
 
     }
 }

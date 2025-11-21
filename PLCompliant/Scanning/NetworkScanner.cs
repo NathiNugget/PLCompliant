@@ -1,12 +1,9 @@
 ﻿using PLCompliant.Enums;
 using PLCompliant.Events;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Globalization;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace PLCompliant.Scanning
 {
@@ -17,12 +14,16 @@ namespace PLCompliant.Scanning
         bool _abortPLCScan = false;
         bool _scanInProgress = false;
         ConcurrentBag<IPAddress> _viableIPs = new ConcurrentBag<IPAddress>();
-        ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>(); 
+        ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>();
         IPAddressRange _scanRange;
 
         public NetworkScanner(IPAddressRange scanRange)
         {
             _scanRange = scanRange;
+        }
+        public NetworkScanner()
+        {
+            _scanRange = new IPAddressRange(1, 1);
         }
         public bool ScanInProgress { get { return _scanInProgress; } }
         public bool AbortIPScan { get { return _abortIPScan; } }
@@ -32,6 +33,10 @@ namespace PLCompliant.Scanning
         {
             _viableIPs.Clear();
             _scanRange.Reset();
+        }
+        public void SetIPRange(IPAddressRange range)
+        {
+            _scanRange = range;
         }
         public void StopIPScan()
         {
@@ -46,10 +51,10 @@ namespace PLCompliant.Scanning
         {
             _scanInProgress = true;
             List<Thread> threads = new List<Thread>();
-            int ipspinged = 1; 
+            int ipspinged = 1;
             foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
             {
-                if(_abortIPScan)
+                if (_abortIPScan)
                 {
                     break;
                 }
@@ -57,7 +62,7 @@ namespace PLCompliant.Scanning
                 {
                     threads.Add(new Thread(() =>
                     {
-                        if(_abortIPScan)
+                        if (_abortIPScan)
                         {
                             return;
                         }
@@ -79,39 +84,39 @@ namespace PLCompliant.Scanning
                             Console.WriteLine(ip);
                         }
                         Interlocked.Increment(ref ipspinged);
-                        UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new Tuple<int, int>((int)_scanRange.Count, ipspinged))); 
+                        UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new Tuple<int, int>((int)_scanRange.Count, ipspinged)));
                     }));
-                    
+
                 }
                 foreach (Thread t in threads)
                 {
-                    t.Start(); 
+                    t.Start();
                 }
                 threads.ForEach(t => t.Join());
-                threads.Clear(); 
+                threads.Clear();
             }
             _abortIPScan = false;
             _scanInProgress = false;
-            
-            
-            
 
 
-            
+
+
+
+
 
             File.WriteAllText("./hello.txt", _viableIPs.Count.ToString());
         }
 
         public void FindPLCs(PLCProtocolType protocol)
         {
-            List<Thread> threads = new(); 
+            List<Thread> threads = new();
             foreach (IPAddress ip in _viableIPs)
             {
                 threads.Add(new Thread(() =>
                 {
                     try
                     {
-                        TcpClient client; 
+                        TcpClient client;
                         switch (protocol)
                         {
                             case PLCProtocolType.Modbus:
@@ -123,7 +128,7 @@ namespace PLCompliant.Scanning
                                     client = new TcpClient(); break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
                                 }
                         }
-                         
+
 
                         if (client.Connected)
                         {

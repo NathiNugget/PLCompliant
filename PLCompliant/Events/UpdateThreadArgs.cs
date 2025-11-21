@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PLCompliant.Scanning;
 
 namespace PLCompliant.Events
 {
-    public struct UpdateThreadArgs
+    public readonly struct UpdateThreadArgs
     {
+        public UpdateThreadArgs(IPAddressRange range)
+        {
+            addressRange = range;
+        }
+        public readonly IPAddressRange addressRange;
     }
 }

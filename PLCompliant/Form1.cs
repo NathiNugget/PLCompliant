@@ -1,6 +1,5 @@
 using PLCompliant.Enums;
 using PLCompliant.Events;
-using PLCompliant.Interface;
 using PLCompliant.Scanning;
 using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
@@ -17,7 +16,7 @@ namespace PLCompliant
         /// </summary>
         bool running;
         System.Windows.Forms.Timer _timer;
-        public PLCProtocolType Protocol {  get; private set; }
+        public PLCProtocolType Protocol { get; private set; }
         public Form1()
         {
 
@@ -162,43 +161,53 @@ namespace PLCompliant
 
         private void StartStopButtonClick(object sender, EventArgs e)
         {
-
-
-
             if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
             {
-                Button button = (Button)sender;
-                button.Text = running ? "Start" : "Stop";
+                var addrRange = new IPAddressRange(from, to);
+                UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new UpdateThreadArgs(addrRange)));
                 label1.Visible = !label1.Visible;
-                Thread t = new Thread(() =>
-                {
-                    if (!running)
-                    {
-
-
-                        IPAddressRange range = new IPAddressRange(from, to);
-                        NetworkScanner scanner = new NetworkScanner(range);
-                        scanner.FindIPs();
-                    }
-
-
-
-                    running = !running;
-                });
-                t.Start();
-
-
-
-
+                running = !running;
             }
-
-
             else
             {
-
                 ShowIPWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
-
             }
+
+
+            //if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
+            //{
+            //    Button button = (Button)sender;
+            //    button.Text = running ? "Start" : "Stop";
+            //    label1.Visible = !label1.Visible;
+            //    Thread t = new Thread(() =>
+            //    {
+            //        if (!running)
+            //        {
+
+
+            //            IPAddressRange range = new IPAddressRange(from, to);
+            //            NetworkScanner scanner = new NetworkScanner(range);
+            //            scanner.FindIPs();
+            //        }
+
+
+
+            //        running = !running;
+            //    }); 
+            //    t.Start();
+
+
+
+
+            //}
+
+
+            //else
+            //{
+
+            //    ShowIPWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
+
+            //}
 
         }
 
@@ -295,12 +304,12 @@ namespace PLCompliant
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void CheckIfButtonIsPressed(object? sender, EventArgs e)
         {
-            if (sender == null) return; 
+            if (sender == null) return;
             RadioButton button = (RadioButton)sender;
             if (button.Checked)
             {

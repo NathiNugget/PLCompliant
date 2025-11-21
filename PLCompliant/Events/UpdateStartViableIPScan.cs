@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PLCompliant.Events
+﻿namespace PLCompliant.Events
 {
     public class UpdateStartViableIPScan : UpdateRaisedEvent
     {
@@ -14,14 +8,17 @@ namespace PLCompliant.Events
 
         public override void ExecuteEvent(UpdateThreadContext context)
         {
-            if(context.scanner.ScanInProgress)
+            context.scanner.SetIPRange(Argument.addressRange);
+            if (context.scanner.ScanInProgress)
             {
                 return;
             }
             Thread scanThread = new Thread(() =>
             {
                 context.scanner.FindIPs();
+                context.scanner.FindPLCs(Enums.PLCProtocolType.Modbus); // TODO: CHANGE TO BE BASED ON ARGUMENT
             });
+            scanThread.Start();
         }
     }
 }

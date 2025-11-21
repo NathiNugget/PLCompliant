@@ -40,10 +40,10 @@ namespace PLCompliant.Scanning
         public static long GetIPv4Addr(this IPAddress ip)
         {
             var ipBytes = ip.GetAddressBytes();
-            if(ipBytes.Length != 4)
+            if (ipBytes.Length != 4)
             {
                 throw new InvalidIPVersionException("IP Version 6 is not supported");
-            } 
+            }
             var ipUint = BitConverter.ToUInt32(ipBytes, 0);
             return (long)ipUint;
         }

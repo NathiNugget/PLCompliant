@@ -1,10 +1,5 @@
 ﻿using PLCompliant.Interface;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
@@ -20,7 +15,7 @@ namespace PLCompliant.Events
 
 
         /// <inheritdoc/>
-        public bool Empty { get {  return _queue.IsEmpty; } }
+        public bool Empty { get { return _queue.IsEmpty; } }
         /// <inheritdoc/>
         public bool Pop(out IRaisedEvent<UpdateThreadContext, UpdateThreadArgs> item)
         {
