@@ -40,7 +40,6 @@
             maskedTextBox1 = new MaskedTextBox();
             toolTip1 = new ToolTip(components);
             maskedTextBox2 = new MaskedTextBox();
-            toolTip2 = new ToolTip(components);
             label4 = new Label();
             label5 = new Label();
             SuspendLayout();
@@ -61,9 +60,9 @@
             label1.AutoSize = true;
             label1.Location = new Point(948, 515);
             label1.Name = "label1";
-            label1.Size = new Size(102, 15);
+            label1.Size = new Size(69, 15);
             label1.TabIndex = 1;
-            label1.Text = "xx enheder tilbage";
+            label1.Text = "Placeholder";
             label1.Visible = false;
             label1.Click += label1_Click;
             // 
@@ -210,7 +209,6 @@
         private MaskedTextBox maskedTextBox1;
         private ToolTip toolTip1;
         private MaskedTextBox maskedTextBox2;
-        private ToolTip toolTip2;
         private Label label4;
         private Label label5;
         public Label label1;
