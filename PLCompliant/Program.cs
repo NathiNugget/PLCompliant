@@ -1,7 +1,5 @@
 using PLCompliant.Events;
-using PLCompliant.Scanning;
 using PLCompliant.Utilities;
-using System.Net;
 
 namespace PLCompliant
 {
@@ -116,13 +114,13 @@ namespace PLCompliant
             */
             UpdateThreadContext context = new UpdateThreadContext();
 
-            Thread updateThread = new Thread( () =>
+            Thread updateThread = new Thread(() =>
             {
-                while(!GlobalVars.ABORT)
+                while (!GlobalVars.ABORT)
                 {
-                    while(!UpdateEventQueue.Instance.Empty)
+                    while (!UpdateEventQueue.Instance.Empty)
                     {
-                        if(UpdateEventQueue.Instance.Pop(out var evt))
+                        if (UpdateEventQueue.Instance.TryPop(out var evt))
                         {
                             evt.ExecuteEvent(context);
                         }

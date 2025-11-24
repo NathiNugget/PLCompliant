@@ -21,7 +21,7 @@
         /// Pops a raised event from the queue via the "out" parameter. Returns true if an element exists and was sucessfully popped from the queue
         /// </summary>
 
-        bool Pop(out IRaisedEvent<T, A> item);
+        bool TryPop(out IRaisedEvent<T, A> item);
 
     }
 }

@@ -1,18 +1,23 @@
 ﻿using PLCompliant.Scanning;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
+    /// <summary>
+    /// Struct used for passing IP address range to an event
+    /// </summary>
     public readonly struct UpdateThreadArgs
     {
+        /// <summary>
+        /// Constructor for the struct
+        /// </summary>
+        /// <param name="range">Range of IPv4 addresses</param>
         public UpdateThreadArgs(IPAddressRange range)
         {
-            addressRange = range;   
+            addressRange = range;
         }
+        /// <summary>
+        /// Adress range
+        /// </summary>
         public readonly IPAddressRange addressRange;
     }
 }

@@ -1,14 +1,15 @@
 ﻿using PLCompliant.Scanning;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
+    /// <summary>
+    /// Class used to provice a NetworkScanner, which is expected to be a singleton
+    /// </summary>
     public class UpdateThreadContext
     {
+        /// <summary>
+        /// The scanner
+        /// </summary>
         public NetworkScanner scanner = new NetworkScanner();
 
     }

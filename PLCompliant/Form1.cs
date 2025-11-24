@@ -1,5 +1,5 @@
+using PLCompliant.Enums;
 using PLCompliant.Events;
-using PLCompliant.Interface;
 using PLCompliant.Scanning;
 using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
@@ -16,6 +16,7 @@ namespace PLCompliant
         /// </summary>
         bool running;
         System.Windows.Forms.Timer _timer;
+        public PLCProtocolType Protocol { get; private set; }
         public Form1()
         {
 
@@ -28,6 +29,10 @@ namespace PLCompliant
             maskedTextBox2.LostFocus += new EventHandler(IPAddressValidationHandling!);
             maskedTextBox2.MouseClick += new MouseEventHandler(MaskedTextBoxOnClick);
             maskedTextBox2.KeyDown += new KeyEventHandler(ControlField);
+
+
+            radioButton1.MouseClick += new MouseEventHandler(CheckIfButtonIsPressed);
+            radioButton2.MouseClick += new MouseEventHandler(CheckIfButtonIsPressed);
 
 
             _timer = new System.Windows.Forms.Timer();
@@ -46,9 +51,11 @@ namespace PLCompliant
         private void UIOnTick(object? sender, EventArgs args)
         {
             UIEventQueue queue = UIEventQueue.Instance;
-            while (!queue.Empty) {
-                if (queue.Pop(out var evt)) {
-                    evt.ExecuteEvent(this); 
+            while (!queue.Empty)
+            {
+                if (queue.TryPop(out var evt))
+                {
+                    evt.ExecuteEvent(this);
 
                 }
             }
@@ -96,7 +103,7 @@ namespace PLCompliant
                 }
                 if (index != 0 && (chararr[index - 1] == ' ' || chararr[index - 1] == '.'))
                 {
-                    int previousindex = text.PreviousIndexOf('.', index);
+                    int previousindex = text.PreviousIndexOfAndFixToSeparator('.', index);
 
                     if (previousindex != -1)
                     {
@@ -116,7 +123,7 @@ namespace PLCompliant
 
             int index = box.Text.IndexOf("   ");
 
-            if (index == -1) box.Select(box.Text.LastIndexOf(".")+1, 0); else box.Select(index, 0);
+            if (index == -1) box.Select(box.Text.LastIndexOf(".") + 1, 0); else box.Select(index, 0);
 
 
 
@@ -165,7 +172,7 @@ namespace PLCompliant
             {
                 ShowIPWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
             }
-            
+
 
             //if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
             //{
@@ -188,10 +195,10 @@ namespace PLCompliant
             //        running = !running;
             //    }); 
             //    t.Start();
-                
-                
-                
-                
+
+
+
+
             //}
 
 
@@ -295,6 +302,31 @@ namespace PLCompliant
 
         }
 
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
 
+        }
+
+        private void CheckIfButtonIsPressed(object? sender, EventArgs e)
+        {
+            if (sender == null) return;
+            RadioButton button = (RadioButton)sender;
+            if (button.Checked)
+            {
+                Protocol = button.TabIndex == 0 ? PLCProtocolType.Modbus : PLCProtocolType.Step_7;
+            }
+            Console.WriteLine((int)Protocol);
+
+        }
+
+        private void bindingSource1_CurrentChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

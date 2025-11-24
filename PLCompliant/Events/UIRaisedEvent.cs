@@ -2,11 +2,25 @@
 
 namespace PLCompliant.Events
 {
+    /// <summary>
+    /// The base for a event on the meant to be executed on the form context
+    /// </summary>
     public abstract class UIRaisedEvent : IRaisedEvent<Form, Tuple<int, int>>
     {
         Tuple<int, int> _argument;
+        /// <summary>
+        /// Get the argument for the execution
+        /// </summary>
         public Tuple<int, int> Argument { get { return _argument; } }
+        /// <summary>
+        /// Where to execute an event
+        /// </summary>
+        /// <param name="context"></param>
         public abstract void ExecuteEvent(Form context);
+        /// <summary>
+        /// Constructor to initialize the argument
+        /// </summary>
+        /// <param name="argument"></param>
         public UIRaisedEvent(Tuple<int, int> argument)
         {
             _argument = argument;

@@ -41,7 +41,6 @@
             toolTip1 = new ToolTip(components);
             maskedTextBox2 = new MaskedTextBox();
             label4 = new Label();
-            label5 = new Label();
             SuspendLayout();
             // 
             // button1
@@ -60,9 +59,9 @@
             label1.AutoSize = true;
             label1.Location = new Point(948, 515);
             label1.Name = "label1";
-            label1.Size = new Size(69, 15);
+            label1.Size = new Size(92, 15);
             label1.TabIndex = 1;
-            label1.Text = "Placeholder";
+            label1.Text = "Starter scanning";
             label1.Visible = false;
             label1.Click += label1_Click;
             // 
@@ -99,14 +98,13 @@
             // radioButton1
             // 
             radioButton1.AutoSize = true;
-            radioButton1.Checked = true;
             radioButton1.Location = new Point(146, 153);
             radioButton1.Name = "radioButton1";
             radioButton1.Size = new Size(129, 19);
             radioButton1.TabIndex = 0;
-            radioButton1.TabStop = true;
             radioButton1.Text = "Modbus TCP/IP 502";
             radioButton1.UseVisualStyleBackColor = true;
+            radioButton1.CheckedChanged += radioButton1_CheckedChanged;
             // 
             // radioButton2
             // 
@@ -115,9 +113,9 @@
             radioButton2.Name = "radioButton2";
             radioButton2.Size = new Size(101, 19);
             radioButton2.TabIndex = 1;
-            radioButton2.TabStop = true;
             radioButton2.Text = "Siemens Step7";
             radioButton2.UseVisualStyleBackColor = true;
+            radioButton2.CheckedChanged += radioButton2_CheckedChanged;
             // 
             // label3
             // 
@@ -164,21 +162,11 @@
             label4.Text = "Fra";
             label4.Click += label4_Click;
             // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Location = new Point(928, 318);
-            label5.Name = "label5";
-            label5.Size = new Size(20, 15);
-            label5.TabIndex = 13;
-            label5.Text = "Til";
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1264, 681);
-            Controls.Add(label5);
             Controls.Add(label4);
             Controls.Add(maskedTextBox2);
             Controls.Add(maskedTextBox1);
@@ -210,7 +198,6 @@
         private ToolTip toolTip1;
         private MaskedTextBox maskedTextBox2;
         private Label label4;
-        private Label label5;
         public Label label1;
     }
 }
