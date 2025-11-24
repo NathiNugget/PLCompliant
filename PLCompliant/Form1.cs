@@ -4,6 +4,7 @@ using PLCompliant.Scanning;
 using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.ComponentModel;
 
 namespace PLCompliant
 {
@@ -16,6 +17,7 @@ namespace PLCompliant
         /// </summary>
         bool running;
         System.Windows.Forms.Timer _timer;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public PLCProtocolType Protocol { get; private set; }
         public Form1()
         {
