@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
-    public class MainStartViableIPScan : MainRaisedEvent
+    public class UpdateStartViableIPScan : UpdateRaisedEvent
     {
-        public MainStartViableIPScan(MainThreadArgs args) : base(args)
+        public UpdateStartViableIPScan(UpdateThreadArgs args) : base(args)
         {
         }
 
-        public override void ExecuteEvent(MainThreadContext context)
+        public override void ExecuteEvent(UpdateThreadContext context)
         {
             context.scanner.SetIPRange(Argument.addressRange);
             if(context.scanner.ScanInProgress)

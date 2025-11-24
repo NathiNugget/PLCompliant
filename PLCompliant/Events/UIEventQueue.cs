@@ -34,10 +34,5 @@ namespace PLCompliant.Events
         {
             return _queue.TryDequeue(out item);
         }
-
-        public void PushCallback(Action<Tuple<int, int>> callback)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

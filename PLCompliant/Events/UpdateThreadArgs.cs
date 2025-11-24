@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
-    public readonly struct MainThreadArgs
+    public readonly struct UpdateThreadArgs
     {
-        public MainThreadArgs(IPAddressRange range)
+        public UpdateThreadArgs(IPAddressRange range)
         {
             addressRange = range;   
         }

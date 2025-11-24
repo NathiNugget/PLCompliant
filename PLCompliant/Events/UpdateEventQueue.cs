@@ -8,26 +8,26 @@ using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
-    public class MainEventQueue : IEventQueue<MainThreadContext, MainThreadArgs>
+    public class UpdateEventQueue : IEventQueue<UpdateThreadContext, UpdateThreadArgs>
     {
-        ConcurrentQueue<IRaisedEvent<MainThreadContext, MainThreadArgs>> _queue = new ConcurrentQueue<IRaisedEvent<MainThreadContext, MainThreadArgs>>();
+        ConcurrentQueue<IRaisedEvent<UpdateThreadContext, UpdateThreadArgs>> _queue = new ConcurrentQueue<IRaisedEvent<UpdateThreadContext, UpdateThreadArgs>>();
 
-        private static MainEventQueue _instance = new MainEventQueue();
+        private static UpdateEventQueue _instance = new UpdateEventQueue();
         /// <summary>
         /// Gets the global instance
         /// </summary>
-        public static MainEventQueue Instance { get { return _instance; } }
+        public static UpdateEventQueue Instance { get { return _instance; } }
 
 
         /// <inheritdoc/>
         public bool Empty { get {  return _queue.IsEmpty; } }
         /// <inheritdoc/>
-        public bool Pop(out IRaisedEvent<MainThreadContext, MainThreadArgs> item)
+        public bool Pop(out IRaisedEvent<UpdateThreadContext, UpdateThreadArgs> item)
         {
             return _queue.TryDequeue(out item);
         }
         /// <inheritdoc/>
-        public void Push(IRaisedEvent<MainThreadContext, MainThreadArgs> item)
+        public void Push(IRaisedEvent<UpdateThreadContext, UpdateThreadArgs> item)
         {
             _queue.Enqueue(item);
         }
