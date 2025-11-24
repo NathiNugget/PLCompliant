@@ -21,6 +21,7 @@
             {
                 return;
             }
+            // TODO: implement proper locking/atomic mechanism to ensure two scan threads cannot run concurrently
             Thread scanThread = new Thread(() =>
             {
                 context.scanner.FindIPs();

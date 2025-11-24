@@ -42,13 +42,13 @@ namespace PLCompliant.Scanning
         /// </summary>
         public bool ScanInProgress { get { return _scanInProgress; } }
         /// <summary>
-        /// Check if the IP scan should be aborted
+        /// Check if the IP scan is aborting
         /// </summary>
-        public bool AbortIPScan { get { return _abortIPScan; } }
+        public bool AbortingIPScan { get { return _abortIPScan; } }
         /// <summary>
-        /// Check if the PLC scan should be aborted
+        /// Check if the PLC scan is aborting
         /// </summary>
-        public bool AbortPLCScan { get { return _abortPLCScan; } }
+        public bool AbortingPLCScan { get { return _abortPLCScan; } }
         #endregion
 
         /// <summary>
