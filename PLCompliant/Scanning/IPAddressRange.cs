@@ -104,5 +104,15 @@ namespace PLCompliant.Scanning
         {
             return (IEnumerator)this;
         }
+
+        public static bool operator ==(IPAddressRange left, IPAddressRange right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(IPAddressRange left, IPAddressRange right)
+        {
+            return !(left == right);
+        }
     }
 }
