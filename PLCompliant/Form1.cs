@@ -157,7 +157,7 @@ namespace PLCompliant
             if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
             {
                 var addrRange = new IPAddressRange(from, to);
-                UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new UpdateThreadArgs(addrRange)));
+                MainEventQueue.Instance.Push(new MainStartViableIPScan(new MainThreadArgs(addrRange)));
                 label1.Visible = !label1.Visible;
                 running = !running;
             }

@@ -114,15 +114,15 @@ namespace PLCompliant
 
             client.Close();
             */
-            UpdateThreadContext context = new UpdateThreadContext();
+            MainThreadContext context = new MainThreadContext();
 
             Thread updateThread = new Thread( () =>
             {
                 while(!GlobalVars.ABORT)
                 {
-                    while(!UpdateEventQueue.Instance.Empty)
+                    while(!MainEventQueue.Instance.Empty)
                     {
-                        if(UpdateEventQueue.Instance.Pop(out var evt))
+                        if(MainEventQueue.Instance.Pop(out var evt))
                         {
                             evt.ExecuteEvent(context);
                         }
