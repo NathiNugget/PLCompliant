@@ -39,8 +39,8 @@ namespace PLCompliant
 
 
             _timer = new System.Windows.Forms.Timer();
-            _timer.Tick += new EventHandler(UIOnTick!); //TODO: Make actual eventhandler for ticks when queue is added; 
-            _timer.Interval = 100;
+            _timer.Tick += new EventHandler(UIOnTick!);
+            _timer.Interval = 100; // This interval is is milliseconds. 
             _timer.Start();
         }
 
@@ -62,8 +62,6 @@ namespace PLCompliant
 
                 }
             }
-
-
         }
 
 

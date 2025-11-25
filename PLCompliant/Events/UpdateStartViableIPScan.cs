@@ -35,8 +35,7 @@ namespace PLCompliant.Events
             // TODO: implement proper locking/atomic mechanism to ensure two scan threads cannot run concurrently
             Thread scanThread = new Thread(() =>
             {
-                context.scanner.FindIPs();
-                context.scanner.FindPLCs(Enums.PLCProtocolType.Modbus); // TODO: CHANGE TO BE BASED ON ARGUMENT
+                context.scanner.FindIPs(Enums.PLCProtocolType.Modbus); //TODO: Update this to use parameters instead
             });
             scanThread.Start();
         }
