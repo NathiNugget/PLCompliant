@@ -1,8 +1,10 @@
 using PLCompliant.Events;
 using PLCompliant.Utilities;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PLCompliant
 {
+    [ExcludeFromCodeCoverage]
     internal static class Program
     {
         /// <summary>

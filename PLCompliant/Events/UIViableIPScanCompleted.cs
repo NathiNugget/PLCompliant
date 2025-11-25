@@ -35,7 +35,17 @@ namespace PLCompliant.Events
             // TODO: Maybe change depending on threads in network scanning
             int ipsleft = args.To - args.Current;
 
-            form.label1.Text = $"Scanner {ipsleft} IP-addresser";
+
+            if (ipsleft != 0)
+            {
+                form.label1.Text = $"Scanner {ipsleft} IP-addresser";
+
+            } else
+            {
+                form.label1.Text = $"Scanning er færdig"; 
+            }
+
+
 
         }
     }

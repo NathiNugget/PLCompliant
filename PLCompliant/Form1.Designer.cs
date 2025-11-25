@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             button1 = new Button();
             label1 = new Label();
             button2 = new Button();
@@ -178,6 +179,7 @@
             Controls.Add(button2);
             Controls.Add(label1);
             Controls.Add(button1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;

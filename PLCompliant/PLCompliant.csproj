@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+    
   </PropertyGroup>
 
   <ItemGroup>
