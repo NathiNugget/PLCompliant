@@ -114,7 +114,7 @@ namespace PLCompliant
             */
             UpdateThreadContext context = new UpdateThreadContext();
 
-            Thread updateThread = new Thread(() =>
+            Thread updateThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
                 while (!GlobalVars.ABORT)
                 {
