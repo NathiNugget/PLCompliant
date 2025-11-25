@@ -2,6 +2,7 @@
 using PLCompliant.EventArguments;
 using PLCompliant.Events;
 using PLCompliant.Modbus;
+using PLCompliant.Utilities;
 using System.CodeDom;
 using System.Collections.Concurrent;
 using System.DirectoryServices.ActiveDirectory;
@@ -119,7 +120,7 @@ namespace PLCompliant.Scanning
                         }
                         foreach (IPAddress ip in chunk)
                         {
-                            threads.Add(new Thread(() =>
+                            threads.Add(ThreadUtilities.CreateBackgroundThread(() =>
                             {
                                 if (_abortIPScan)
                                 {

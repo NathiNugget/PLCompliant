@@ -1,5 +1,6 @@
 ﻿
 using PLCompliant.EventArguments;
+using PLCompliant.Utilities;
 using System.Diagnostics;
 
 namespace PLCompliant.Events
@@ -33,7 +34,7 @@ namespace PLCompliant.Events
                 return;
             }
             // TODO: implement proper locking/atomic mechanism to ensure two scan threads cannot run concurrently
-            Thread scanThread = new Thread(() =>
+            Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
                 context.scanner.FindIPs(Enums.PLCProtocolType.Modbus); //TODO: Update this to use parameters instead
             });
