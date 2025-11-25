@@ -1,9 +1,14 @@
 ﻿using PLCompliant.Enums;
 using PLCompliant.Events;
+using PLCompliant.Modbus;
 using System.Collections.Concurrent;
+using System.DirectoryServices.ActiveDirectory;
+using System.Globalization;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PLCompliant.Scanning
 {
@@ -16,7 +21,6 @@ namespace PLCompliant.Scanning
         bool _abortIPScan = false;
         bool _abortPLCScan = false;
         bool _scanInProgress = false;
-        ConcurrentBag<IPAddress> _viableIPs = new ConcurrentBag<IPAddress>();
         ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>();
         IPAddressRange _scanRange;
 
@@ -56,7 +60,7 @@ namespace PLCompliant.Scanning
         /// </summary>
         public void Reset()
         {
-            _viableIPs.Clear();
+            _responsivePLCs.Clear();
             _scanRange.Reset();
         }
 
@@ -91,7 +95,7 @@ namespace PLCompliant.Scanning
         /// 
 
         //TODO: Find out if it has a value for the end user for how many threads should preferably be used. First time setup/test? 
-        public void FindIPs()
+        public void FindIPs(PLCProtocolType protocol)
         {
             _scanInProgress = true;
             List<Thread> threads = new List<Thread>();
@@ -118,7 +122,113 @@ namespace PLCompliant.Scanning
                                 if (reply.Status == IPStatus.Success)
                                 {
 
-                                    _viableIPs.Add(ip);
+
+
+
+                                    TcpClient client;
+                                    switch (protocol)
+                                    {
+                                        case PLCProtocolType.Modbus:
+                                            {
+                                                client = new TcpClient(ip.ToString(), 502); break;
+                                            }
+                                        default:
+                                            {
+                                                client = new TcpClient(); break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
+                                            }
+                                    }
+
+
+                                    if (client.Connected)
+                                    {
+                                        _responsivePLCs.Add(ip);
+                                         client = new TcpClient("192.168.123.100", 502);
+
+
+                                        //ModbusHeader header = new ModbusHeader();
+                                        //header.transactionmodifier = 0;
+                                        //header.protocolidentifier = 0;
+                                        //header.length = 0; 
+                                        //header.unitidentifier = 0;
+
+                                        //ModbusMessage mbm = new ModbusMessage(header); 
+
+                                        //mbm.data = 
+
+
+
+
+
+
+                                        int identifier = 0;
+
+                                        ushort address = 0;
+
+
+                                        while (address < 64)
+                                        {
+                                            ModBusMessageFactory factory = new ModBusMessageFactory();
+                                            ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
+
+
+
+
+
+
+
+
+
+
+                                            byte[] buffer = msg.Serialize();
+
+
+                                            var stream = client.GetStream();
+
+                                            stream.Write(buffer, 0, buffer.Length);
+
+                                            byte[] returnbytes = new byte[1024];
+                                            int readbytes = 0;
+                                            while (readbytes == 0)
+                                            {
+
+                                                readbytes = stream.Read(returnbytes);
+
+                                            }
+
+                                            Console.WriteLine(returnbytes);
+
+
+                                            ModBusMessage response = new(new ModBusHeader(), new ModBusData());
+                                            byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
+                                            Array.Copy(returnbytes, 0, header_bytes, 0, header_bytes.Length);
+                                            response.DeserializeHeader(header_bytes);
+
+                                            byte[] payload_data = new byte[response.Header.length - 1];
+                                            Array.Copy(returnbytes, Marshal.SizeOf<ModBusHeader>(), payload_data, 0, payload_data.Length);
+
+
+
+
+
+                                            response.DeserializeData(payload_data);
+                                            var output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, System.Net.IPAddress.Parse("192.168.123.100"));
+                                            var CSV_data = output.ToCSV();
+                                            Console.WriteLine(CSV_data);
+
+
+
+
+
+
+
+                                            address += 64;
+                                            identifier++;
+                                            Thread.Sleep(100);
+                                        }
+                                    }
+                                    client.Close();
+
+
 
                                 }
                             }
@@ -146,66 +256,35 @@ namespace PLCompliant.Scanning
 
 
 
+            DateTime prefix = new DateTime();
 
+
+            string customformat = "dd/MM yyyy";
+
+            prefix = DateTime.Now;
+            string filenameprefix = prefix.ToString(customformat);
+            string filename = $"IP-skan log - {filenameprefix}";
+
+            StringBuilder sb = new StringBuilder(1000);
+            foreach (IPAddress ip in _responsivePLCs)
+            {
+                sb.AppendLine(ip.ToString());
+            }
+            string output = sb.ToString();
 
             //TODO: Remove before release/hand in
-            File.WriteAllText("./hello.txt", _viableIPs.Count.ToString());
+            if (!File.Exists($"./{filename}.log"))
+            {
+                File.WriteAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
+            }
+            else File.AppendAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
+
+
         }
 
-        /// <summary>
-        /// Find PLCs capable of the specified protocol
-        /// </summary>
-        /// <param name="protocol"></param>
-        /// 
-
-        //TODO: Discuss how protocol should be into the class/method
-        public void FindPLCs(PLCProtocolType protocol)
-        {
-            List<Thread> threads = new();
-            foreach (IPAddress ip in _viableIPs)
-            {
-                threads.Add(new Thread(() =>
-                {
-                    try
-                    {
-                        TcpClient client;
-                        switch (protocol)
-                        {
-                            case PLCProtocolType.Modbus:
-                                {
-                                    client = new TcpClient(ip.ToString(), 502); break;
-                                }
-                            default:
-                                {
-                                    client = new TcpClient(); break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
-                                }
-                        }
 
 
-                        if (client.Connected)
-                        {
-                            _responsivePLCs.Add(ip);
-                        }
-                        client.Close();
-                    }
-                    catch (SocketException ex)
-                    {
-                        //TODO: Implement logging here eventually
-                    }
-                }));
 
-
-            }
-
-            foreach (Thread t in threads)
-            {
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-        }
 
 
 
