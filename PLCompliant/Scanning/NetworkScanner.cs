@@ -2,6 +2,7 @@
 using PLCompliant.EventArguments;
 using PLCompliant.Events;
 using PLCompliant.Modbus;
+using System.CodeDom;
 using System.Collections.Concurrent;
 using System.DirectoryServices.ActiveDirectory;
 using System.Globalization;
@@ -21,10 +22,10 @@ namespace PLCompliant.Scanning
         const int TIMEOUT = 500;
         bool _abortIPScan = false;
         bool _abortPLCScan = false;
-        bool _scanInProgress = false;
-        object scanMutex = new object();
-        bool lockTaken = false;
         
+        object scanMutex = new object();
+        bool _scanInProgress = false;
+
         ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>();
         IPAddressRange _scanRange;
 
@@ -101,196 +102,210 @@ namespace PLCompliant.Scanning
         //TODO: Find out if it has a value for the end user for how many threads should preferably be used. First time setup/test? 
         public void FindIPs(PLCProtocolType protocol)
         {
-            _scanInProgress = true;
-            List<Thread> threads = new List<Thread>();
-            int ipspinged = 1;
-            foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
+            try
             {
-                if (_abortIPScan)
+                Monitor.TryEnter(scanMutex, ref _scanInProgress);
+                if (_scanInProgress)
                 {
-                    break;
-                }
-                foreach (IPAddress ip in chunk)
-                {
-                    threads.Add(new Thread(() =>
+                    _scanInProgress = true;
+                    List<Thread> threads = new List<Thread>();
+                    int ipspinged = 1;
+
+                    foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
                     {
                         if (_abortIPScan)
                         {
-                            return;
+                            break;
                         }
-                        try
+                        foreach (IPAddress ip in chunk)
                         {
-                            using (Ping ping = new Ping())
+                            threads.Add(new Thread(() =>
                             {
-                                PingReply reply = ping.Send(ip, TIMEOUT);
-                                if (reply.Status == IPStatus.Success)
+                                if (_abortIPScan)
                                 {
-
-
-
-
-                                    TcpClient client;
-                                    switch (protocol)
+                                    return;
+                                }
+                                try
+                                {
+                                    using (Ping ping = new Ping())
                                     {
-                                        case PLCProtocolType.Modbus:
-                                            {
-                                                client = new TcpClient(ip.ToString(), 502); break;
-                                            }
-                                        default:
-                                            {
-                                                client = new TcpClient(); break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
-                                            }
-                                    }
-
-
-                                    if (client.Connected)
-                                    {
-                                        _responsivePLCs.Add(ip);
-                                         client = new TcpClient("192.168.123.100", 502);
-
-
-                                        //ModbusHeader header = new ModbusHeader();
-                                        //header.transactionmodifier = 0;
-                                        //header.protocolidentifier = 0;
-                                        //header.length = 0; 
-                                        //header.unitidentifier = 0;
-
-                                        //ModbusMessage mbm = new ModbusMessage(header); 
-
-                                        //mbm.data = 
-
-
-
-
-
-
-                                        int identifier = 0;
-
-                                        ushort address = 0;
-
-
-                                        while (address < 64)
+                                        PingReply reply = ping.Send(ip, TIMEOUT);
+                                        if (reply.Status == IPStatus.Success)
                                         {
-                                            ModBusMessageFactory factory = new ModBusMessageFactory();
-                                            ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
 
 
 
 
-
-
-
-
-
-
-                                            byte[] buffer = msg.Serialize();
-
-
-                                            var stream = client.GetStream();
-
-                                            stream.Write(buffer, 0, buffer.Length);
-
-                                            byte[] returnbytes = new byte[1024];
-                                            int readbytes = 0;
-                                            while (readbytes == 0)
+                                            TcpClient client;
+                                            switch (protocol)
                                             {
-
-                                                readbytes = stream.Read(returnbytes);
-
+                                                case PLCProtocolType.Modbus:
+                                                    {
+                                                        client = new TcpClient(ip.ToString(), 502); break;
+                                                    }
+                                                default:
+                                                    {
+                                                        client = new TcpClient(); break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
+                                                    }
                                             }
 
-                                            Console.WriteLine(returnbytes);
+
+                                            if (client.Connected)
+                                            {
+                                                _responsivePLCs.Add(ip);
+                                                client = new TcpClient("192.168.123.100", 502);
 
 
-                                            ModBusMessage response = new(new ModBusHeader(), new ModBusData());
-                                            byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
-                                            Array.Copy(returnbytes, 0, header_bytes, 0, header_bytes.Length);
-                                            response.DeserializeHeader(header_bytes);
+                                                //ModbusHeader header = new ModbusHeader();
+                                                //header.transactionmodifier = 0;
+                                                //header.protocolidentifier = 0;
+                                                //header.length = 0; 
+                                                //header.unitidentifier = 0;
 
-                                            byte[] payload_data = new byte[response.Header.length - 1];
-                                            Array.Copy(returnbytes, Marshal.SizeOf<ModBusHeader>(), payload_data, 0, payload_data.Length);
+                                                //ModbusMessage mbm = new ModbusMessage(header); 
 
-
-
-
-
-                                            response.DeserializeData(payload_data);
-                                            var output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, System.Net.IPAddress.Parse("192.168.123.100"));
-                                            var CSV_data = output.ToCSV();
-                                            Console.WriteLine(CSV_data);
+                                                //mbm.data = 
 
 
 
 
 
 
+                                                int identifier = 0;
 
-                                            address += 64;
-                                            identifier++;
-                                            Thread.Sleep(100);
+                                                ushort address = 0;
+
+
+                                                while (address < 64)
+                                                {
+                                                    ModBusMessageFactory factory = new ModBusMessageFactory();
+                                                    ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
+
+
+
+
+
+
+
+
+
+
+                                                    byte[] buffer = msg.Serialize();
+
+
+                                                    var stream = client.GetStream();
+
+                                                    stream.Write(buffer, 0, buffer.Length);
+
+                                                    byte[] returnbytes = new byte[1024];
+                                                    int readbytes = 0;
+                                                    while (readbytes == 0)
+                                                    {
+
+                                                        readbytes = stream.Read(returnbytes);
+
+                                                    }
+
+                                                    Console.WriteLine(returnbytes);
+
+
+                                                    ModBusMessage response = new(new ModBusHeader(), new ModBusData());
+                                                    byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
+                                                    Array.Copy(returnbytes, 0, header_bytes, 0, header_bytes.Length);
+                                                    response.DeserializeHeader(header_bytes);
+
+                                                    byte[] payload_data = new byte[response.Header.length - 1];
+                                                    Array.Copy(returnbytes, Marshal.SizeOf<ModBusHeader>(), payload_data, 0, payload_data.Length);
+
+
+
+
+
+                                                    response.DeserializeData(payload_data);
+                                                    var output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, System.Net.IPAddress.Parse("192.168.123.100"));
+                                                    var CSV_data = output.ToCSV();
+                                                    Console.WriteLine(CSV_data);
+
+
+
+
+
+
+
+                                                    address += 64;
+                                                    identifier++;
+                                                    Thread.Sleep(100);
+                                                }
+                                            }
+                                            client.Close();
+
+
+
                                         }
                                     }
-                                    client.Close();
-
-
-
                                 }
-                            }
+                                catch
+                                {
+                                    //TODO: Implement logging here, maybe
+                                    Console.WriteLine(ip);
+                                }
+                                Interlocked.Increment(ref ipspinged);
+                                UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
+                            }));
+
                         }
-                        catch
+                        foreach (Thread t in threads)
                         {
-                            //TODO: Implement logging here, maybe
-                            Console.WriteLine(ip);
+                            t.Start();
                         }
-                        Interlocked.Increment(ref ipspinged);
-                        UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new Tuple<int, int>((int)_scanRange.Count, ipspinged)));
-                    }));
+                        threads.ForEach(t => t.Join());
+                        threads.Clear();
+                    }
+                    _abortIPScan = false;
+                    _scanInProgress = false;
+
+
+
+
+                    DateTime prefix = new DateTime();
+
+
+                    string customformat = "dd/MM yyyy";
+
+                    prefix = DateTime.Now;
+                    string filenameprefix = prefix.ToString(customformat);
+                    string filename = $"IP-skan log - {filenameprefix}";
+
+                    StringBuilder sb = new StringBuilder(1000);
+                    foreach (IPAddress ip in _responsivePLCs)
+                    {
+                        sb.AppendLine(ip.ToString());
+                    }
+                    string output = sb.ToString();
+
+                    //TODO: Remove before release/hand in
+                    if (!File.Exists($"./{filename}.log"))
+                    {
+                        File.WriteAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
+                    }
+                    else File.AppendAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
 
                 }
-                foreach (Thread t in threads)
+            }
+            finally
+            {
+                if (_scanInProgress)
                 {
-                    t.Start();
+                    Monitor.Exit(scanMutex);
                 }
-                threads.ForEach(t => t.Join());
-                threads.Clear();
             }
-            _abortIPScan = false;
-            _scanInProgress = false;
 
 
 
 
-            DateTime prefix = new DateTime();
 
-
-            string customformat = "dd/MM yyyy";
-
-            prefix = DateTime.Now;
-            string filenameprefix = prefix.ToString(customformat);
-            string filename = $"IP-skan log - {filenameprefix}";
-
-            StringBuilder sb = new StringBuilder(1000);
-            foreach (IPAddress ip in _responsivePLCs)
-            {
-                sb.AppendLine(ip.ToString());
-            }
-            string output = sb.ToString();
-
-            //TODO: Remove before release/hand in
-            if (!File.Exists($"./{filename}.log"))
-            {
-                File.WriteAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
-            }
-            else File.AppendAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
 
 
         }
-
-
-
-
-
-
-
     }
 }
