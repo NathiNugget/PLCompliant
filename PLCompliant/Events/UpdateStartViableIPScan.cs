@@ -23,7 +23,7 @@ namespace PLCompliant.Events
         {
 
             StartViableIPsScanArgs? args = Argument as StartViableIPsScanArgs;
-            if(args == null)
+            if (args == null)
             {
                 Debug.Assert(false, "Event argument was not the expected runtime type ");
                 return;

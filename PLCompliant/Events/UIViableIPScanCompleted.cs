@@ -40,9 +40,10 @@ namespace PLCompliant.Events
             {
                 form.label1.Text = $"Scanner {ipsleft} IP-addresser";
 
-            } else
+            }
+            else
             {
-                form.label1.Text = $"Scanning er færdig"; 
+                form.label1.Text = $"Scanning er færdig";
             }
 
 

@@ -1,11 +1,11 @@
 using PLCompliant.Enums;
+using PLCompliant.EventArguments;
 using PLCompliant.Events;
 using PLCompliant.Scanning;
 using PLCompliant.Utilities;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.ComponentModel;
-using PLCompliant.EventArguments;
 
 namespace PLCompliant
 {

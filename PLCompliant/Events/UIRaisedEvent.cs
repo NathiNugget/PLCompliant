@@ -1,6 +1,5 @@
 ﻿using PLCompliant.EventArguments;
 using PLCompliant.Interface;
-using System.Drawing.Design;
 
 namespace PLCompliant.Events
 {

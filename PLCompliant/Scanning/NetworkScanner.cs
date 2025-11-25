@@ -2,11 +2,9 @@
 using PLCompliant.EventArguments;
 using PLCompliant.Events;
 using PLCompliant.Modbus;
+using PLCompliant.Response;
 using PLCompliant.Utilities;
-using System.CodeDom;
 using System.Collections.Concurrent;
-using System.DirectoryServices.ActiveDirectory;
-using System.Globalization;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -20,10 +18,11 @@ namespace PLCompliant.Scanning
     /// </summary>
     public class NetworkScanner
     {
-        const int TIMEOUT = 500;
+        const int PINGTIMEOUT = 500;
+        const int SOCKETTIMEOUT = 60000; 
         bool _abortIPScan = false;
         bool _abortPLCScan = false;
-        
+
         object scanMutex = new object();
         bool _scanInProgress = false;
 
@@ -130,107 +129,31 @@ namespace PLCompliant.Scanning
                                 {
                                     using (Ping ping = new Ping())
                                     {
-                                        PingReply reply = ping.Send(ip, TIMEOUT);
+                                        PingReply reply = ping.Send(ip, PINGTIMEOUT);
                                         if (reply.Status == IPStatus.Success)
                                         {
 
-
-
-
-                                            TcpClient client;
                                             switch (protocol)
                                             {
                                                 case PLCProtocolType.Modbus:
                                                     {
-                                                        client = new TcpClient(ip.ToString(), 502); break;
+
+                                                        ReadDeviceInformationData? response = StartModbusIdentification(ip);
+                                                        
+                                                        if (response != null)
+                                                        {
+                                                            Console.WriteLine(response.ToCSV());
+                                                        }
+                                                        break;
                                                     }
                                                 default:
                                                     {
-                                                        client = new TcpClient(); break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
+                                                        break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
                                                     }
                                             }
 
 
-                                            if (client.Connected)
-                                            {
-                                                _responsivePLCs.Add(ip);
-                                                client = new TcpClient("192.168.123.100", 502);
 
-
-                                                
-
-
-
-
-
-
-                                                int identifier = 0;
-
-                                                ushort address = 0;
-
-
-                                                while (address < 64)
-                                                {
-                                                    ModBusMessageFactory factory = new ModBusMessageFactory();
-                                                    ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
-
-
-
-
-
-
-
-
-
-
-                                                    byte[] buffer = msg.Serialize();
-
-
-                                                    var stream = client.GetStream();
-
-                                                    stream.Write(buffer, 0, buffer.Length);
-
-                                                    byte[] returnbytes = new byte[1024];
-                                                    int readbytes = 0;
-                                                    while (readbytes == 0)
-                                                    {
-
-                                                        readbytes = stream.Read(returnbytes);
-
-                                                    }
-
-                                                    Console.WriteLine(returnbytes);
-
-
-                                                    ModBusMessage response = new(new ModBusHeader(), new ModBusData());
-                                                    byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
-                                                    Array.Copy(returnbytes, 0, header_bytes, 0, header_bytes.Length);
-                                                    response.DeserializeHeader(header_bytes);
-
-                                                    byte[] payload_data = new byte[response.Header.length - 1];
-                                                    Array.Copy(returnbytes, Marshal.SizeOf<ModBusHeader>(), payload_data, 0, payload_data.Length);
-
-
-
-
-
-                                                    response.DeserializeData(payload_data);
-                                                    var output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, System.Net.IPAddress.Parse("192.168.123.100"));
-                                                    var CSV_data = output.ToCSV();
-                                                    Console.WriteLine(CSV_data);
-
-
-
-
-
-
-
-                                                    address += 64;
-                                                    identifier++;
-                                                    Thread.Sleep(100);
-                                                }
-                                            }
-                                            client.Close();
 
 
 
@@ -282,7 +205,6 @@ namespace PLCompliant.Scanning
                         File.WriteAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
                     }
                     else File.AppendAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
-
                 }
             }
             finally
@@ -292,13 +214,96 @@ namespace PLCompliant.Scanning
                     Monitor.Exit(scanMutex);
                 }
             }
+        }
+        private ReadDeviceInformationData? StartModbusIdentification(IPAddress ip)
+        {
+            try
+            {
+
+                using (TcpClient client = new TcpClient(ip.ToString(), 502))
+                using (NetworkStream clientStream = client.GetStream())
+                {
+                    clientStream.ReadTimeout = SOCKETTIMEOUT; // Written as milliseconds
+                    if (client.Connected)
+                    {
+                        _responsivePLCs.Add(ip);
+                        int identifier = 0;
+                        ModBusMessageFactory factory = new ModBusMessageFactory();
+                        ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
+                        byte[] buffer = msg.Serialize();
+                        clientStream.Write(buffer, 0, buffer.Length);
+                        byte[] databuffer = new byte[1024];
+                        int readbytes = 0;
+                        byte[] headerbuffer = new byte[msg.Header.Size];
+                        bool readingHeader = true;
+                        ModBusMessage response = new(new ModBusHeader(), new ModBusData());
+                        byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
+
+                        while (true)
+                        {
+                            if (readingHeader)
+                            {
+                                int dataleft = msg.Header.Size - readbytes;
+                                int index = msg.Header.Size - dataleft;
+                                readbytes += clientStream.Read(headerbuffer, index, dataleft);
+                                if (readbytes == 7)
+                                {
+                                    response.DeserializeHeader(headerbuffer);
+                                    readingHeader = false;
+                                    readbytes = 0;
+                                }
+
+                            }
+                            else
+                            {
+
+                                int dataleft = (response.Header.length-1) - readbytes;
+                                int index = (response.Header.length-1) - dataleft;
+                                readbytes += clientStream.Read(databuffer, index, dataleft);
+                                if (readbytes == response.Header.length - 1)
+                                {
+                                    response.DeserializeData(databuffer);
+                                    break;
+                                }
+                            }
 
 
+                        }
+                        bool isError = ModBusResponseParsing.TryHandleReponseError(response, out byte errCode);
+                        if (isError)
+                        {
+                            //TODO: Implement actual filewriter/logger 
+                            string path = "./errors.log";
+                            if (!File.Exists(path))
+                            {
+                                File.WriteAllText(path, $"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, fejlkode: {errCode}");
+                            }
+                            else
+                            {
+                                File.AppendAllText(path, $"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, fejlkode: {errCode}");
+                            }
+                            return null;
+                        }
+                        else
+                        {
 
+                            ReadDeviceInformationData output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
+                            return output;
 
-
-
-
+                        }
+                    }
+                    else return null;
+                }
+            }
+            catch (SocketException)
+            {
+                return null;
+            }
+            catch (IOException)
+            {
+                return null;
+            }
         }
     }
+
 }
