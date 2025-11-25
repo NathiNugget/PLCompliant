@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Enums;
+using PLCompliant.EventArguments;
 using PLCompliant.Events;
 using PLCompliant.Modbus;
 using System.Collections.Concurrent;
@@ -21,6 +22,9 @@ namespace PLCompliant.Scanning
         bool _abortIPScan = false;
         bool _abortPLCScan = false;
         bool _scanInProgress = false;
+        object scanMutex = new object();
+        bool lockTaken = false;
+        
         ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>();
         IPAddressRange _scanRange;
 

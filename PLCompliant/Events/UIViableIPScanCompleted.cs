@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using PLCompliant.EventArguments;
+using System.Diagnostics;
 
 namespace PLCompliant.Events
 {
@@ -11,7 +12,7 @@ namespace PLCompliant.Events
         /// Constructor for the finished scan.
         /// </summary>
         /// <param name="argument">Should maybe be discarded</param>
-        public UIViableIPScanCompleted(Tuple<int, int> argument) : base(argument) { }
+        public UIViableIPScanCompleted(ViableIPsScanCompletedArgs argument) : base(argument) { }
 
         /// <summary>
         /// Execution of event
@@ -25,10 +26,14 @@ namespace PLCompliant.Events
                 Debug.Assert(false, "Event failed due to context not being the expected runtime type");
                 return;
             }
+            ViableIPsScanCompletedArgs? args = Argument as ViableIPsScanCompletedArgs;
+            if (args == null)
+            {
+                Debug.Assert(false, "Event failed due to eventargs not being the expected runtime type");
+                return;
+            }
             // TODO: Maybe change depending on threads in network scanning
-            int to = Argument.Item1;
-            int current = Argument.Item2;
-            int ipsleft = to - current;
+            int ipsleft = args.To - args.Current;
 
             form.label1.Text = $"Scanner {ipsleft} IP-addresser";
 

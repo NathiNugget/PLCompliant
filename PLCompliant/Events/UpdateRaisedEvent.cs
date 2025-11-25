@@ -1,23 +1,24 @@
-﻿using PLCompliant.Interface;
+﻿using PLCompliant.EventArguments;
+using PLCompliant.Interface;
 
 namespace PLCompliant.Events
 {
     /// <summary>
     /// Class used to update a raised event
     /// </summary>
-    public abstract class UpdateRaisedEvent : IRaisedEvent<UpdateThreadContext, UpdateThreadArgs>
+    public abstract class UpdateRaisedEvent : IRaisedEvent<UpdateThreadContext, RaisedEventArgs>
     {
-        UpdateThreadArgs _args;
+        RaisedEventArgs _args;
         /// <summary>
         /// Constructor to initilize the arguments
         /// </summary>
         /// <param name="args"></param>
-        protected UpdateRaisedEvent(UpdateThreadArgs args)
+        protected UpdateRaisedEvent(RaisedEventArgs args)
         {
             _args = args;
         }
         /// <inheritdoc/>
-        public UpdateThreadArgs Argument { get { return _args; } }
+        public RaisedEventArgs Argument { get { return _args; } }
 
         /// <inheritdoc/>
         public abstract void ExecuteEvent(UpdateThreadContext context);

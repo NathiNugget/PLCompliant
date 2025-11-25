@@ -1,6 +1,6 @@
 ﻿using PLCompliant.Scanning;
 
-namespace PLCompliant.Events
+namespace PLCompliant.EventArguments
 {
     /// <summary>
     /// Struct used for passing IP address range to an event

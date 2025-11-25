@@ -1,4 +1,8 @@
-﻿namespace PLCompliant.Events
+﻿
+using PLCompliant.EventArguments;
+using System.Diagnostics;
+
+namespace PLCompliant.Events
 {
     /// <summary>
     /// Class used for starting IP scanning
@@ -6,7 +10,7 @@
     public class UpdateStartViableIPScan : UpdateRaisedEvent
     {
         /// <inheritdoc/>
-        public UpdateStartViableIPScan(UpdateThreadArgs args) : base(args)
+        public UpdateStartViableIPScan(StartViableIPsScanArgs args) : base(args)
         {
         }
 
@@ -16,7 +20,14 @@
         /// <param name="context"></param>
         public override void ExecuteEvent(UpdateThreadContext context)
         {
-            context.scanner.SetIPRange(Argument.addressRange);
+
+            StartViableIPsScanArgs? args = Argument as StartViableIPsScanArgs;
+            if(args == null)
+            {
+                Debug.Assert(false, "Event argument was not the expected runtime type ");
+                return;
+            }
+            context.scanner.SetIPRange(args.AddressRange);
             if (context.scanner.ScanInProgress)
             {
                 return;
