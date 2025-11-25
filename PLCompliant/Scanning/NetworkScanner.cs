@@ -17,6 +17,8 @@ namespace PLCompliant.Scanning
         bool _abortIPScan = false;
         bool _abortPLCScan = false;
         bool _scanInProgress = false;
+        object scanMutex = new object();
+        bool lockTaken = false;
         ConcurrentBag<IPAddress> _viableIPs = new ConcurrentBag<IPAddress>();
         ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>();
         IPAddressRange _scanRange;
@@ -58,6 +60,7 @@ namespace PLCompliant.Scanning
         public void Reset()
         {
             _viableIPs.Clear();
+            _responsivePLCs.Clear();
             _scanRange.Reset();
         }
 
@@ -94,63 +97,68 @@ namespace PLCompliant.Scanning
         //TODO: Find out if it has a value for the end user for how many threads should preferably be used. First time setup/test? 
         public void FindIPs()
         {
-            _scanInProgress = true;
-            List<Thread> threads = new List<Thread>();
-            int ipspinged = 1;
-            foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
+            try
             {
-                if (_abortIPScan)
+                Monitor.TryEnter(scanMutex, ref lockTaken);
+                if (lockTaken)
                 {
-                    break;
-                }
-                foreach (IPAddress ip in chunk)
-                {
-                    threads.Add(new Thread(() =>
+                    _scanInProgress = true;
+                    List<Thread> threads = new List<Thread>();
+                    int ipspinged = 1;
+                    foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
                     {
                         if (_abortIPScan)
                         {
-                            return;
+                            break;
                         }
-                        try
+                        foreach (IPAddress ip in chunk)
                         {
-                            using (Ping ping = new Ping())
+                            threads.Add(new Thread(() =>
                             {
-                                PingReply reply = ping.Send(ip, TIMEOUT);
-                                if (reply.Status == IPStatus.Success)
+                                if (_abortIPScan)
                                 {
-
-                                    _viableIPs.Add(ip);
-
+                                    return;
                                 }
-                            }
+                                try
+                                {
+                                    using (Ping ping = new Ping())
+                                    {
+                                        PingReply reply = ping.Send(ip, TIMEOUT);
+                                        if (reply.Status == IPStatus.Success)
+                                        {
+
+                                            _viableIPs.Add(ip);
+
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    //TODO: Implement logging here, maybe
+                                    Console.WriteLine(ip);
+                                }
+                                Interlocked.Increment(ref ipspinged);
+                                UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
+                            }));
+
                         }
-                        catch
+                        foreach (Thread t in threads)
                         {
-                            //TODO: Implement logging here, maybe
-                            Console.WriteLine(ip);
+                            t.Start();
                         }
-                        Interlocked.Increment(ref ipspinged);
-                        UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
-                    }));
-
+                        threads.ForEach(t => t.Join());
+                        threads.Clear();
+                    }
+                    _abortIPScan = false;
+                    _scanInProgress = false;
                 }
-                foreach (Thread t in threads)
-                {
-                    t.Start();
-                }
-                threads.ForEach(t => t.Join());
-                threads.Clear();
             }
-            _abortIPScan = false;
-            _scanInProgress = false;
-
-
-
-
-
-
-            //TODO: Remove before release/hand in
-            File.WriteAllText("./hello.txt", _viableIPs.Count.ToString());
+            finally
+            {
+                // ensure the lock is cleaned up even with an exception
+                if (lockTaken) Monitor.Exit(scanMutex);
+            }
+            
         }
 
         /// <summary>
