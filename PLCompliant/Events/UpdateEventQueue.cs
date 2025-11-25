@@ -1,4 +1,5 @@
-﻿using PLCompliant.Interface;
+﻿using PLCompliant.EventArguments;
+using PLCompliant.Interface;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,9 +8,9 @@ namespace PLCompliant.Events
     /// <summary>
     /// Class used for updating the event queue. Could be for stopping a thread if a user has pushed the stop button
     /// </summary>
-    public class UpdateEventQueue : IEventQueue<UpdateThreadContext, UpdateThreadArgs>
+    public class UpdateEventQueue : IEventQueue<UpdateThreadContext, RaisedEventArgs>
     {
-        ConcurrentQueue<IRaisedEvent<UpdateThreadContext, UpdateThreadArgs>> _queue = new ConcurrentQueue<IRaisedEvent<UpdateThreadContext, UpdateThreadArgs>>();
+        ConcurrentQueue<IRaisedEvent<UpdateThreadContext, RaisedEventArgs>> _queue = new ConcurrentQueue<IRaisedEvent<UpdateThreadContext, RaisedEventArgs>>();
 
         private static UpdateEventQueue _instance = new UpdateEventQueue();
         /// <summary>
@@ -21,12 +22,12 @@ namespace PLCompliant.Events
         /// <inheritdoc/>
         public bool Empty { get { return _queue.IsEmpty; } }
         /// <inheritdoc/>
-        public bool TryPop([NotNullWhen(true)] out IRaisedEvent<UpdateThreadContext, UpdateThreadArgs> item)
+        public bool TryPop([NotNullWhen(true)] out IRaisedEvent<UpdateThreadContext, RaisedEventArgs> item)
         {
             return _queue.TryDequeue(out item!);
         }
         /// <inheritdoc/>
-        public void Push(IRaisedEvent<UpdateThreadContext, UpdateThreadArgs> item)
+        public void Push(IRaisedEvent<UpdateThreadContext, RaisedEventArgs> item)
         {
             _queue.Enqueue(item);
         }

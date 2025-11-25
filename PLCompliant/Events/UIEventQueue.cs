@@ -1,4 +1,5 @@
-﻿using PLCompliant.Interface;
+﻿using PLCompliant.EventArguments;
+using PLCompliant.Interface;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,10 +8,10 @@ namespace PLCompliant.Events
     /// <summary>
     /// This singleton handles sending events FROM the worker threads, to the UI thread.
     /// </summary>
-    public class UIEventQueue : IEventQueue<Form, Tuple<int, int>>
+    public class UIEventQueue : IEventQueue<Form, RaisedEventArgs>
     {
 
-        ConcurrentQueue<IRaisedEvent<Form, Tuple<int, int>>> _queue;
+        ConcurrentQueue<IRaisedEvent<Form, RaisedEventArgs>> _queue;
 
 
         private static UIEventQueue _instance = new UIEventQueue();
@@ -36,7 +37,7 @@ namespace PLCompliant.Events
         /// Pushes an event with a form (context)
         /// </summary>
         /// <param name="item">Two integers. The first is the count, second is how many have been scanned</param>
-        public void Push(IRaisedEvent<Form, Tuple<int, int>> item)
+        public void Push(IRaisedEvent<Form, RaisedEventArgs> item)
         {
             _queue.Enqueue(item);
         }
@@ -46,7 +47,7 @@ namespace PLCompliant.Events
         /// </summary>
         /// <param name="item">Two integers. The first is the count, second is how many have been scanned</param>
         /// <returns>If true, returns an event and an integer tuple</returns>
-        public bool TryPop([NotNullWhen(true)] out IRaisedEvent<Form, Tuple<int, int>> item)
+        public bool TryPop([NotNullWhen(true)] out IRaisedEvent<Form, RaisedEventArgs> item)
         {
             return _queue.TryDequeue(out item!);
         }

@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Enums;
+using PLCompliant.EventArguments;
 using PLCompliant.Events;
 using System.Collections.Concurrent;
 using System.Net;
@@ -129,7 +130,7 @@ namespace PLCompliant.Scanning
                             Console.WriteLine(ip);
                         }
                         Interlocked.Increment(ref ipspinged);
-                        UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new Tuple<int, int>((int)_scanRange.Count, ipspinged)));
+                        UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
                     }));
 
                 }

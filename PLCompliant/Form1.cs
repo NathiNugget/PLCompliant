@@ -5,6 +5,7 @@ using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.ComponentModel;
+using PLCompliant.EventArguments;
 
 namespace PLCompliant
 {
@@ -166,7 +167,7 @@ namespace PLCompliant
             if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
             {
                 var addrRange = new IPAddressRange(from, to);
-                UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new UpdateThreadArgs(addrRange)));
+                UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange)));
                 label1.Visible = !label1.Visible;
                 running = !running;
             }

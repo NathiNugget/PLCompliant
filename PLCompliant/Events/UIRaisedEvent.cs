@@ -1,17 +1,19 @@
-﻿using PLCompliant.Interface;
+﻿using PLCompliant.EventArguments;
+using PLCompliant.Interface;
+using System.Drawing.Design;
 
 namespace PLCompliant.Events
 {
     /// <summary>
     /// The base for a event on the meant to be executed on the form context
     /// </summary>
-    public abstract class UIRaisedEvent : IRaisedEvent<Form, Tuple<int, int>>
+    public abstract class UIRaisedEvent : IRaisedEvent<Form, RaisedEventArgs>
     {
-        Tuple<int, int> _argument;
+        RaisedEventArgs _argument;
         /// <summary>
         /// Get the argument for the execution
         /// </summary>
-        public Tuple<int, int> Argument { get { return _argument; } }
+        public RaisedEventArgs Argument { get { return _argument; } }
         /// <summary>
         /// Where to execute an event
         /// </summary>
@@ -21,7 +23,7 @@ namespace PLCompliant.Events
         /// Constructor to initialize the argument
         /// </summary>
         /// <param name="argument"></param>
-        public UIRaisedEvent(Tuple<int, int> argument)
+        public UIRaisedEvent(RaisedEventArgs argument)
         {
             _argument = argument;
         }
