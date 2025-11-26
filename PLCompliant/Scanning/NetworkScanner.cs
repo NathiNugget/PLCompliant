@@ -59,6 +59,11 @@ namespace PLCompliant.Scanning
         /// Check if the PLC scan is aborting
         /// </summary>
         public bool AbortingPLCScan { get { return _abortPLCScan; } }
+        /// <summary>
+        /// Contains the responses from a scan
+        /// </summary>
+        public ConcurrentBag<ResponseData> Responses { get; private set; }
+
         #endregion
 
         /// <summary>
@@ -110,7 +115,7 @@ namespace PLCompliant.Scanning
                 Monitor.TryEnter(scanMutex, ref _aquiredLock);
                 if (_aquiredLock)
                 {
-                    _scanInProgress = true; 
+                    _scanInProgress = true;
                     List<Thread> threads = new List<Thread>();
                     int ipspinged = 1;
 
@@ -312,6 +317,23 @@ namespace PLCompliant.Scanning
                 return null;
             }
         }
-    }
 
+        public void GenerateCSV(string path, PLCProtocolType protocol)
+        {
+            StringBuilder sb = new StringBuilder(1000);
+            switch (protocol)
+            {
+                case PLCProtocolType.Modbus:
+                    string headers = string.Join(GlobalVars.CSV_SEPARATOR, ResponseData.HeaderNames);
+                    foreach (ReadDeviceInformationData data in Responses)
+                    {
+                        sb.AppendLine(data.ToCSV()); 
+                    }
+                    File.WriteAllText(path, sb.ToString());
+
+                    break;
+                default: break;
+            }
+        }
+    }
 }

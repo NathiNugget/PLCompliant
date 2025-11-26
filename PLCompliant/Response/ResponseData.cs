@@ -12,11 +12,11 @@ namespace PLCompliant.Response
         /// </summary>
         /// 
         //TODO: Find out if this should be moved to GLOBALS!
-        readonly static Dictionary<int, string> HeaderNames = new Dictionary<int, string>
+        public readonly static string[] HeaderNames =
         {
-            {0, "VendorName" },
-            {1, "ProductCode" },
-            {2, "FirmwareVersion" }
+            "VendorName" ,
+            "ProductCode" ,
+            "FirmwareVersion"
         };
         /// <summary>
         /// The PLC from which a response was read. <br></br>It is on purpose left as uninitialized
