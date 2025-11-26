@@ -1,6 +1,5 @@
 ﻿using PLCompliant.EventArguments;
 using PLCompliant.Utilities;
-using System.Diagnostics;
 
 namespace PLCompliant.Events
 {
@@ -24,7 +23,7 @@ namespace PLCompliant.Events
             var validatedTypes = EventUtilities.ValidateArgs<Form1, ViableIPsScanCompletedArgs, Form, RaisedEventArgs>(context, Argument);
             Form1 form = validatedTypes.Item1;
 
-            ViableIPsScanCompletedArgs args = validatedTypes.Item2; 
+            ViableIPsScanCompletedArgs args = validatedTypes.Item2;
             int ipsleft = args.To - args.Current;
             if (ipsleft != 0)
             {

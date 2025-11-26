@@ -8,7 +8,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PLCompliant.Scanning
@@ -62,7 +61,7 @@ namespace PLCompliant.Scanning
         /// <summary>
         /// Contains the responses from a scan
         /// </summary>
-        public ConcurrentBag<ResponseData> Responses { get { return _responses; } private set { _responses = value; }}
+        public ConcurrentBag<ResponseData> Responses { get { return _responses; } private set { _responses = value; } }
 
         #endregion
 
@@ -197,7 +196,7 @@ namespace PLCompliant.Scanning
                 DateTime prefix = new DateTime();
 
 
-                
+
 
                 prefix = DateTime.Now;
                 string filenameprefix = prefix.ToString(GlobalVars.customformat);
@@ -323,17 +322,17 @@ namespace PLCompliant.Scanning
             StringBuilder sb = new StringBuilder(1000);
             DateTime currentTime = DateTime.Now;
             string suffix = currentTime.ToString(GlobalVars.customformat);
-            string filename = string.Empty; 
+            string filename = string.Empty;
 
 
             switch (protocol)
             {
                 case PLCProtocolType.Modbus:
                     string headers = string.Join(GlobalVars.CSV_SEPARATOR, ResponseData.HeaderNames);
-                    sb.AppendLine(headers); 
+                    sb.AppendLine(headers);
                     foreach (ReadDeviceInformationData data in Responses)
                     {
-                        sb.AppendLine(data.ToCSV()); 
+                        sb.AppendLine(data.ToCSV());
                     }
                     filename = $"ModbusResultat{suffix}.csv";
                     File.WriteAllText($"{path}\\{filename}", sb.ToString());
@@ -342,7 +341,7 @@ namespace PLCompliant.Scanning
                 default: break;
             }
 
-            return filename; 
+            return filename;
 
         }
     }

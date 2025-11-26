@@ -169,12 +169,12 @@ namespace PLCompliant
             }
             else if (!Directory.Exists(textBox1.Text))
             {
-                ShowWarning(textBox1, "Ugyldig sti", "Du skal vælge en gyldig mappe hvor resultatet kan gemmes"); 
+                ShowWarning(textBox1, "Ugyldig sti", "Du skal vælge en gyldig mappe hvor resultatet kan gemmes");
             }
             else
             {
                 {
-                    
+
                     IPAddressRange addrRange = new IPAddressRange(from!, to!); //Ignore null as they are already not null
                     UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange)));
                     label1.Visible = !label1.Visible;

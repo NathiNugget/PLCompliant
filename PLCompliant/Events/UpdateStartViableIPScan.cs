@@ -1,8 +1,6 @@
 ﻿
 using PLCompliant.EventArguments;
 using PLCompliant.Utilities;
-using System.Diagnostics;
-using System.Net;
 
 namespace PLCompliant.Events
 {
@@ -23,13 +21,13 @@ namespace PLCompliant.Events
         public override void ExecuteEvent(UpdateThreadContext context)
         {
             var validatedTypes = EventUtilities.ValidateArgs<UpdateThreadContext, StartViableIPsScanArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
-            StartViableIPsScanArgs? args = validatedTypes.Item2; 
+            StartViableIPsScanArgs? args = validatedTypes.Item2;
             context.scanner.SetIPRange(args.AddressRange);
             if (context.scanner.ScanInProgress)
             {
                 return;
             }
-            
+
             Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
                 context.scanner.FindIPs(Enums.PLCProtocolType.Modbus); //TODO: Update this to use parameters instead

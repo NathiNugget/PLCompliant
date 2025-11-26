@@ -1,9 +1,4 @@
 ﻿using PLCompliant.EventArguments;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Utilities
 {
@@ -45,7 +40,7 @@ namespace PLCompliant.Utilities
             {
                 throw new ArgumentNullException();
             }
-            
+
 
             C? ctx = (C)context;
             if (ctx == null)
@@ -53,8 +48,8 @@ namespace PLCompliant.Utilities
                 throw new InvalidCastException(nameof(context));
             }
 
-            
-            return ctx;  
+
+            return ctx;
         }
     }
 }

@@ -1,9 +1,4 @@
 ﻿using PLCompliant.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.EventArguments
 {
@@ -15,7 +10,7 @@ namespace PLCompliant.EventArguments
         public GenerateCSVArgs(string path, PLCProtocolType protocol)
         {
             Path = path;
-            Protocol = protocol; 
+            Protocol = protocol;
         }
     }
 }

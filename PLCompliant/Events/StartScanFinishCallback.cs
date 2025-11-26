@@ -1,11 +1,5 @@
 ﻿using PLCompliant.EventArguments;
-using PLCompliant.Interface;
 using PLCompliant.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
@@ -18,9 +12,9 @@ namespace PLCompliant.Events
 
         public override void ExecuteEvent(Form context)
         {
-            Form1 form = EventUtilities.ValidateContext<Form1, Form>(context); 
-            UpdateEventQueue.Instance.Push(new GenerateCSVEvent(new GenerateCSVArgs(form.textBox1.Text, form.Protocol))); 
-            
+            Form1 form = EventUtilities.ValidateContext<Form1, Form>(context);
+            UpdateEventQueue.Instance.Push(new GenerateCSVEvent(new GenerateCSVArgs(form.textBox1.Text, form.Protocol)));
+
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using PLCompliant.EventArguments;
 using PLCompliant.Interface;
-using System.Runtime.InteropServices;
 
 namespace PLCompliant.Events
 {
@@ -28,6 +27,6 @@ namespace PLCompliant.Events
             _argument = argument;
         }
 
-        
+
     }
 }

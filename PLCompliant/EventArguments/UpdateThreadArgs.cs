@@ -1,5 +1,4 @@
 ﻿using PLCompliant.Scanning;
-using System.Runtime.InteropServices;
 
 namespace PLCompliant.EventArguments
 {
@@ -15,11 +14,12 @@ namespace PLCompliant.EventArguments
         /// 
 
 
-        public UpdateThreadArgs(IPAddressRange range) : base() {
+        public UpdateThreadArgs(IPAddressRange range) : base()
+        {
             AddressRange = range;
         }
 
-        
+
 
         /// <summary>
         /// Adress range
