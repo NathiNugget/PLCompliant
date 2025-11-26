@@ -1,4 +1,5 @@
 ﻿using PLCompliant.EventArguments;
+using PLCompliant.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace PLCompliant.Events
 
         public override void ExecuteEvent(UpdateThreadContext context)
         {
+            var validatedTypes = EventUtilities.ValidateArgs<UpdateThreadContext, GenerateCSVArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument); 
+            
             GenerateCSVArgs? args = Argument as GenerateCSVArgs;
             string savedAs = context.scanner.GenerateCSV(args.Path, args.Protocol); 
             UIEventQueue.Instance.Push(new SavedFileEvent(new SavedFileArgs(args.Path, savedAs))); 

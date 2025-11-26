@@ -2,6 +2,7 @@
 using PLCompliant.EventArguments;
 using PLCompliant.Utilities;
 using System.Diagnostics;
+using System.Net;
 
 namespace PLCompliant.Events
 {
@@ -21,19 +22,14 @@ namespace PLCompliant.Events
         /// <param name="context"></param>
         public override void ExecuteEvent(UpdateThreadContext context)
         {
-
-            StartViableIPsScanArgs? args = Argument as StartViableIPsScanArgs;
-            if (args == null)
-            {
-                Debug.Assert(false, "Event argument was not the expected runtime type ");
-                return;
-            }
+            var validatedTypes = EventUtilities.ValidateArgs<UpdateThreadContext, StartViableIPsScanArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
+            StartViableIPsScanArgs? args = validatedTypes.Item2; 
             context.scanner.SetIPRange(args.AddressRange);
             if (context.scanner.ScanInProgress)
             {
                 return;
             }
-            // TODO: implement proper locking/atomic mechanism to ensure two scan threads cannot run concurrently
+            
             Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
                 context.scanner.FindIPs(Enums.PLCProtocolType.Modbus); //TODO: Update this to use parameters instead

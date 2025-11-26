@@ -1,4 +1,5 @@
 ﻿using PLCompliant.EventArguments;
+using PLCompliant.Utilities;
 using System.Diagnostics;
 
 namespace PLCompliant.Events
@@ -20,26 +21,14 @@ namespace PLCompliant.Events
         /// <param name="context">Form containing the label in which the label should be updated to orient the user</param>
         public override void ExecuteEvent(Form context)
         {
-            Form1? form = context as Form1;
-            if (form == null)
-            {
-                Debug.Assert(false, "Event failed due to context not being the expected runtime type");
-                return;
-            }
-            ViableIPsScanCompletedArgs? args = Argument as ViableIPsScanCompletedArgs;
-            if (args == null)
-            {
-                Debug.Assert(false, "Event failed due to eventargs not being the expected runtime type");
-                return;
-            }
-            // TODO: Maybe change depending on threads in network scanning
+            var validatedTypes = EventUtilities.ValidateArgs<Form1, ViableIPsScanCompletedArgs, Form, RaisedEventArgs>(context, Argument);
+            Form1 form = validatedTypes.Item1;
+
+            ViableIPsScanCompletedArgs args = validatedTypes.Item2; 
             int ipsleft = args.To - args.Current;
-
-
             if (ipsleft != 0)
             {
                 form.label1.Text = $"Scanner {ipsleft} IP-addresser";
-
             }
             else
             {
