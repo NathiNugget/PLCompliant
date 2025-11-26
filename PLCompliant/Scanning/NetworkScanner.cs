@@ -105,107 +105,104 @@ namespace PLCompliant.Scanning
             try
             {
                 Monitor.TryEnter(scanMutex, ref _scanInProgress);
-                if (_scanInProgress)
+                List<Thread> threads = new List<Thread>();
+                int ipspinged = 1;
+
+                foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
                 {
-                    _scanInProgress = true;
-                    List<Thread> threads = new List<Thread>();
-                    int ipspinged = 1;
-
-                    foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
+                    if (_abortIPScan)
                     {
-                        if (_abortIPScan)
+                        break;
+                    }
+                    foreach (IPAddress ip in chunk)
+                    {
+                        threads.Add(ThreadUtilities.CreateBackgroundThread(() =>
                         {
-                            break;
-                        }
-                        foreach (IPAddress ip in chunk)
-                        {
-                            threads.Add(ThreadUtilities.CreateBackgroundThread(() =>
+                            if (_abortIPScan)
                             {
-                                if (_abortIPScan)
+                                return;
+                            }
+                            try
+                            {
+                                using (Ping ping = new Ping())
                                 {
-                                    return;
-                                }
-                                try
-                                {
-                                    using (Ping ping = new Ping())
+                                    PingReply reply = ping.Send(ip, PINGTIMEOUT);
+                                    if (reply.Status == IPStatus.Success)
                                     {
-                                        PingReply reply = ping.Send(ip, PINGTIMEOUT);
-                                        if (reply.Status == IPStatus.Success)
+
+                                        switch (protocol)
                                         {
+                                            case PLCProtocolType.Modbus:
+                                                {
 
-                                            switch (protocol)
-                                            {
-                                                case PLCProtocolType.Modbus:
-                                                    {
-
-                                                        ReadDeviceInformationData? response = StartModbusIdentification(ip);
+                                                    ReadDeviceInformationData? response = StartModbusIdentification(ip);
                                                         
-                                                        if (response != null)
-                                                        {
-                                                            Console.WriteLine(response.ToCSV());
-                                                        }
-                                                        break;
-                                                    }
-                                                default:
+                                                    if (response != null)
                                                     {
-                                                        break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
+                                                        Console.WriteLine(response.ToCSV());
                                                     }
-                                            }
-
-
-
-
-
-
+                                                    break;
+                                                }
+                                            default:
+                                                {
+                                                    break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
+                                                }
                                         }
+
+
+
+
+
+
                                     }
                                 }
-                                catch
-                                {
-                                    //TODO: Implement logging here, maybe
-                                    Console.WriteLine(ip);
-                                }
-                                Interlocked.Increment(ref ipspinged);
-                                UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
-                            }));
+                            }
+                            catch
+                            {
+                                //TODO: Implement logging here, maybe
+                                Console.WriteLine(ip);
+                            }
+                            Interlocked.Increment(ref ipspinged);
+                            UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
+                        }));
 
-                        }
-                        foreach (Thread t in threads)
-                        {
-                            t.Start();
-                        }
-                        threads.ForEach(t => t.Join());
-                        threads.Clear();
                     }
-                    _abortIPScan = false;
-                    _scanInProgress = false;
-
-
-
-
-                    DateTime prefix = new DateTime();
-
-
-                    string customformat = "dd/MM yyyy";
-
-                    prefix = DateTime.Now;
-                    string filenameprefix = prefix.ToString(customformat);
-                    string filename = $"IP-skan log - {filenameprefix}";
-
-                    StringBuilder sb = new StringBuilder(1000);
-                    foreach (IPAddress ip in _responsivePLCs)
+                    foreach (Thread t in threads)
                     {
-                        sb.AppendLine(ip.ToString());
+                        t.Start();
                     }
-                    string output = sb.ToString();
-
-                    //TODO: Remove before release/hand in
-                    if (!File.Exists($"./{filename}.log"))
-                    {
-                        File.WriteAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
-                    }
-                    else File.AppendAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
+                    threads.ForEach(t => t.Join());
+                    threads.Clear();
                 }
+                _abortIPScan = false;
+                _scanInProgress = false;
+
+
+
+
+                DateTime prefix = new DateTime();
+
+
+                string customformat = "dd/MM yyyy";
+
+                prefix = DateTime.Now;
+                string filenameprefix = prefix.ToString(customformat);
+                string filename = $"IP-skan log - {filenameprefix}";
+
+                StringBuilder sb = new StringBuilder(1000);
+                foreach (IPAddress ip in _responsivePLCs)
+                {
+                    sb.AppendLine(ip.ToString());
+                }
+                string output = sb.ToString();
+
+                //TODO: Remove before release/hand in
+                if (!File.Exists($"./{filename}.log"))
+                {
+                    File.WriteAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
+                }
+                else File.AppendAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
+                
             }
             finally
             {
