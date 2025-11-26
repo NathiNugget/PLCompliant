@@ -14,6 +14,7 @@ namespace PLCompliant.Response
         //TODO: Find out if this should be moved to GLOBALS!
         public readonly static string[] HeaderNames =
         {
+            "IP-Address",
             "VendorName" ,
             "ProductCode" ,
             "FirmwareVersion"

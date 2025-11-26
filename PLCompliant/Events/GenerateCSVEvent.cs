@@ -17,10 +17,8 @@ namespace PLCompliant.Events
         public override void ExecuteEvent(UpdateThreadContext context)
         {
             GenerateCSVArgs? args = Argument as GenerateCSVArgs;
-            StringBuilder sb = new StringBuilder(1000);
-            if (args != null) { 
-                foreach (Response in context.scanner.re)
-            }
+            string savedAs = context.scanner.GenerateCSV(args.Path, args.Protocol); 
+            UIEventQueue.Instance.Push(new SavedFileEvent(new SavedFileArgs(args.Path, savedAs))); 
         }
     }
 }

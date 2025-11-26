@@ -42,6 +42,7 @@
             toolTip1 = new ToolTip(components);
             maskedTextBox2 = new MaskedTextBox();
             label4 = new Label();
+            label5 = new Label();
             SuspendLayout();
             // 
             // button1
@@ -99,10 +100,12 @@
             // radioButton1
             // 
             radioButton1.AutoSize = true;
+            radioButton1.Checked = true;
             radioButton1.Location = new Point(146, 153);
             radioButton1.Name = "radioButton1";
             radioButton1.Size = new Size(129, 19);
             radioButton1.TabIndex = 0;
+            radioButton1.TabStop = true;
             radioButton1.Text = "Modbus TCP/IP 502";
             radioButton1.UseVisualStyleBackColor = true;
             radioButton1.CheckedChanged += radioButton1_CheckedChanged;
@@ -163,11 +166,22 @@
             label4.Text = "Fra";
             label4.Click += label4_Click;
             // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(928, 318);
+            label5.Name = "label5";
+            label5.Size = new Size(20, 15);
+            label5.TabIndex = 13;
+            label5.Text = "Til";
+            label5.Click += label5_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1264, 681);
+            Controls.Add(label5);
             Controls.Add(label4);
             Controls.Add(maskedTextBox2);
             Controls.Add(maskedTextBox1);
@@ -191,7 +205,6 @@
 
         private Button button1;
         private Button button2;
-        private TextBox textBox1;
         private Label label2;
         private RadioButton radioButton1;
         private RadioButton radioButton2;
@@ -201,5 +214,7 @@
         private MaskedTextBox maskedTextBox2;
         private Label label4;
         public Label label1;
+        public TextBox textBox1;
+        private Label label5;
     }
 }

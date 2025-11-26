@@ -62,7 +62,7 @@ namespace PLCompliant.Scanning
         /// <summary>
         /// Contains the responses from a scan
         /// </summary>
-        public ConcurrentBag<ResponseData> Responses { get; private set; }
+        public ConcurrentBag<ResponseData> Responses { get { return _responses; } private set { _responses = value; }}
 
         #endregion
 
@@ -197,10 +197,10 @@ namespace PLCompliant.Scanning
                 DateTime prefix = new DateTime();
 
 
-                string customformat = "dd/MM yyyy";
+                
 
                 prefix = DateTime.Now;
-                string filenameprefix = prefix.ToString(customformat);
+                string filenameprefix = prefix.ToString(GlobalVars.customformat);
                 string filename = $"IP-skan log - {filenameprefix}";
 
                 StringBuilder sb = new StringBuilder(1000);
@@ -318,22 +318,32 @@ namespace PLCompliant.Scanning
             }
         }
 
-        public void GenerateCSV(string path, PLCProtocolType protocol)
+        public string GenerateCSV(string path, PLCProtocolType protocol)
         {
             StringBuilder sb = new StringBuilder(1000);
+            DateTime currentTime = DateTime.Now;
+            string suffix = currentTime.ToString(GlobalVars.customformat);
+            string filename = string.Empty; 
+
+
             switch (protocol)
             {
                 case PLCProtocolType.Modbus:
                     string headers = string.Join(GlobalVars.CSV_SEPARATOR, ResponseData.HeaderNames);
+                    sb.AppendLine(headers); 
                     foreach (ReadDeviceInformationData data in Responses)
                     {
                         sb.AppendLine(data.ToCSV()); 
                     }
-                    File.WriteAllText(path, sb.ToString());
+                    filename = $"ModbusResultat{suffix}.csv";
+                    File.WriteAllText($"{path}\\{filename}", sb.ToString());
 
                     break;
                 default: break;
             }
+
+            return filename; 
+
         }
     }
 }

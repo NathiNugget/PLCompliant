@@ -19,7 +19,7 @@ namespace PLCompliant
         bool running;
         System.Windows.Forms.Timer _timer;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public PLCProtocolType Protocol { get; private set; }
+        public PLCProtocolType Protocol { get; private set; } = PLCProtocolType.Modbus;
         public Form1()
         {
 
@@ -34,8 +34,7 @@ namespace PLCompliant
             maskedTextBox2.KeyDown += new KeyEventHandler(ControlField);
 
 
-            radioButton1.MouseClick += new MouseEventHandler(CheckIfButtonIsPressed);
-            radioButton2.MouseClick += new MouseEventHandler(CheckIfButtonIsPressed);
+
 
 
             _timer = new System.Windows.Forms.Timer();
@@ -141,7 +140,7 @@ namespace PLCompliant
 
             if (!IPAddress.TryParse(input, out IPAddress? _))
             {
-                ShowIPWarning(maskedTextBox);
+                ShowWarning(maskedTextBox);
 
 
             }
@@ -150,7 +149,7 @@ namespace PLCompliant
 
         }
 
-        private void ShowIPWarning(object sender, string title = "Ugyldig IP-addresse", string msg = "Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være tal før og efter hvert punktum")
+        private void ShowWarning(object sender, string title = "Ugyldig IP-addresse", string msg = "Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være tal før og efter hvert punktum")
         {
 
 
@@ -162,54 +161,26 @@ namespace PLCompliant
 
         private void StartStopButtonClick(object sender, EventArgs e)
         {
-            if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
+            // If IP addresses cannot be validated
+            if (!ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress? from, out IPAddress? to))
             {
-                var addrRange = new IPAddressRange(from, to);
-                UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange)));
-                label1.Visible = !label1.Visible;
-                running = !running;
+                ShowWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
+
+            }
+            else if (!Directory.Exists(textBox1.Text))
+            {
+                ShowWarning(textBox1, "Ugyldig sti", "Du skal vælge en gyldig mappe hvor resultatet kan gemmes"); 
             }
             else
             {
-                ShowIPWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
+                {
+                    
+                    IPAddressRange addrRange = new IPAddressRange(from!, to!); //Ignore null as they are already not null
+                    UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange)));
+                    label1.Visible = !label1.Visible;
+                    running = !running;
+                }
             }
-
-
-            //if (ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress from, out IPAddress to))
-            //{
-            //    Button button = (Button)sender;
-            //    button.Text = running ? "Start" : "Stop";
-            //    label1.Visible = !label1.Visible;
-            //    Thread t = new Thread(() =>
-            //    {
-            //        if (!running)
-            //        {
-
-
-            //            IPAddressRange range = new IPAddressRange(from, to);
-            //            NetworkScanner scanner = new NetworkScanner(range);
-            //            scanner.FindIPs();
-            //        }
-
-
-
-            //        running = !running;
-            //    }); 
-            //    t.Start();
-
-
-
-
-            //}
-
-
-            //else
-            //{
-
-            //    ShowIPWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
-
-            //}
-
         }
 
         private bool ValidateRange(MaskedTextBox maskedTextBox1, MaskedTextBox maskedTextBox2, out IPAddress? from, out IPAddress? to)
@@ -305,7 +276,11 @@ namespace PLCompliant
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
-
+            CheckIfButtonIsPressed(sender, e);
+        }
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckIfButtonIsPressed(sender, e);
         }
 
         private void CheckIfButtonIsPressed(object? sender, EventArgs e)
@@ -316,7 +291,7 @@ namespace PLCompliant
             {
                 Protocol = button.TabIndex == 0 ? PLCProtocolType.Modbus : PLCProtocolType.Step_7;
             }
-            Console.WriteLine((int)Protocol);
+
 
         }
 
@@ -325,7 +300,8 @@ namespace PLCompliant
 
         }
 
-        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+
+        private void label5_Click(object sender, EventArgs e)
         {
 
         }

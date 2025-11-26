@@ -37,6 +37,7 @@ namespace PLCompliant.Events
             Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
                 context.scanner.FindIPs(Enums.PLCProtocolType.Modbus); //TODO: Update this to use parameters instead
+                UIEventQueue.Instance.Push(new StartScanFinishCallback(null!)); //This is null on purpose, don't touch. 
             });
             scanThread.Start();
         }

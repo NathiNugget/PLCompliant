@@ -26,5 +26,32 @@ namespace PLCompliant.Events
         {
             _argument = argument;
         }
+
+        protected virtual Tuple<C, A> ValidateArgs<C, A>(Form context)
+            where C : class
+            where A : RaisedEventArgs
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException("");
+            }
+            if (Argument == null)
+            {
+                throw new ArgumentNullException(nameof(Argument));
+            }
+
+            C? form = context as C;
+            if (form == null)
+            {
+                throw new InvalidCastException($"Forkerte runtime type: {Argument.GetType()}");
+            }
+
+            A? args = Argument as A;
+            if (args == null)
+            {
+                throw new InvalidCastException(nameof(args));
+            }
+            return new Tuple<C, A>(form, args);
+        }
     }
 }
