@@ -14,7 +14,7 @@ namespace PLCompliant.Modbus
         /// </summary>
         /// <param name="msg">The response</param>
         /// <param name="errCode">0 if nothing most significant bit is 0, otherwise has the number specified in the payload</param>
-        /// <returns>True if there is an exception in the response, otherwise false</returns>
+        /// <returns>False if there is an exception, otherwise true</returns>
         public static bool TryHandleReponseError(ModBusMessage msg, out byte errCode)
         {
             byte functionCode = msg.Data._functionCode;

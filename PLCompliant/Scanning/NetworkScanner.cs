@@ -19,7 +19,7 @@ namespace PLCompliant.Scanning
     public class NetworkScanner
     {
         const int PINGTIMEOUT = 500;
-        const int SOCKETTIMEOUT = 60000; 
+        const int SOCKETTIMEOUT = 60000;
         bool _abortIPScan = false;
         bool _abortPLCScan = false;
 
@@ -27,6 +27,7 @@ namespace PLCompliant.Scanning
         bool _scanInProgress = false;
 
         ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>();
+        ConcurrentBag<ResponseData> _responses = new ConcurrentBag<ResponseData>();
         IPAddressRange _scanRange;
 
         /// <summary>
@@ -102,80 +103,88 @@ namespace PLCompliant.Scanning
         //TODO: Find out if it has a value for the end user for how many threads should preferably be used. First time setup/test? 
         public void FindIPs(PLCProtocolType protocol)
         {
+            bool _aquiredLock = false;
             try
             {
-                Monitor.TryEnter(scanMutex, ref _scanInProgress);
-                List<Thread> threads = new List<Thread>();
-                int ipspinged = 1;
 
-                foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
+                Monitor.TryEnter(scanMutex, ref _aquiredLock);
+                if (_aquiredLock)
                 {
-                    if (_abortIPScan)
+                    _scanInProgress = true; 
+                    List<Thread> threads = new List<Thread>();
+                    int ipspinged = 1;
+
+                    foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
                     {
-                        break;
-                    }
-                    foreach (IPAddress ip in chunk)
-                    {
-                        threads.Add(ThreadUtilities.CreateBackgroundThread(() =>
+                        if (_abortIPScan)
                         {
-                            if (_abortIPScan)
+                            break;
+                        }
+                        foreach (IPAddress ip in chunk)
+                        {
+                            threads.Add(ThreadUtilities.CreateBackgroundThread(() =>
                             {
-                                return;
-                            }
-                            try
-                            {
-                                using (Ping ping = new Ping())
+                                if (_abortIPScan)
                                 {
-                                    PingReply reply = ping.Send(ip, PINGTIMEOUT);
-                                    if (reply.Status == IPStatus.Success)
+                                    return;
+                                }
+                                try
+                                {
+                                    using (Ping ping = new Ping())
                                     {
-
-                                        switch (protocol)
+                                        PingReply reply = ping.Send(ip, PINGTIMEOUT);
+                                        if (reply.Status == IPStatus.Success)
                                         {
-                                            case PLCProtocolType.Modbus:
-                                                {
 
-                                                    ReadDeviceInformationData? response = StartModbusIdentification(ip);
-                                                        
-                                                    if (response != null)
+                                            switch (protocol)
+                                            {
+                                                case PLCProtocolType.Modbus:
                                                     {
-                                                        Console.WriteLine(response.ToCSV());
+
+                                                        ReadDeviceInformationData? response = StartModbusIdentification(ip);
+                                                        if (response != null)
+                                                        {
+                                                            response.IPAddr = ip;
+                                                            _responses.Add(response);
+
+                                                        }
+                                                        break;
                                                     }
-                                                    break;
-                                                }
-                                            default:
-                                                {
-                                                    break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
-                                                }
+                                                default:
+                                                    {
+                                                        break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
+                                                    }
+                                            }
+
+
+
+
+
+
                                         }
-
-
-
-
-
-
                                     }
                                 }
-                            }
-                            catch
-                            {
-                                //TODO: Implement logging here, maybe
-                                Console.WriteLine(ip);
-                            }
-                            Interlocked.Increment(ref ipspinged);
-                            UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
-                        }));
+                                catch
+                                {
+                                    //TODO: Implement logging here, maybe
+                                    Console.WriteLine(ip);
+                                }
+                                Interlocked.Increment(ref ipspinged);
+                                UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
+                            }));
 
+                        }
+                        foreach (Thread t in threads)
+                        {
+                            t.Start();
+                        }
+                        threads.ForEach(t => t.Join());
+                        threads.Clear();
                     }
-                    foreach (Thread t in threads)
-                    {
-                        t.Start();
-                    }
-                    threads.ForEach(t => t.Join());
-                    threads.Clear();
+                    _abortIPScan = false;
                 }
-                _abortIPScan = false;
-                _scanInProgress = false;
+
+
 
 
 
@@ -202,14 +211,16 @@ namespace PLCompliant.Scanning
                     File.WriteAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
                 }
                 else File.AppendAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
-                
+
             }
             finally
             {
-                if (_scanInProgress)
+                if (_aquiredLock)
                 {
                     Monitor.Exit(scanMutex);
                 }
+                _scanInProgress = false;
+
             }
         }
         private ReadDeviceInformationData? StartModbusIdentification(IPAddress ip)
@@ -229,12 +240,11 @@ namespace PLCompliant.Scanning
                         ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
                         byte[] buffer = msg.Serialize();
                         clientStream.Write(buffer, 0, buffer.Length);
-                        byte[] databuffer = new byte[1024];
+                        byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
                         int readbytes = 0;
                         byte[] headerbuffer = new byte[msg.Header.Size];
                         bool readingHeader = true;
                         ModBusMessage response = new(new ModBusHeader(), new ModBusData());
-                        byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
 
                         while (true)
                         {
@@ -248,14 +258,15 @@ namespace PLCompliant.Scanning
                                     response.DeserializeHeader(headerbuffer);
                                     readingHeader = false;
                                     readbytes = 0;
+                                    Array.Resize(ref databuffer, response.Header.length - 1); //Minus 1 because unit id is included. Standard Modbus stuff :/
                                 }
 
                             }
                             else
                             {
 
-                                int dataleft = (response.Header.length-1) - readbytes;
-                                int index = (response.Header.length-1) - dataleft;
+                                int dataleft = (response.Header.length - 1) - readbytes;
+                                int index = (response.Header.length - 1) - dataleft;
                                 readbytes += clientStream.Read(databuffer, index, dataleft);
                                 if (readbytes == response.Header.length - 1)
                                 {
@@ -266,8 +277,8 @@ namespace PLCompliant.Scanning
 
 
                         }
-                        bool isError = ModBusResponseParsing.TryHandleReponseError(response, out byte errCode);
-                        if (isError)
+                        bool noError = ModBusResponseParsing.TryHandleReponseError(response, out byte errCode);
+                        if (!noError)
                         {
                             //TODO: Implement actual filewriter/logger 
                             string path = "./errors.log";
