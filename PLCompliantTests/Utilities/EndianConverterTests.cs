@@ -141,7 +141,7 @@ namespace PLCompliant.Utilities.Tests
         {
             byte[] actualbytes = BitConverter.GetBytes(actual);
             byte[] expectedbytes = BitConverter.GetBytes(original);
-            actual = EndianConverter.FromHostToNetwork(actual);
+            actual = EndianConverter.FromNetworkToHost(actual);
             actualbytes = BitConverter.GetBytes(actual);
             if (BitConverter.IsLittleEndian)
             {
@@ -163,7 +163,7 @@ namespace PLCompliant.Utilities.Tests
         {
             byte[] actualbytes = BitConverter.GetBytes(actual);
             byte[] expectedbytes = BitConverter.GetBytes(original);
-            actual = EndianConverter.FromHostToNetwork(actual);
+            actual = EndianConverter.FromNetworkToHost(actual);
             actualbytes = BitConverter.GetBytes(actual);
             if (BitConverter.IsLittleEndian)
             {
@@ -185,7 +185,7 @@ namespace PLCompliant.Utilities.Tests
         {
             byte[] actualbytes = BitConverter.GetBytes(actual);
             byte[] expectedbytes = BitConverter.GetBytes(original);
-            actual = EndianConverter.FromHostToNetwork(actual);
+            actual = EndianConverter.FromNetworkToHost(actual);
             actualbytes = BitConverter.GetBytes(actual);
             if (BitConverter.IsLittleEndian)
             {
@@ -203,11 +203,11 @@ namespace PLCompliant.Utilities.Tests
         [TestMethod()]
         [DataRow((short)(short.MaxValue - 1), (short)(short.MaxValue - 1))]
         [DataRow((short)(short.MinValue + 1), (short)(short.MinValue + 1))]
-        public void FromNetworkToHostTest3(short actual, short original)
+        public void FromNetworkToHostTestShort(short actual, short original)
         {
             byte[] actualbytes = BitConverter.GetBytes(actual);
             byte[] expectedbytes = BitConverter.GetBytes(original);
-            actual = EndianConverter.FromHostToNetwork(actual);
+            actual = EndianConverter.FromNetworkToHost(actual);
             actualbytes = BitConverter.GetBytes(actual);
             if (BitConverter.IsLittleEndian)
             {
@@ -225,11 +225,11 @@ namespace PLCompliant.Utilities.Tests
         [TestMethod()]
         [DataRow((long)(long.MaxValue - 1), (long)(long.MaxValue - 1))]
         [DataRow((long)(long.MinValue + 1), (long)(long.MinValue + 1))]
-        public void FromNetworkToHostTest4(long actual, long original)
+        public void FromNetworkToHostTestLong(long actual, long original)
         {
             byte[] actualbytes = BitConverter.GetBytes(actual);
             byte[] expectedbytes = BitConverter.GetBytes(original);
-            actual = EndianConverter.FromHostToNetwork(actual);
+            actual = EndianConverter.FromNetworkToHost(actual);
             actualbytes = BitConverter.GetBytes(actual);
             if (BitConverter.IsLittleEndian)
             {
@@ -243,5 +243,9 @@ namespace PLCompliant.Utilities.Tests
 
             }
         }
+
+        
+
+        
     }
 }

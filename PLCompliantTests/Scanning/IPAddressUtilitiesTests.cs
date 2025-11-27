@@ -1,3 +1,4 @@
+using PLCompliant.Exceptions;
 using PLCompliant.Scanning;
 using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
@@ -42,5 +43,40 @@ public class IPAddressUtilitiesTests
             Assert.AreEqual(expected, actual);
             increment++;
         }
+    }
+
+
+    [TestMethod]
+    [DataRow("0000:0000:0000:0000:0000:0000:0000:0000", "0000:0000:0000:0000:0000:0000:0000:ffff")]
+    [DataRow("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0000", "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")]
+
+    public void GetIPRangeIPv4TestIllegal(string from, string to)
+    {
+        IPAddress ip1 = IPAddress.Parse(from);
+        IPAddress ip2 = IPAddress.Parse(to);
+        Assert.ThrowsException<InvalidIPVersionException>(() => IPAddressUtilities.GetRangeIPsIPv4(ip1, ip2)); 
+        
+       
+    }
+
+    [TestMethod]
+    [DataRow("0000:0000:0000:0000:0000:0000:0000:0000", "0000:0000:0000:0000:0000:0000:0000:ffff")]
+    [DataRow("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0000", "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")]
+
+    public void GetIPRangeIPv4CountTestIllegal(string from, string to)
+    {
+        IPAddress ip1 = IPAddress.Parse(from);
+        IPAddress ip2 = IPAddress.Parse(to);
+        Assert.ThrowsException<InvalidIPVersionException>(() => IPAddressUtilities.GetRangeCountIPv4(ip1, ip2));
+    }
+
+
+    [TestMethod]
+    [DataRow("0000:0000:0000:0000:0000:0000:0000:ffff")]
+    public void GetIPv4AddrTest(string addr)
+    {
+        IPAddress address = IPAddress.Parse(addr);
+        
+        Assert.ThrowsException<InvalidIPVersionException>(() => address.GetIPv4Addr());
     }
 }

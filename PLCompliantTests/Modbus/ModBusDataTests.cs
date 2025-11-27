@@ -37,6 +37,27 @@ namespace PLCompliant.Modbus.Tests
 
         }
 
+        [TestMethod]
+        [DataRow((byte)0x2B, ushort.MaxValue)]
+        [DataRow((byte)byte.MaxValue, ushort.MaxValue)]
+        [DataRow((byte)byte.MinValue, ushort.MinValue)]
+        [DataRow((byte)0x90, (ushort)25000)]
+
+        public void ModBusDataEquals(byte funcCode, ushort param_1)
+        {
+            ModBusMessage firstmsg = new(new(), new());
+            ModBusMessage secondmsg = new(new(), new());
+            firstmsg.Data._functionCode = funcCode;
+            firstmsg.AddData(param_1);
+            secondmsg.Data._functionCode = funcCode;
+            secondmsg.AddData(param_1);
+            Assert.IsTrue(firstmsg.Data.Equals(secondmsg.Data));
+
+
+
+
+        }
+
 
 
 

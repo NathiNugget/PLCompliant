@@ -6,6 +6,7 @@ using PLCompliant.Utilities;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.Net.Sockets;
 
 namespace PLCompliant
 {
@@ -192,7 +193,11 @@ namespace PLCompliant
             {
                 from = left;
                 to = right;
-                return true;
+                AddressFamily leftfam = from.AddressFamily;
+                AddressFamily rightfam = right.AddressFamily;
+
+                if(AddressFamily.InterNetwork == leftfam && AddressFamily.InterNetwork == rightfam) return true;
+                return false; 
             }
 
 
