@@ -37,11 +37,11 @@ namespace PLCompliant.Modbus.Tests
         [TestMethod()]
         public void ParseReadDeviceInformationResponseTest()
         {
-            ModBusMessage msg = UtilityMethodTests.CreateExampleReadDeviceInformationResponse();
+            ModBusMessage msg = TestHelper.CreateExampleReadDeviceInformationResponse();
             int expectedobjectcount = 3; //We will be inserting 3 objects; 
-            string expected1 = UtilityMethodTests.getDeviceInfoObject1;
-            string expected2 = UtilityMethodTests.getDeviceInfoObject2;
-            string expected3 = UtilityMethodTests.getDeviceInfoObject3;
+            string expected1 = TestHelper.getDeviceInfoObject1;
+            string expected2 = TestHelper.getDeviceInfoObject2;
+            string expected3 = TestHelper.getDeviceInfoObject3;
 
             ReadDeviceInformationData response = ModBusResponseParsing.ParseReadDeviceInformationResponse(msg, System.Net.IPAddress.Parse("192.168.123.100"));
             Assert.AreEqual(response.noOfObjects, expectedobjectcount);

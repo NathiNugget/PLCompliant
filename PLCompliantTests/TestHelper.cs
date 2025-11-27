@@ -5,7 +5,7 @@ using System.Text;
 namespace PLCompliantTests
 {
     [ExcludeFromCodeCoverage]
-    public static class UtilityMethodTests
+    public static class TestHelper
     {
 
         public static string getDeviceInfoObject1 = "Schneider Electric";

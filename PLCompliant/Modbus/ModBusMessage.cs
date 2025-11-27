@@ -1,5 +1,5 @@
 ﻿using PLCompliant.Interface;
-using PLCompliant.Uilities;
+using PLCompliant.Utilities;
 using System.Runtime.InteropServices;
 
 namespace PLCompliant.Modbus

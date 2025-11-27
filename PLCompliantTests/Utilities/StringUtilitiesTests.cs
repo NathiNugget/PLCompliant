@@ -1,6 +1,9 @@
-﻿namespace PLCompliant.Utilities.Tests
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace PLCompliant.Utilities.Tests
 {
     [TestClass()]
+    [ExcludeFromCodeCoverage]
     public class StringUtilitiesTests
     {
         [TestMethod()]

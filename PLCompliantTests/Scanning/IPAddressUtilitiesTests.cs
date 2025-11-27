@@ -1,10 +1,12 @@
 using PLCompliant.Scanning;
-using PLCompliant.Uilities;
+using PLCompliant.Utilities;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace PLCompliantTests;
 
 [TestClass]
+[ExcludeFromCodeCoverage]
 public class IPAddressUtilitiesTests
 {
     [TestMethod]
