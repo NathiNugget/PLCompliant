@@ -13,6 +13,7 @@ namespace PLCompliant.Utilities.Tests
         [DataRow("   .   .   .   ", 12, 8)]
         [DataRow("   .   .   .   ", int.MaxValue, 8)]
         [DataRow("   .   .   .   ", int.MinValue, -1)]
+        [DataRow("   .   .   .   ", 0, -1)]
         public void PreviousIndexOfTest(string stringtosearch, int index, int expected)
         {
             int actual = stringtosearch.PreviousIndexOfAndFixToSeparator('.', index);

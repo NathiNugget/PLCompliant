@@ -17,5 +17,16 @@ namespace PLCompliant.Response.Tests
             string actual = response.ToCSV();
             Assert.AreEqual(expected, actual);
         }
+
+        [TestMethod()]
+        public void ObjectsInResponse()
+        {
+            ModBusMessage msg = TestHelper.CreateExampleReadDeviceInformationResponse();
+            ReadDeviceInformationData response = ModBusResponseParsing.ParseReadDeviceInformationResponse(msg, System.Net.IPAddress.Parse("192.168.123.100"));
+            Dictionary<int, string> objs = response.Objects;
+            Assert.IsNotNull(objs);
+            objs.Add(4, "SomeObjectValueOn4thIndexBecauseProtocolWasNotStandardized"); 
+            Assert.IsNotNull(objs);
+        }   
     }
 }

@@ -1,7 +1,10 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PLCompliant.Exceptions;
 using PLCompliant.Scanning;
 using PLCompliant.Utilities;
+using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Eventing.Reader;
 using System.Net;
 
 namespace PLCompliantTests;
@@ -58,4 +61,102 @@ public class IPAddressRangeTests
 
 
     }
+
+    [TestMethod]
+    [DataRow((long)((long)uint.MaxValue + 1), (long)((long)uint.MaxValue + 1))]
+    [DataRow(long.MaxValue, long.MaxValue)]
+    public void CreateIllegalRange(long start, long end)
+    {
+        Assert.ThrowsException<InvalidIPVersionException>(() => { new IPAddressRange(start, end); });
+    }
+
+    [TestMethod]
+    [DataRow(0, 10)]
+    [DataRow(uint.MaxValue, uint.MaxValue)]
+    public void IEnumeratorTest(long start, long end)
+    {
+        IPAddressRange range = new IPAddressRange(start, end);
+        foreach (var item in range)
+        {
+            Console.WriteLine(item);
+        }
+
+
+        Assert.IsTrue(range != null); 
+
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("swag")]
+    public void EqualsIllegalValues(object? obj)
+    {
+        IPAddressRange range = new(1, 10);
+        Assert.IsFalse(range.Equals(obj)); 
+
+    }
+
+    [TestMethod]
+    [DataRow(1,1)]
+    [DataRow(0, 10)]
+    [DataRow(0, uint.MaxValue)]
+
+
+    public void EqualsIllegalValues(long otherstart, long otherend)
+    {
+        IPAddressRange expected = new(1, 10);
+        IPAddressRange actual = new(otherstart, otherend);
+
+        Assert.IsFalse(expected.Equals(actual));
+
+    }
+
+
+    [TestMethod]
+    [DataRow(uint.MinValue, uint.MaxValue)]
+    [DataRow(1, 10)]
+    public void EqualsOperator(long start, long end)
+    {
+        IPAddressRange left = new(start, end);
+        IPAddressRange right = new(start, end);
+        Assert.IsTrue(left == right); 
+
+    }
+
+    [TestMethod]
+    [DataRow(uint.MinValue, uint.MaxValue)]
+    [DataRow(1, 10)]
+    public void NotEqualsOperator(long start, long end)
+    {
+        IPAddressRange left = new(start, end);
+        IPAddressRange right = new(-1, -1);
+        Assert.IsTrue(left != right);
+
+    }
+
+
+
+    /*
+     * 
+     * 
+     * 
+     * 
+     * IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (IEnumerator)this;
+        }
+
+        public static bool operator ==(IPAddressRange left, IPAddressRange right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(IPAddressRange left, IPAddressRange right)
+        {
+            return !(left == right);
+        }
+     * 
+     * 
+     * 
+     * */
 }
