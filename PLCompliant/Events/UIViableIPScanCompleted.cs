@@ -20,7 +20,7 @@ namespace PLCompliant.Events
         /// <param name="context">Form containing the label in which the label should be updated to orient the user</param>
         public override void ExecuteEvent(Form context)
         {
-            var validatedTypes = EventUtilities.ValidateArgs<Form1, ViableIPsScanCompletedArgs, Form, RaisedEventArgs>(context, Argument);
+            var validatedTypes = EventUtilities.ValidateContextAndArgs<Form1, ViableIPsScanCompletedArgs, Form, RaisedEventArgs>(context, Argument);
             Form1 form = validatedTypes.Item1;
 
             ViableIPsScanCompletedArgs args = validatedTypes.Item2;

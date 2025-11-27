@@ -187,7 +187,7 @@ namespace PLCompliant
 
                     }
                     IPAddressRange addrRange = new IPAddressRange(from!, to!); //Ignore null as they are already not null
-                    UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange)));
+                    UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange, Protocol)));
                     label1.Visible = !label1.Visible;
                     running = !running;
                 }

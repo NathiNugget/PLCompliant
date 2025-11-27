@@ -1,4 +1,7 @@
-﻿using PLCompliant.EventArguments;
+﻿using PLCompliant.CSV;
+using PLCompliant.Enums;
+using PLCompliant.EventArguments;
+using PLCompliant.Interface;
 using PLCompliant.Utilities;
 
 namespace PLCompliant.Events
@@ -12,11 +15,21 @@ namespace PLCompliant.Events
 
         public override void ExecuteEvent(UpdateThreadContext context)
         {
-            var validatedTypes = EventUtilities.ValidateArgs<UpdateThreadContext, GenerateCSVArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
+            var validatedTypes = EventUtilities.ValidateContextAndArgs<UpdateThreadContext, GenerateCSVArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
+            var args = validatedTypes.Item2;
+            ICSVWriter writer = null;
+            switch (args.WithProtocol)
+            {
+                case PLCProtocolType.Modbus:
+                    writer = new ModBusCSVWriter();
+                    break;
+                default:
+                    break;
+            }
+            string csv = writer.GenerateCSVString(args.Responses);
+            string savedAs = writer.GenerateCSVFile(args.Path, csv);
 
-            GenerateCSVArgs? args = Argument as GenerateCSVArgs;
-            string savedAs = context.scanner.GenerateCSV(args.Path, args.Protocol);
-            UIEventQueue.Instance.Push(new SavedFileEvent(new SavedFileArgs(args.Path, savedAs)));
+            UIEventQueue.Instance.Push(new SavedFileEvent(new SavedFileArgs(validatedTypes.Item2.Path, savedAs)));
         }
     }
 }

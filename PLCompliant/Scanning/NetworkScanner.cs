@@ -199,7 +199,7 @@ namespace PLCompliant.Scanning
 
 
                 prefix = DateTime.Now;
-                string filenameprefix = prefix.ToString(GlobalVars.customformat);
+                string filenameprefix = prefix.ToString(GlobalVars.CustomFormat);
                 string filename = $"IP-skan log - {filenameprefix}";
 
                 StringBuilder sb = new StringBuilder(1000);
@@ -317,32 +317,5 @@ namespace PLCompliant.Scanning
             }
         }
 
-        public string GenerateCSV(string path, PLCProtocolType protocol)
-        {
-            StringBuilder sb = new StringBuilder(1000);
-            DateTime currentTime = DateTime.Now;
-            string suffix = currentTime.ToString(GlobalVars.customformat);
-            string filename = string.Empty;
-
-
-            switch (protocol)
-            {
-                case PLCProtocolType.Modbus:
-                    string headers = string.Join(GlobalVars.CSV_SEPARATOR, ResponseData.HeaderNames);
-                    sb.AppendLine(headers);
-                    foreach (ReadDeviceInformationData data in Responses)
-                    {
-                        sb.AppendLine(data.ToCSV());
-                    }
-                    filename = $"ModbusResultat{suffix}.csv";
-                    File.WriteAllText($"{path}\\{filename}", sb.ToString());
-
-                    break;
-                default: break;
-            }
-
-            return filename;
-
-        }
     }
 }
