@@ -1,7 +1,7 @@
 ﻿using System.Buffers.Binary;
 
 
-namespace PLCompliant.Uilities
+namespace PLCompliant.Utilities
 {
     /// <summary>
     /// This class is a helper-class made for possibly converting endianness of values where byte order could be different between host and network

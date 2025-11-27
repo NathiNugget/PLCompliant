@@ -1,5 +1,5 @@
 ﻿using PLCompliant.Exceptions;
-using PLCompliant.Uilities;
+using PLCompliant.Utilities;
 using System.Net;
 
 namespace PLCompliant.Scanning

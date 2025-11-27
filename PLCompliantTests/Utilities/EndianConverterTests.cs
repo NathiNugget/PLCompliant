@@ -1,5 +1,8 @@
-﻿namespace PLCompliant.Uilities.Tests
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace PLCompliant.Utilities.Tests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass()]
     public class EndianConverterTests
     {
