@@ -7,11 +7,13 @@ namespace PLCompliant.EventArguments
     {
         public string Path { get; private set; }
         public IEnumerable<ResponseData> Responses { get; private set; }
+        public PLCProtocolType WithProtocol { get; private set; }
 
-        public GenerateCSVArgs(string path, IEnumerable<ResponseData> responses)
+        public GenerateCSVArgs(string path, IEnumerable<ResponseData> responses, PLCProtocolType withProtocol)
         {
             Path = path;
             Responses = responses;
+            WithProtocol = withProtocol;
         }
     }
 }

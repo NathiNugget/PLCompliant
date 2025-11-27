@@ -4,6 +4,7 @@ using PLCompliant.Response;
 using PLCompliant.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,8 @@ namespace PLCompliant.CSV
     /// </summary>
     public class ModBusCSVWriter : ICSVWriter
     {
-        private readonly static string[] HeaderNames =
+        private const int EXPECTED_CHARS_PER_LINE = 80;
+        public readonly static string[] HeaderNames =
         {
             "IP-Address",
             "VendorName" ,
@@ -23,24 +25,30 @@ namespace PLCompliant.CSV
             "FirmwareVersion"
         };
         /// <inheritdoc/>
-        public string GenerateCSVFile(string path, IEnumerable<ResponseData> responses)
+        public string GenerateCSVFile(string dirPath, string CSVText)
         {
-            StringBuilder sb = new StringBuilder(1000);
+
             DateTime currentTime = DateTime.Now;
             string suffix = currentTime.ToString(GlobalVars.CustomFormat);
             string filename = string.Empty;
+            filename = $"ModbusResultat{suffix}.csv";
+            File.WriteAllText($"{dirPath}\\{filename}", CSVText);
+
+            return filename;
+        }
+        /// <inheritdoc/>
+        public string GenerateCSVString(IEnumerable<ResponseData> responses)
+        {
+            StringBuilder sb = new StringBuilder(EXPECTED_CHARS_PER_LINE * (responses.Count() + 1));
+            DateTime currentTime = DateTime.Now;
 
             string headers = string.Join(GlobalVars.CSV_SEPARATOR, HeaderNames);
             sb.AppendLine(headers);
-            foreach (ReadDeviceInformationData data in responses)
+            foreach (var data in responses)
             {
                 sb.AppendLine(data.ToCSV());
             }
-            filename = $"ModbusResultat{suffix}.csv";
-            File.WriteAllText($"{path}\\{filename}", sb.ToString());
-
-            return filename;
-
+            return sb.ToString();
         }
     }
 }

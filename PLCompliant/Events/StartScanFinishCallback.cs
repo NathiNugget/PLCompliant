@@ -12,8 +12,10 @@ namespace PLCompliant.Events
 
         public override void ExecuteEvent(Form context)
         {
+            // Push the callback event back to the backend event queue
             var validatedVals = EventUtilities.ValidateContextAndArgs<Form1, StartScanFinishCallbackArgs, Form, RaisedEventArgs>(context, Argument);
-            UpdateEventQueue.Instance.Push(new GenerateCSVEvent(new GenerateCSVArgs(validatedVals.Item1.textBox1.Text, validatedVals.Item2.Responses)));
+            var args = validatedVals.Item2;
+            UpdateEventQueue.Instance.Push(new GenerateCSVEvent(new GenerateCSVArgs(validatedVals.Item1.textBox1.Text, args.Responses, args.ScannedWith)));
 
         }
     }

@@ -16,9 +16,18 @@ namespace PLCompliant.Events
         public override void ExecuteEvent(UpdateThreadContext context)
         {
             var validatedTypes = EventUtilities.ValidateContextAndArgs<UpdateThreadContext, GenerateCSVArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
-
-            ICSVWriter writer = new ModBusCSVWriter();
-            string savedAs = writer.GenerateCSVFile(validatedTypes.Item2.Path, validatedTypes.Item2.Responses);
+            var args = validatedTypes.Item2;
+            ICSVWriter writer = null;
+            switch (args.WithProtocol)
+            {
+                case PLCProtocolType.Modbus:
+                    writer = new ModBusCSVWriter();
+                    break;
+                default:
+                    break;
+            }
+            string csv = writer.GenerateCSVString(args.Responses);
+            string savedAs = writer.GenerateCSVFile(args.Path, csv);
 
             UIEventQueue.Instance.Push(new SavedFileEvent(new SavedFileArgs(validatedTypes.Item2.Path, savedAs)));
         }
