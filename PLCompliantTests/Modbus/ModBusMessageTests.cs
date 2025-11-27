@@ -1,4 +1,4 @@
-﻿using PLCompliant.Uilities;
+﻿using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
