@@ -4,7 +4,7 @@ namespace PLCompliant.Utilities
 {
     public static class EventUtilities
     {
-        public static Tuple<C, A> ValidateArgs<C, A, CFROM, AFROM>(CFROM context, AFROM argument)
+        public static Tuple<C, A> ValidateContextAndArgs<C, A, CFROM, AFROM>(CFROM context, AFROM argument)
             where CFROM : class
             where C : CFROM
             where A : RaisedEventArgs

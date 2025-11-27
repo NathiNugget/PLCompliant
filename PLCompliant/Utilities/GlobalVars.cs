@@ -7,6 +7,6 @@
     {
         public const char CSV_SEPARATOR = ';';
         public static bool ABORT = false;
-        public static string customformat = "hh.mm_dd-MM_yyyy";
+        public static string CustomFormat = "hh.mm_dd-MM_yyyy";
     }
 }

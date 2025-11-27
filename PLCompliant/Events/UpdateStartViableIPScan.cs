@@ -20,7 +20,7 @@ namespace PLCompliant.Events
         /// <param name="context"></param>
         public override void ExecuteEvent(UpdateThreadContext context)
         {
-            var validatedTypes = EventUtilities.ValidateArgs<UpdateThreadContext, StartViableIPsScanArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
+            var validatedTypes = EventUtilities.ValidateContextAndArgs<UpdateThreadContext, StartViableIPsScanArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
             StartViableIPsScanArgs? args = validatedTypes.Item2;
             context.scanner.SetIPRange(args.AddressRange);
             if (context.scanner.ScanInProgress)
@@ -31,7 +31,7 @@ namespace PLCompliant.Events
             Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
                 context.scanner.FindIPs(Enums.PLCProtocolType.Modbus); //TODO: Update this to use parameters instead
-                UIEventQueue.Instance.Push(new StartScanFinishCallback(null!)); //This is null on purpose, don't touch. 
+                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses))); //This is null on purpose, don't touch. 
             });
             scanThread.Start();
         }
