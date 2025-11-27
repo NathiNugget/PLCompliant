@@ -174,13 +174,39 @@ namespace PLCompliant
             }
             else
             {
-                {
+                bool hasWriteAccess = TryWrite();
 
+                if (hasWriteAccess)
+                {
+                    if (from?.GetIPv4Addr() > to?.GetIPv4Addr()) // Take care of from and to range
+                    {
+                        IPAddress? temp = null;
+                        temp = from;
+                        from = to;
+                        to = temp;
+
+                    }
                     IPAddressRange addrRange = new IPAddressRange(from!, to!); //Ignore null as they are already not null
                     UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange)));
                     label1.Visible = !label1.Visible;
                     running = !running;
                 }
+            }
+        }
+
+        private bool TryWrite()
+        {
+            try
+            {
+                string filename = $"{textBox1.Text}.testlog";
+                File.WriteAllText(filename, "test test");
+                File.Delete(textBox1.Text);
+                return true;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                ShowWarning(textBox1, "Ugyldig skrive rettighed", "Du har valgt en en mappe hvor programmet kan skrive til.\nVælg en venligst en anden");
+                return false;
             }
         }
 
@@ -196,8 +222,8 @@ namespace PLCompliant
                 AddressFamily leftfam = from.AddressFamily;
                 AddressFamily rightfam = right.AddressFamily;
 
-                if(AddressFamily.InterNetwork == leftfam && AddressFamily.InterNetwork == rightfam) return true;
-                return false; 
+                if (AddressFamily.InterNetwork == leftfam && AddressFamily.InterNetwork == rightfam) return true;
+                return false;
             }
 
 
