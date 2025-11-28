@@ -85,6 +85,36 @@ public class IPAddressRangeTests
         Assert.IsTrue(range != null); 
 
     }
+    [TestMethod]
+    [DataRow(1, 1)]
+    [DataRow(uint.MaxValue, uint.MaxValue)]
+    [DataRow(0, 0)]
+    public void IEnumeratorSameStartEnd(long start, long end)
+    {
+        IPAddressRange range = new IPAddressRange(start, end);
+        int count = 0;
+        foreach (var item in range)
+        {
+            count++;
+        }
+        Assert.AreEqual(1, count) ;
+
+    }
+    [TestMethod]
+    [DataRow(1, 2)]
+    [DataRow(uint.MaxValue - 1, uint.MaxValue)]
+    [DataRow(0, 1)]
+    public void IEnumeratorSameStartEndPlus1(long start, long end)
+    {
+        IPAddressRange range = new IPAddressRange(start, end);
+        int count = 0;
+        foreach (var item in range)
+        {
+            count++;
+        }
+        Assert.AreEqual(2, count);
+
+    }
 
     [TestMethod]
     [DataRow(null)]

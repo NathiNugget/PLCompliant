@@ -9,6 +9,7 @@ namespace PLCompliant.Modbus
     /// </summary>
     public class ModBusMessage : IProtocolMessage
     {
+        public static ushort MODBUS_TCP_PORT = 502;
         #region instance fields
 
 

@@ -222,7 +222,7 @@ namespace PLCompliant.Scanning
             try
             {
 
-                using (TcpClient client = new TcpClient(ip.ToString(), 502))
+                using (TcpClient client = new TcpClient(ip.ToString(), ModBusMessage.MODBUS_TCP_PORT))
                 using (NetworkStream clientStream = client.GetStream())
                 {
                     clientStream.ReadTimeout = SOCKETTIMEOUT; // Written as milliseconds
