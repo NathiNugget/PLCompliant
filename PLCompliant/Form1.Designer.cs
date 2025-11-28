@@ -77,7 +77,7 @@
             button2.TabIndex = 3;
             button2.Text = "Browse";
             button2.UseVisualStyleBackColor = true;
-            button2.Click += ChooseSafeFilePath;
+            button2.Click += ChooseSaveFilePath;
             // 
             // textBox1
             // 

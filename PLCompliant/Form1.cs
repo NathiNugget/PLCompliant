@@ -205,7 +205,7 @@ namespace PLCompliant
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowWarning(textBox1, "Ugyldig skrive rettighed", "Du har valgt en en mappe hvor programmet kan skrive til.\nVælg en venligst en anden");
+                ShowWarning(textBox1, "Ugyldig skrive rettighed", "Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe");
                 return false;
             }
         }
@@ -238,20 +238,16 @@ namespace PLCompliant
 
 
 
-        private void ChooseSafeFilePath(object sender, EventArgs e)
+        private void ChooseSaveFilePath(object sender, EventArgs e)
         {
             FolderBrowserDialog openFolderDialog1 = new FolderBrowserDialog();
             DialogResult result = openFolderDialog1.ShowDialog();
             if (result == DialogResult.OK)
             {
                 string folderpath = openFolderDialog1.SelectedPath;
-
-
                 textBox1.Text = folderpath;
-
+                TryWrite(); //This method checks for Write-permissions in the chosen directory
             }
-
-
         }
 
 
