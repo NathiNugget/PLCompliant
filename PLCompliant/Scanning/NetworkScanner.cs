@@ -18,7 +18,7 @@ namespace PLCompliant.Scanning
     public class NetworkScanner
     {
         const int PINGTIMEOUT = 500;
-        const int SOCKETTIMEOUT = 60000;
+        const int SOCKETTIMEOUT = 3000;
         bool _abortIPScan = false;
         bool _abortPLCScan = false;
 
@@ -143,28 +143,18 @@ namespace PLCompliant.Scanning
                                             switch (protocol)
                                             {
                                                 case PLCProtocolType.Modbus:
+                                                    ReadDeviceInformationData? response = StartModbusIdentification(ip);
+                                                    if (response != null)
                                                     {
+                                                        response.IPAddr = ip;
+                                                        _responses.Add(response);
 
-                                                        ReadDeviceInformationData? response = StartModbusIdentification(ip);
-                                                        if (response != null)
-                                                        {
-                                                            response.IPAddr = ip;
-                                                            _responses.Add(response);
-
-                                                        }
-                                                        break;
                                                     }
+                                                    break;                                            
                                                 default:
-                                                    {
-                                                        break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
-                                                    }
+                                                    break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
+                                                    
                                             }
-
-
-
-
-
-
                                         }
                                     }
                                 }
@@ -239,7 +229,6 @@ namespace PLCompliant.Scanning
                     if (client.Connected)
                     {
                         _responsivePLCs.Add(ip);
-                        int identifier = 0;
                         ModBusMessageFactory factory = new ModBusMessageFactory();
                         ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
                         byte[] buffer = msg.Serialize();
@@ -278,8 +267,6 @@ namespace PLCompliant.Scanning
                                     break;
                                 }
                             }
-
-
                         }
                         bool noError = ModBusResponseParsing.TryHandleReponseError(response, out byte errCode);
                         if (!noError)
