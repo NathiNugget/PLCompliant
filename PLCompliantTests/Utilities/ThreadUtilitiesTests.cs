@@ -1,11 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PLCompliant.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace PLCompliant.Utilities.Tests
 {
@@ -20,13 +13,13 @@ namespace PLCompliant.Utilities.Tests
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    double _ = Math.Pow(i, i); 
+                    double _ = Math.Pow(i, i);
                 }
             });
             Assert.IsTrue(t.IsBackground);
             t.Start();
-            t.Join(); 
-           
+            t.Join();
+
         }
     }
 }

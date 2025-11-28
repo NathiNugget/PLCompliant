@@ -54,9 +54,9 @@ public class IPAddressUtilitiesTests
     {
         IPAddress ip1 = IPAddress.Parse(from);
         IPAddress ip2 = IPAddress.Parse(to);
-        Assert.ThrowsException<InvalidIPVersionException>(() => IPAddressUtilities.GetRangeIPsIPv4(ip1, ip2)); 
-        
-       
+        Assert.ThrowsException<InvalidIPVersionException>(() => IPAddressUtilities.GetRangeIPsIPv4(ip1, ip2));
+
+
     }
 
     [TestMethod]
@@ -76,7 +76,7 @@ public class IPAddressUtilitiesTests
     public void GetIPv4AddrTest(string addr)
     {
         IPAddress address = IPAddress.Parse(addr);
-        
+
         Assert.ThrowsException<InvalidIPVersionException>(() => address.GetIPv4Addr());
     }
 }

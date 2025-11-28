@@ -1,13 +1,7 @@
-﻿using PLCompliant.Enums;
-using PLCompliant.Interface;
+﻿using PLCompliant.Interface;
 using PLCompliant.Response;
 using PLCompliant.Utilities;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.CSV
 {

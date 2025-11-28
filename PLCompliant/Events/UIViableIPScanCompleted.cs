@@ -20,18 +20,18 @@ namespace PLCompliant.Events
         /// <param name="context">Form containing the label in which the label should be updated to orient the user</param>
         public override void ExecuteEvent(Form context)
         {
-            var validatedTypes = EventUtilities.ValidateContextAndArgs<Form1, ViableIPsScanCompletedArgs, Form, RaisedEventArgs>(context, Argument);
-            Form1 form = validatedTypes.Item1;
+            var validatedTypes = EventUtilities.ValidateContextAndArgs<PLCompliantUI, ViableIPsScanCompletedArgs, Form, RaisedEventArgs>(context, Argument);
+            PLCompliantUI form = validatedTypes.Item1;
 
             ViableIPsScanCompletedArgs args = validatedTypes.Item2;
             int ipsleft = args.To - args.Current;
             if (ipsleft != 0)
             {
-                form.label1.Text = $"Scanner {ipsleft} IP-addresser";
+                form.CurrentStateLabel.Text = $"Scanner {ipsleft} IP-addresser";
             }
             else
             {
-                form.label1.Text = $"Scanning er færdig";
+                form.CurrentStateLabel.Text = $"Scanning er færdig";
             }
 
 

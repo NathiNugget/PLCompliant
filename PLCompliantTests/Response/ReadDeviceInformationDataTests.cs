@@ -25,8 +25,8 @@ namespace PLCompliant.Response.Tests
             ReadDeviceInformationData response = ModBusResponseParsing.ParseReadDeviceInformationResponse(msg, System.Net.IPAddress.Parse("192.168.123.100"));
             Dictionary<int, string> objs = response.Objects;
             Assert.IsNotNull(objs);
-            objs.Add(4, "SomeObjectValueOn4thIndexBecauseProtocolWasNotStandardized"); 
+            objs.Add(4, "SomeObjectValueOn4thIndexBecauseProtocolWasNotStandardized");
             Assert.IsNotNull(objs);
-        }   
+        }
     }
 }

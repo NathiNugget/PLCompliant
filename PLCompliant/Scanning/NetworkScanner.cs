@@ -150,10 +150,10 @@ namespace PLCompliant.Scanning
                                                         _responses.Add(response);
 
                                                     }
-                                                    break;                                            
+                                                    break;
                                                 default:
                                                     break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
-                                                    
+
                                             }
                                         }
                                     }
@@ -198,13 +198,14 @@ namespace PLCompliant.Scanning
                     sb.AppendLine(ip.ToString());
                 }
                 string output = sb.ToString();
-
+                string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                string combined = $"{path}\\{filename}.log";
                 //TODO: Remove before release/hand in
-                if (!File.Exists($"./{filename}.log"))
+                if (!File.Exists(combined))
                 {
-                    File.WriteAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
+                    File.WriteAllText(combined, $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
                 }
-                else File.AppendAllText("./" + filename + ".log", $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
+                else File.AppendAllText(combined, $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
 
             }
             finally

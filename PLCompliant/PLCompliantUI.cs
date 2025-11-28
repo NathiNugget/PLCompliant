@@ -11,7 +11,7 @@ using System.Net.Sockets;
 namespace PLCompliant
 {
     [ExcludeFromCodeCoverage]
-    public partial class Form1 : Form
+    public partial class PLCompliantUI : Form
     {
         //TODO: DELETE running field; 
         /// <summary>
@@ -21,22 +21,18 @@ namespace PLCompliant
         System.Windows.Forms.Timer _timer;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public PLCProtocolType Protocol { get; private set; } = PLCProtocolType.Modbus;
-        public Form1()
+        public PLCompliantUI()
         {
 
             running = false;
             InitializeComponent();
-            maskedTextBox1.LostFocus += new EventHandler(IPAddressValidationHandling!);
-            maskedTextBox1.MouseClick += new MouseEventHandler(MaskedTextBoxOnClick);
-            maskedTextBox1.KeyDown += new KeyEventHandler(ControlField);
+            FromTextBox.LostFocus += new EventHandler(IPAddressValidationHandling!);
+            FromTextBox.MouseClick += new MouseEventHandler(MaskedTextBoxOnClick);
+            FromTextBox.KeyDown += new KeyEventHandler(ControlField);
 
-            maskedTextBox2.LostFocus += new EventHandler(IPAddressValidationHandling!);
-            maskedTextBox2.MouseClick += new MouseEventHandler(MaskedTextBoxOnClick);
-            maskedTextBox2.KeyDown += new KeyEventHandler(ControlField);
-
-
-
-
+            ToTextBox.LostFocus += new EventHandler(IPAddressValidationHandling!);
+            ToTextBox.MouseClick += new MouseEventHandler(MaskedTextBoxOnClick);
+            ToTextBox.KeyDown += new KeyEventHandler(ControlField);
 
             _timer = new System.Windows.Forms.Timer();
             _timer.Tick += new EventHandler(UIOnTick!);
@@ -44,10 +40,8 @@ namespace PLCompliant
             _timer.Start();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void PLCompliantUI_Load(object sender, EventArgs e)
         {
-
-
 
         }
 
@@ -121,14 +115,9 @@ namespace PLCompliant
             //Console.WriteLine(box.Location.X);
             //Console.WriteLine(e);
             // TODO: Make logic about where they click maybe
-
             int index = box.Text.IndexOf("   ");
 
             if (index == -1) box.Select(box.Text.LastIndexOf(".") + 1, 0); else box.Select(index, 0);
-
-
-
-
         }
 
         private void IPAddressValidationHandling(object sender, EventArgs e)
@@ -136,47 +125,35 @@ namespace PLCompliant
             MaskedTextBox maskedTextBox = (MaskedTextBox)sender!;
             string input = maskedTextBox.Text.Replace(" ", "");
 
-
-
-
             if (!IPAddress.TryParse(input, out IPAddress? _))
             {
                 ShowWarning(maskedTextBox);
-
-
             }
-
-
-
         }
 
         private void ShowWarning(IWin32Window sender, string title = "Ugyldig IP-addresse", string msg = "Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være tal før og efter hvert punktum")
         {
-
-
-
-
-            toolTip1.ToolTipTitle = title;
-            toolTip1.Show(msg, sender, 0, -40, 5000);
+            Tooltip.ToolTipTitle = title;
+            Tooltip.Show(msg, sender, 0, -40, 5000);
         }
 
         private void StartStopButtonClick(object sender, EventArgs e)
         {
             // If IP addresses cannot be validated
-            if (!ValidateRange(maskedTextBox1, maskedTextBox2, out IPAddress? from, out IPAddress? to))
+            if (!ValidateRange(FromTextBox, ToTextBox, out IPAddress? from, out IPAddress? to))
             {
-                ShowWarning(button1, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
+                ShowWarning(StartStopButton, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
 
             }
-            else if (!Directory.Exists(textBox1.Text))
+            else if (!Directory.Exists(SavePath.Text))
             {
-                ShowWarning(textBox1, "Ugyldig sti", "Du skal vælge en gyldig mappe hvor resultatet kan gemmes");
+                ShowWarning(SavePath, "Ugyldig sti", "Du skal vælge en gyldig mappe hvor resultatet kan gemmes");
             }
             else
             {
                 bool hasWriteAccess = TryWrite();
 
-                if  (hasWriteAccess)
+                if (hasWriteAccess)
                 {
                     if (from?.GetIPv4Addr() > to?.GetIPv4Addr()) // Take care of from and to range
                     {
@@ -188,7 +165,7 @@ namespace PLCompliant
                     }
                     IPAddressRange addrRange = new IPAddressRange(from!, to!); //Ignore null as they are already not null
                     UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange, Protocol)));
-                    label1.Visible = !label1.Visible;
+                    CurrentStateLabel.Visible = !CurrentStateLabel.Visible;
                     running = !running;
                 }
             }
@@ -198,23 +175,23 @@ namespace PLCompliant
         {
             try
             {
-                string filename = $"{textBox1.Text}.testlog";
+                string filename = $"{SavePath.Text}.testlog";
                 File.WriteAllText(filename, "test test");
                 File.Delete(filename);
                 return true;
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowWarning(textBox1, "Ugyldig skrive rettighed", "Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe");
+                ShowWarning(SavePath, "Ugyldig skrive rettighed", "Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe");
                 return false;
             }
         }
 
-        private bool ValidateRange(MaskedTextBox maskedTextBox1, MaskedTextBox maskedTextBox2, out IPAddress? from, out IPAddress? to)
+        private bool ValidateRange(MaskedTextBox fromtextbox, MaskedTextBox totextbox, out IPAddress? from, out IPAddress? to)
         {
 
-            string addr1 = maskedTextBox1.Text.Replace(" ", "");
-            string addr2 = maskedTextBox2.Text.Replace(" ", "");
+            string addr1 = fromtextbox.Text.Replace(" ", "");
+            string addr2 = totextbox.Text.Replace(" ", "");
             if (IPAddress.TryParse(addr1, out IPAddress? left) && IPAddress.TryParse(addr2, out IPAddress? right))
             {
                 from = left;
@@ -234,78 +211,23 @@ namespace PLCompliant
             return false;
         }
 
-
-
-
-
         private void ChooseSaveFilePath(object sender, EventArgs e)
         {
-            FolderBrowserDialog openFolderDialog1 = new FolderBrowserDialog();
-            DialogResult result = openFolderDialog1.ShowDialog();
+            FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+            DialogResult result = folderDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                string folderpath = openFolderDialog1.SelectedPath;
-                textBox1.Text = folderpath;
+                string folderpath = folderDialog.SelectedPath;
+                SavePath.Text = folderpath;
                 TryWrite(); //This method checks for Write-permissions in the chosen directory
             }
         }
 
-
-
-        private void textBox1_TextChanged_1(object sender, EventArgs e)
-        {
-
-        }
-
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox2_TextChanged_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void maskedTextBox1_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
-        {
-
-
-        }
-
-
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void maskedTextBox2_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
-        {
-
-        }
-
-        private void toolTip1_Popup(object sender, PopupEventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        private void ModbusButtonCheck(object sender, EventArgs e)
         {
             CheckIfButtonIsPressed(sender, e);
         }
-        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        private void Step7ButtonCheck(object sender, EventArgs e)
         {
             CheckIfButtonIsPressed(sender, e);
         }
@@ -322,15 +244,9 @@ namespace PLCompliant
 
         }
 
-        private void bindingSource1_CurrentChanged(object sender, EventArgs e)
-        {
-
-        }
 
 
-        private void label5_Click(object sender, EventArgs e)
-        {
 
-        }
+
     }
 }
