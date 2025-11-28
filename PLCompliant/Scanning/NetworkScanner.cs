@@ -18,7 +18,7 @@ namespace PLCompliant.Scanning
     public class NetworkScanner
     {
         const int PINGTIMEOUT = 500;
-        const int SOCKETTIMEOUT = 60000;
+        const int SOCKETTIMEOUT = 3000;
         bool _abortIPScan = false;
         bool _abortPLCScan = false;
 
