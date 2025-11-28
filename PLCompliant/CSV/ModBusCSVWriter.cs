@@ -40,7 +40,6 @@ namespace PLCompliant.CSV
         public string GenerateCSVString(IEnumerable<ResponseData> responses)
         {
             StringBuilder sb = new StringBuilder(EXPECTED_CHARS_PER_LINE * (responses.Count() + 1));
-            DateTime currentTime = DateTime.Now;
 
             string headers = string.Join(GlobalVars.CSV_SEPARATOR, HeaderNames);
             sb.AppendLine(headers);
