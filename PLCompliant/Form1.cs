@@ -150,14 +150,14 @@ namespace PLCompliant
 
         }
 
-        private void ShowWarning(object sender, string title = "Ugyldig IP-addresse", string msg = "Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være tal før og efter hvert punktum")
+        private void ShowWarning(IWin32Window sender, string title = "Ugyldig IP-addresse", string msg = "Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være tal før og efter hvert punktum")
         {
 
 
 
 
             toolTip1.ToolTipTitle = title;
-            toolTip1.Show(msg, (IWin32Window)sender, 0, -40, 5000);
+            toolTip1.Show(msg, sender, 0, -40, 5000);
         }
 
         private void StartStopButtonClick(object sender, EventArgs e)
@@ -176,7 +176,7 @@ namespace PLCompliant
             {
                 bool hasWriteAccess = TryWrite();
 
-                if (hasWriteAccess)
+                if  (hasWriteAccess)
                 {
                     if (from?.GetIPv4Addr() > to?.GetIPv4Addr()) // Take care of from and to range
                     {
@@ -200,7 +200,7 @@ namespace PLCompliant
             {
                 string filename = $"{textBox1.Text}.testlog";
                 File.WriteAllText(filename, "test test");
-                File.Delete(textBox1.Text);
+                File.Delete(filename);
                 return true;
             }
             catch (UnauthorizedAccessException ex)

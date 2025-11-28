@@ -196,7 +196,7 @@
             Controls.Add(button1);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
-            Text = "Form1";
+            Text = "PLCompliant";
             Load += Form1_Load;
             ResumeLayout(false);
             PerformLayout();
