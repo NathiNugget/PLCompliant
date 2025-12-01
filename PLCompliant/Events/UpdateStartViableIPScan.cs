@@ -1,6 +1,9 @@
 ﻿
+using PLCompliant.Enums;
 using PLCompliant.EventArguments;
+using PLCompliant.Logging;
 using PLCompliant.Utilities;
+using System.Diagnostics;
 
 namespace PLCompliant.Events
 {
@@ -30,8 +33,13 @@ namespace PLCompliant.Events
 
             Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
-                context.scanner.FindIPs(args.Protocol); //TODO: Update this to use parameters instead
-                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol))); //This is null on purpose, don't touch. 
+                Logger.Instance.LogMessage($"PLC scan startet på protokol {EnumToString.ProtocolType(args.Protocol)}", TraceEventType.Information);
+                var scanResult = context.scanner.FindIPs(args.Protocol); //TODO: Update this to use parameters instead
+                if(scanResult == ScanResult.Finished || scanResult == ScanResult.Aborted)
+                {
+                    UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol)));
+                } 
+                
             });
             scanThread.Start();
         }

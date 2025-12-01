@@ -1,9 +1,11 @@
 ﻿using PLCompliant.Enums;
 using PLCompliant.Interface;
+using PLCompliant.Logging;
 using PLCompliant.Response;
 using PLCompliant.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,6 +35,8 @@ namespace PLCompliant.CSV
             string filename = string.Empty;
             filename = $"ModbusResultat{suffix}.csv";
             File.WriteAllText($"{dirPath}\\{filename}", CSVText);
+
+            Logger.Instance.LogMessage($"Skrev CSV fil {filename} til sti {dirPath}", TraceEventType.Information);
 
             return filename;
         }
