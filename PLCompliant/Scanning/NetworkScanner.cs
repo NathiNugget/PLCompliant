@@ -22,7 +22,6 @@ namespace PLCompliant.Scanning
         const int PINGTIMEOUT = 500;
         const int SOCKETTIMEOUT = 3000;
         bool _abortScan = false;
-        bool _abortPLCScan = false;
 
         object scanMutex = new object();
         bool _scanInProgress = false;
@@ -55,11 +54,10 @@ namespace PLCompliant.Scanning
         /// <summary>
         /// Check if the IP scan is aborting
         /// </summary>
-        public bool AbortingIPScan { get { return _abortScan; } }
+        public bool AbortingScan { get { return _abortScan; } }
         /// <summary>
         /// Check if the PLC scan is aborting
         /// </summary>
-        public bool AbortingPLCScan { get { return _abortPLCScan; } }
         /// <summary>
         /// Contains the responses from a scan
         /// </summary>
