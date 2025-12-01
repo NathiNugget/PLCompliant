@@ -60,7 +60,7 @@
             // CurrentStateLabel
             // 
             CurrentStateLabel.AutoSize = true;
-            CurrentStateLabel.Location = new Point(948, 515);
+            CurrentStateLabel.Location = new Point(920, 515);
             CurrentStateLabel.MaximumSize = new Size(300, 400);
             CurrentStateLabel.Name = "CurrentStateLabel";
             CurrentStateLabel.Size = new Size(92, 15);
@@ -70,7 +70,7 @@
             // 
             // BrowseButton
             // 
-            BrowseButton.Location = new Point(615, 383);
+            BrowseButton.Location = new Point(615, 421);
             BrowseButton.Margin = new Padding(3, 3, 3, 0);
             BrowseButton.Name = "BrowseButton";
             BrowseButton.Size = new Size(75, 23);
@@ -82,7 +82,7 @@
             // SavePath
             // 
             SavePath.Font = new Font("Segoe UI", 9F);
-            SavePath.Location = new Point(84, 384);
+            SavePath.Location = new Point(84, 421);
             SavePath.Name = "SavePath";
             SavePath.Size = new Size(525, 23);
             SavePath.TabIndex = 2;
@@ -90,7 +90,7 @@
             // SaveFileInstruction
             // 
             SaveFileInstruction.AutoSize = true;
-            SaveFileInstruction.Location = new Point(84, 366);
+            SaveFileInstruction.Location = new Point(84, 403);
             SaveFileInstruction.Name = "SaveFileInstruction";
             SaveFileInstruction.Size = new Size(156, 15);
             SaveFileInstruction.TabIndex = 4;
@@ -102,10 +102,10 @@
             ModbusButton.Checked = true;
             ModbusButton.Location = new Point(146, 153);
             ModbusButton.Name = "ModbusButton";
-            ModbusButton.Size = new Size(129, 19);
+            ModbusButton.Size = new Size(139, 19);
             ModbusButton.TabIndex = 0;
             ModbusButton.TabStop = true;
-            ModbusButton.Text = "Modbus TCP/IP 502";
+            ModbusButton.Text = "Modbus TCP Port 502";
             ModbusButton.UseVisualStyleBackColor = true;
             ModbusButton.CheckedChanged += ModbusButtonCheck;
             // 
@@ -114,16 +114,16 @@
             Step7Button.AutoSize = true;
             Step7Button.Location = new Point(146, 240);
             Step7Button.Name = "Step7Button";
-            Step7Button.Size = new Size(101, 19);
+            Step7Button.Size = new Size(147, 19);
             Step7Button.TabIndex = 1;
-            Step7Button.Text = "Siemens Step7";
+            Step7Button.Text = "Siemens Step7 Port 102";
             Step7Button.UseVisualStyleBackColor = true;
             Step7Button.CheckedChanged += Step7ButtonCheck;
             // 
             // IPInstructionLabel
             // 
             IPInstructionLabel.AutoSize = true;
-            IPInstructionLabel.Location = new Point(928, 209);
+            IPInstructionLabel.Location = new Point(920, 110);
             IPInstructionLabel.Name = "IPInstructionLabel";
             IPInstructionLabel.Size = new Size(122, 15);
             IPInstructionLabel.TabIndex = 7;
@@ -132,17 +132,21 @@
             // FromTextBox
             // 
             FromTextBox.Culture = new System.Globalization.CultureInfo("en-US");
-            FromTextBox.Location = new Point(928, 252);
+            FromTextBox.Location = new Point(920, 152);
             FromTextBox.Mask = "099.099.099.099";
             FromTextBox.Name = "FromTextBox";
             FromTextBox.PromptChar = ' ';
             FromTextBox.Size = new Size(100, 23);
             FromTextBox.TabIndex = 5;
             // 
+            // Tooltip
+            // 
+            Tooltip.OwnerDraw = true;
+            // 
             // ToTextBox
             // 
             ToTextBox.Culture = new System.Globalization.CultureInfo("en-US");
-            ToTextBox.Location = new Point(928, 336);
+            ToTextBox.Location = new Point(920, 239);
             ToTextBox.Mask = "099.099.099.099";
             ToTextBox.Name = "ToTextBox";
             ToTextBox.PromptChar = ' ';
@@ -152,7 +156,7 @@
             // FromLabel
             // 
             FromLabel.AutoSize = true;
-            FromLabel.Location = new Point(928, 234);
+            FromLabel.Location = new Point(920, 134);
             FromLabel.Name = "FromLabel";
             FromLabel.Size = new Size(23, 15);
             FromLabel.TabIndex = 12;
@@ -161,7 +165,7 @@
             // ToLabel
             // 
             ToLabel.AutoSize = true;
-            ToLabel.Location = new Point(928, 318);
+            ToLabel.Location = new Point(920, 221);
             ToLabel.Name = "ToLabel";
             ToLabel.Size = new Size(20, 15);
             ToLabel.TabIndex = 13;
