@@ -31,7 +31,7 @@ namespace PLCompliant.Events
             Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
                 context.scanner.FindIPs(args.Protocol); //TODO: Update this to use parameters instead
-                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol))); //This is null on purpose, don't touch. 
+                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol))); 
             });
             scanThread.Start();
         }

@@ -205,7 +205,6 @@
         #endregion
 
         private Button StartStopButton;
-        private Button BrowseButton;
         private Label SaveFileInstruction;
         private RadioButton ModbusButton;
         private RadioButton Step7Button;
@@ -218,5 +217,6 @@
         public TextBox SavePath;
         private Label ToLabel;
         private Label ProtocolInstruction;
+        public Button BrowseButton;
     }
 }

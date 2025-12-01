@@ -3,7 +3,7 @@
 namespace PLCompliant.Events
 {
     /// <summary>
-    /// Class used to provice a NetworkScanner, which is expected to be a singleton
+    /// Class used to provide a NetworkScanner, which is expected to be a singleton
     /// </summary>
     public class UpdateThreadContext
     {

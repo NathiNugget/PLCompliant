@@ -163,13 +163,45 @@ namespace PLCompliant
                         to = temp;
 
                     }
-                    IPAddressRange addrRange = new IPAddressRange(from!, to!); //Ignore null as they are already not null
+                    IPAddressRange addrRange = new IPAddressRange(from!, to!); 
+                    if (!running && addrRange.Count > 1000)
+                    {
+                        DialogResult shouldContinue = ShowPopup("Du har valgt mere end 1000 addresser\rTryk Ok hvis du vil starte", PopupWindowType.WarningWindow, MessageBoxButtons.OKCancel); 
+                        if (shouldContinue == DialogResult.Cancel)
+                        {
+                            return; 
+                        }
+                    }
+
                     UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange, Protocol)));
                     CurrentStateLabel.Visible = !CurrentStateLabel.Visible;
                     running = !running;
+                    StartStopButton.Text = running ? "Stop" : "Start"; 
+
                 }
             }
         }
+
+        public DialogResult ShowPopup(string msg, PopupWindowType type, MessageBoxButtons buttons){
+            
+
+        switch (type)
+            {
+                case PopupWindowType.ErrorWindow:
+                    
+                    return MessageBox.Show(msg, "Fejl", buttons, MessageBoxIcon.Error);
+                case PopupWindowType.WarningWindow:
+                    
+                    return MessageBox.Show(msg, "Advarsel", buttons, MessageBoxIcon.Warning);
+                case PopupWindowType.InformationWindow:
+                    return MessageBox.Show(msg, "Information", buttons, MessageBoxIcon.Information);
+                   
+                default:
+                    return MessageBox.Show(msg, "Ukendt Popup Type", buttons, MessageBoxIcon.None);
+
+            }
+}
+
 
         private bool TryWrite()
         {
@@ -214,11 +246,13 @@ namespace PLCompliant
         private void ChooseSaveFilePath(object sender, EventArgs e)
         {
             FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+            
             DialogResult result = folderDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
                 string folderpath = folderDialog.SelectedPath;
                 SavePath.Text = folderpath;
+                
                 TryWrite(); //This method checks for Write-permissions in the chosen directory
             }
         }

@@ -1,6 +1,8 @@
-﻿using PLCompliant.Modbus;
+﻿using PLCompliant;
+using PLCompliant.Modbus;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Windows.Forms;
 
 namespace PLCompliantTests
 {
@@ -36,6 +38,12 @@ namespace PLCompliantTests
             msg.AddData(Encoding.UTF8.GetBytes(getDeviceInfoObject3));
 
             return msg;
+        }
+
+        public static PLCompliantUI MockUI()
+        {
+
+                return new PLCompliantUI();      
         }
     }
 }

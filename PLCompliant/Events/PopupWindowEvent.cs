@@ -15,22 +15,7 @@ namespace PLCompliant.Events
             var validatedItems = EventUtilities.ValidateContextAndArgs<PLCompliantUI, PopupWindowArgs, Form, RaisedEventArgs>(context, Argument);
             var args = validatedItems.Item2;
             var form = validatedItems.Item1;
-            switch (args.Type)
-            {
-                case PopupWindowType.ErrorWindow:
-                    MessageBox.Show(args.Message, "Fejl", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    break;
-                case PopupWindowType.WarningWindow:
-                    MessageBox.Show(args.Message, "Advarsel", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    break;
-                case PopupWindowType.InformationWindow:
-                    MessageBox.Show(args.Message, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    break;
-                default:
-                    MessageBox.Show(args.Message, "Ukendt Popup Type", MessageBoxButtons.OK, MessageBoxIcon.None);
-                    break;
-
-            }
+            form.ShowPopup(args.Message, args.Type, MessageBoxButtons.OK);
         }
     }
 }

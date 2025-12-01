@@ -3,7 +3,7 @@
 namespace PLCompliant.Utilities
 {
     /// <summary>
-    /// Variables used throughout the application that did not make sense to include in their respective places
+    /// Variables used throughout the application that did not make sense to include in their respective places as they are used repeatedly throughout different poritions of the application
     /// </summary>
     [ExcludeFromCodeCoverage]
     public static class GlobalVars
