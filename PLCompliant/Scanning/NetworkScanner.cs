@@ -258,10 +258,16 @@ namespace PLCompliant.Scanning
                         }
                         else
                         {
-
-                            ReadDeviceInformationData output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
-                            return output;
-
+                            if(response.Data._functionCode == (byte)ModBusCommandType.read_device_information)
+                            {
+                                ReadDeviceInformationData output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
+                                return output;
+                            }
+                            else
+                            {
+                                Logger.Instance.LogMessage($"\"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, PLC returnerede et ukendt funktionskode: {response.Data._functionCode}", TraceEventType.Error);
+                                return null;
+                            }
                         }
                     }
                     else return null;
