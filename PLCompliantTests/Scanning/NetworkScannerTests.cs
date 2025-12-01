@@ -22,10 +22,11 @@ public class NetworkScannerTests
         NetworkScanner scanner = new NetworkScanner(range);
         scanner.FindIPs(PLCProtocolType.Modbus);
         Assert.IsFalse(scanner.Responses.IsEmpty);
-        foreach(var response in scanner.Responses) {
+        foreach (var response in scanner.Responses)
+        {
             ReadDeviceInformationData castedResponse = (ReadDeviceInformationData)response;
             Assert.IsTrue(castedResponse.Objects.Count == 3);
-            foreach(var obj in castedResponse.Objects)
+            foreach (var obj in castedResponse.Objects)
             {
                 Assert.IsTrue(obj.Value.Length != 0);
             }

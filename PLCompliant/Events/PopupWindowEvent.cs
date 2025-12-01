@@ -12,10 +12,10 @@ namespace PLCompliant.Events
 
         public override void ExecuteEvent(Form context)
         {
-            var validatedItems = EventUtilities.ValidateContextAndArgs<Form1, PopupWindowArgs, Form, RaisedEventArgs>(context, Argument);
+            var validatedItems = EventUtilities.ValidateContextAndArgs<PLCompliantUI, PopupWindowArgs, Form, RaisedEventArgs>(context, Argument);
             var args = validatedItems.Item2;
             var form = validatedItems.Item1;
-            switch(args.Type)
+            switch (args.Type)
             {
                 case PopupWindowType.ErrorWindow:
                     MessageBox.Show(args.Message, "Fejl", MessageBoxButtons.OK, MessageBoxIcon.Error);

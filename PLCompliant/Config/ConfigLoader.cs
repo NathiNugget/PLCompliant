@@ -1,8 +1,6 @@
-﻿using PLCompliant.Interface;
-using PLCompliant.Logging;
+﻿using PLCompliant.Logging;
 using System.Diagnostics;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace PLCompliant.Config
 {
@@ -28,7 +26,7 @@ namespace PLCompliant.Config
         }
         private static void ProcessNode(XmlNode node)
         {
-            
+
             switch (node.Name.ToLower())
             {
                 case "logging_level":
@@ -38,7 +36,7 @@ namespace PLCompliant.Config
                     // Create new stream first to check if the file can be written to or created
                     FileStream stream = new FileStream(node.InnerText, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                     Logger.Instance.RemoveListener(Logger.FILE_LOGGER_NAME);
-                    Logger.Instance.AddListener(new TextWriterTraceListener(stream, Logger.FILE_LOGGER_NAME)); 
+                    Logger.Instance.AddListener(new TextWriterTraceListener(stream, Logger.FILE_LOGGER_NAME));
                     break;
             }
         }
@@ -48,7 +46,7 @@ namespace PLCompliant.Config
             try
             {
                 config.Load(filepath);
-                foreach(var node in config.DocumentElement.ChildNodes)
+                foreach (var node in config.DocumentElement.ChildNodes)
                 {
                     if (node == null)
                     {

@@ -1,5 +1,4 @@
-﻿using PLCompliant.Enums;
-using PLCompliant.Interface;
+﻿using PLCompliant.Interface;
 using PLCompliant.Logging;
 using PLCompliant.Response;
 using PLCompliant.Utilities;
@@ -9,7 +8,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.CSV
 {

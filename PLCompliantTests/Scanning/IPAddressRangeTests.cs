@@ -1,10 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PLCompliant.Exceptions;
 using PLCompliant.Scanning;
 using PLCompliant.Utilities;
-using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Eventing.Reader;
 using System.Net;
 
 namespace PLCompliantTests;
@@ -82,7 +79,7 @@ public class IPAddressRangeTests
         }
 
 
-        Assert.IsTrue(range != null); 
+        Assert.IsTrue(range != null);
 
     }
     [TestMethod]
@@ -97,7 +94,7 @@ public class IPAddressRangeTests
         {
             count++;
         }
-        Assert.AreEqual(1, count) ;
+        Assert.AreEqual(1, count);
 
     }
     [TestMethod]
@@ -122,12 +119,12 @@ public class IPAddressRangeTests
     public void EqualsIllegalValues(object? obj)
     {
         IPAddressRange range = new(1, 10);
-        Assert.IsFalse(range.Equals(obj)); 
+        Assert.IsFalse(range.Equals(obj));
 
     }
 
     [TestMethod]
-    [DataRow(1,1)]
+    [DataRow(1, 1)]
     [DataRow(0, 10)]
     [DataRow(0, uint.MaxValue)]
 
@@ -149,7 +146,7 @@ public class IPAddressRangeTests
     {
         IPAddressRange left = new(start, end);
         IPAddressRange right = new(start, end);
-        Assert.IsTrue(left == right); 
+        Assert.IsTrue(left == right);
 
     }
 

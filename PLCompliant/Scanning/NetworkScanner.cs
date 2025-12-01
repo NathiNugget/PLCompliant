@@ -145,10 +145,10 @@ namespace PLCompliant.Scanning
                                                         _responses.Add(response);
 
                                                     }
-                                                    break;                                            
+                                                    break;
                                                 default:
                                                     break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
-                                                    
+
                                             }
                                         }
                                     }

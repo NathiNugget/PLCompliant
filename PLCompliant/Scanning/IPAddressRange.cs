@@ -54,7 +54,7 @@ namespace PLCompliant.Scanning
                 }
             }
         }
-        
+
         object IEnumerator.Current
         {
             get
