@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestPlatform.TestHost;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Windows;
 using PLCompliant;
@@ -13,9 +14,9 @@ using System.Xml;
 namespace PLCompliantTests
 {
     [TestClass]
-    public class UITESTMOCK
+    public class UiTest
     {
-        static WindowsDriver<WindowsElement> driver;
+        static WindowsDriver<WindowsElement> _driver;
         [TestInitialize]
         public void Setup()
         {
@@ -36,15 +37,15 @@ namespace PLCompliantTests
             opts.AddAdditionalCapability("app", AppPath);
 
             // 5. Initialize the driver
-            driver = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723/"), opts);
+            _driver = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723/"), opts);
         }
 
         [TestMethod]
         public void WindowsHandlesExist()
         {
 
-            Assert.IsTrue(driver.WindowHandles != null);
-            driver.CloseApp();
+            Assert.IsTrue(_driver.WindowHandles != null);
+            _driver.CloseApp();
 
 
 
@@ -53,20 +54,20 @@ namespace PLCompliantTests
         [TestMethod]
         public void SelectPath()
         {
-            var elem = driver.FindElementByAccessibilityId("BrowseButton");
+            var elem = _driver.FindElementByAccessibilityId("BrowseButton");
             elem.Click();
             int i = 0;
-            foreach (var handle in driver.WindowHandles)
+            foreach (var handle in _driver.WindowHandles)
             {
-                var wd = driver.SwitchTo().Window(handle);
-                i = driver.WindowHandles.Count;
+                var wd = _driver.SwitchTo().Window(handle);
+                i = _driver.WindowHandles.Count;
                 WindowsElement desktop_elem = null!;
-                desktop_elem = driver.FindElementByName("Start på Hurtig adgang – Skrivebord (fastgjort)") ?? driver.FindElementByName("Start on Quick Access – Desktop (pinned)");
+                desktop_elem = _driver.FindElementByName("Start på Hurtig adgang – Skrivebord (fastgjort)") ?? _driver.FindElementByName("Start on Quick Access – Desktop (pinned)");
                 desktop_elem.Click();
-                var submit_elem = driver.FindElementsByName("Select Folder");
+                var submit_elem = _driver.FindElementsByName("Select Folder");
                 if (submit_elem.Count < 1)
                 {
-                    submit_elem = driver.FindElementsByName("Vælg mappe");
+                    submit_elem = _driver.FindElementsByName("Vælg mappe");
                 }
 
                 submit_elem[1].Click(); 
@@ -75,21 +76,22 @@ namespace PLCompliantTests
 
             }
 
-            var chosen_path = driver.FindElementByAccessibilityId("SavePath");
+            var chosen_path = _driver.FindElementByAccessibilityId("SavePath");
             Assert.IsTrue(chosen_path.Text.Contains("Desktop") || chosen_path.Text.Contains("Skrivebord")); 
         }
 
         [TestMethod]
-        public void ToolTipTest()
+        public void InsertInvalidIP()
         {
-            WindowsElement 
+            
+
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            driver.Quit();
-            driver = null;
+            _driver.Quit();
+            _driver = null;
 
         }
     }

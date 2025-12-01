@@ -89,6 +89,7 @@ namespace PLCompliant.Scanning
         public void StopScan()
         {
             _abortScan = true;
+
         }
 
         /// <summary>
@@ -106,6 +107,7 @@ namespace PLCompliant.Scanning
                 Monitor.TryEnter(scanMutex, ref _aquiredLock);
                 if (_aquiredLock)
                 {
+                    _abortScan = false;
                     _scanInProgress = true;
                     _responsivePLCs.Clear();
                     List<Thread> threads = new List<Thread>();
@@ -154,7 +156,11 @@ namespace PLCompliant.Scanning
                                 catch (PingException) { }
                                 catch (IOException) { }
                                 Interlocked.Increment(ref ipspinged);
-                                UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
+                                if (!_abortScan) // To prevent erraneous update of state label in UI. 
+                                {
+                                    UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
+
+                                }
                             }));
 
                         }
@@ -164,7 +170,7 @@ namespace PLCompliant.Scanning
                         }
                         threads.ForEach(t => t.Join());
                         threads.Clear();
-                        if(_abortScan)
+                        if (_abortScan)
                         {
                             return ScanResult.Aborted;
                         }
@@ -181,7 +187,7 @@ namespace PLCompliant.Scanning
             {
                 if (_aquiredLock)
                 {
-                    if(_responsivePLCs.IsEmpty)
+                    if (_responsivePLCs.IsEmpty)
                     {
                         UIEventQueue.Instance.Push(new PopupWindowEvent(new PopupWindowArgs($"Ingen PLC Addresser fundet på {EnumToString.ProtocolType(protocol)} protokol!", PopupWindowType.WarningWindow)));
                         Logger.Instance.LogMessage($"Ingen PLC IP-Addresser fundet i scan på protocol: {EnumToString.ProtocolType(protocol)}", TraceEventType.Warning);
@@ -192,7 +198,7 @@ namespace PLCompliant.Scanning
                         {
                             Logger.Instance.LogMessage($"PLC IP-Addresse fundet i scan: {ip.ToString()} til protocol ", TraceEventType.Information);
                         }
-                    }           
+                    }
                     _scanInProgress = false;
                     Monitor.Exit(scanMutex);
                 }
@@ -258,7 +264,7 @@ namespace PLCompliant.Scanning
                         }
                         else
                         {
-                            if(response.Data._functionCode == (byte)ModBusCommandType.read_device_information)
+                            if (response.Data._functionCode == (byte)ModBusCommandType.read_device_information)
                             {
                                 ReadDeviceInformationData output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
                                 return output;

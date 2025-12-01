@@ -10,6 +10,6 @@ namespace PLCompliant.Utilities
     {
         public const char CSV_SEPARATOR = ';';
         public static bool ABORT = false;
-        public static string CustomFormat = "HH.mm_dd-MM-yyyy";
+        public static string CustomFormat = "HH.mm.ss_dd-MM-yyyy";
     }
 }

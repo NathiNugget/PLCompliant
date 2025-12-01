@@ -210,7 +210,6 @@
         private RadioButton Step7Button;
         private Label IPInstructionLabel;
         private MaskedTextBox FromTextBox;
-        private ToolTip Tooltip;
         private MaskedTextBox ToTextBox;
         private Label FromLabel;
         public Label CurrentStateLabel;
@@ -218,5 +217,6 @@
         private Label ToLabel;
         private Label ProtocolInstruction;
         public Button BrowseButton;
+        public ToolTip Tooltip;
     }
 }

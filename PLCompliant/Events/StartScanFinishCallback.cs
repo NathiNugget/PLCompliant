@@ -26,8 +26,10 @@ namespace PLCompliant.Events
             }
             else
             {
+                 
                 UpdateEventQueue.Instance.Push(new GenerateCSVEvent(new GenerateCSVArgs(validatedVals.Item1.SavePath.Text, args.Responses, args.ScannedWith)));
             }
+            validatedVals.Item1.NotifyScanToggle();
 
         }
     }

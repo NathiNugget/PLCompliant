@@ -36,7 +36,7 @@ namespace PLCompliant
 
             _timer = new System.Windows.Forms.Timer();
             _timer.Tick += new EventHandler(UIOnTick!);
-            _timer.Interval = 100; // This interval is is milliseconds. 
+            _timer.Interval = 10; // This interval is is milliseconds. 
             _timer.Start();
         }
 
@@ -163,44 +163,66 @@ namespace PLCompliant
                         to = temp;
 
                     }
-                    IPAddressRange addrRange = new IPAddressRange(from!, to!); 
-                    if (!running && addrRange.Count > 1000)
+                    IPAddressRange addrRange = new IPAddressRange(from!, to!);
+                    if (!running)
                     {
-                        DialogResult shouldContinue = ShowPopup("Du har valgt mere end 1000 addresser\rTryk Ok hvis du vil starte", PopupWindowType.WarningWindow, MessageBoxButtons.OKCancel); 
-                        if (shouldContinue == DialogResult.Cancel)
+                        if (addrRange.Count > 1000)
                         {
-                            return; 
+                            DialogResult shouldContinue = ShowPopup("Du har valgt mere end 1000 addresser\rTryk Ok hvis du vil starte", PopupWindowType.WarningWindow, MessageBoxButtons.OKCancel);
+                            if (shouldContinue == DialogResult.Cancel)
+                            {
+                                return;
+                            }
                         }
+                        UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange, Protocol)));
+                        CurrentStateLabel.Visible = true;
+
+
                     }
 
-                    UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange, Protocol)));
-                    CurrentStateLabel.Visible = !CurrentStateLabel.Visible;
-                    running = !running;
-                    StartStopButton.Text = running ? "Stop" : "Start"; 
+                    else
+                    {
+                        CurrentStateLabel.Text = "Stopper scan...";
+                        UpdateEventQueue.Instance.Push(new StopScanEvent(null!));
+
+                    }
+
+
+
+
+
 
                 }
             }
         }
 
-        public DialogResult ShowPopup(string msg, PopupWindowType type, MessageBoxButtons buttons){
-            
+        public void NotifyScanToggle()
+        {
+            running = !running;
+            StartStopButton.Text = running ? "Stop" : "Start";
 
-        switch (type)
+        }
+
+        public DialogResult ShowPopup(string msg, PopupWindowType type, MessageBoxButtons buttons)
+        {
+
+
+            switch (type)
             {
                 case PopupWindowType.ErrorWindow:
-                    
+
                     return MessageBox.Show(msg, "Fejl", buttons, MessageBoxIcon.Error);
                 case PopupWindowType.WarningWindow:
-                    
+
                     return MessageBox.Show(msg, "Advarsel", buttons, MessageBoxIcon.Warning);
                 case PopupWindowType.InformationWindow:
                     return MessageBox.Show(msg, "Information", buttons, MessageBoxIcon.Information);
-                   
+
                 default:
                     return MessageBox.Show(msg, "Ukendt Popup Type", buttons, MessageBoxIcon.None);
 
             }
-}
+        }
 
 
         private bool TryWrite()
@@ -246,13 +268,13 @@ namespace PLCompliant
         private void ChooseSaveFilePath(object sender, EventArgs e)
         {
             FolderBrowserDialog folderDialog = new FolderBrowserDialog();
-            
+
             DialogResult result = folderDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
                 string folderpath = folderDialog.SelectedPath;
                 SavePath.Text = folderpath;
-                
+
                 TryWrite(); //This method checks for Write-permissions in the chosen directory
             }
         }
