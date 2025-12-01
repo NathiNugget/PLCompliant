@@ -141,7 +141,9 @@
             // 
             // Tooltip
             // 
-            Tooltip.OwnerDraw = true;
+            Tooltip.AutoPopDelay = 5000;
+            Tooltip.InitialDelay = 0;
+            Tooltip.ReshowDelay = 100;
             // 
             // ToTextBox
             // 
