@@ -1,10 +1,12 @@
 ﻿using PLCompliant.Enums;
 using PLCompliant.EventArguments;
 using PLCompliant.Events;
+using PLCompliant.Logging;
 using PLCompliant.Modbus;
 using PLCompliant.Response;
 using PLCompliant.Utilities;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -19,8 +21,7 @@ namespace PLCompliant.Scanning
     {
         const int PINGTIMEOUT = 500;
         const int SOCKETTIMEOUT = 3000;
-        bool _abortIPScan = false;
-        bool _abortPLCScan = false;
+        bool _abortScan = false;
 
         object scanMutex = new object();
         bool _scanInProgress = false;
@@ -53,11 +54,10 @@ namespace PLCompliant.Scanning
         /// <summary>
         /// Check if the IP scan is aborting
         /// </summary>
-        public bool AbortingIPScan { get { return _abortIPScan; } }
+        public bool AbortingScan { get { return _abortScan; } }
         /// <summary>
         /// Check if the PLC scan is aborting
         /// </summary>
-        public bool AbortingPLCScan { get { return _abortPLCScan; } }
         /// <summary>
         /// Contains the responses from a scan
         /// </summary>
@@ -84,19 +84,11 @@ namespace PLCompliant.Scanning
         }
 
         /// <summary>
-        /// Stop the IP scanning
+        /// Stop the scanning
         /// </summary>
-        public void StopIPScan()
+        public void StopScan()
         {
-            _abortIPScan = true;
-        }
-
-        /// <summary>
-        /// Stop the PLC scanning
-        /// </summary>
-        public void StopPLCScan()
-        {
-            _abortPLCScan = true;
+            _abortScan = true;
         }
 
         /// <summary>
@@ -105,7 +97,7 @@ namespace PLCompliant.Scanning
         /// 
 
         //TODO: Find out if it has a value for the end user for how many threads should preferably be used. First time setup/test? 
-        public void FindIPs(PLCProtocolType protocol)
+        public ScanResult FindIPs(PLCProtocolType protocol)
         {
             bool _aquiredLock = false;
             try
@@ -115,20 +107,21 @@ namespace PLCompliant.Scanning
                 if (_aquiredLock)
                 {
                     _scanInProgress = true;
+                    _responsivePLCs.Clear();
                     List<Thread> threads = new List<Thread>();
                     int ipspinged = 1;
 
                     foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
                     {
-                        if (_abortIPScan)
+                        if (_abortScan)
                         {
-                            break;
+                            return ScanResult.Aborted;
                         }
                         foreach (IPAddress ip in chunk)
                         {
                             threads.Add(ThreadUtilities.CreateBackgroundThread(() =>
                             {
-                                if (_abortIPScan)
+                                if (_abortScan)
                                 {
                                     return;
                                 }
@@ -158,11 +151,8 @@ namespace PLCompliant.Scanning
                                         }
                                     }
                                 }
-                                catch
-                                {
-                                    //TODO: Implement logging here, maybe
-                                    Console.WriteLine(ip);
-                                }
+                                catch (PingException) { }
+                                catch (IOException) { }
                                 Interlocked.Increment(ref ipspinged);
                                 UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
                             }));
@@ -174,49 +164,40 @@ namespace PLCompliant.Scanning
                         }
                         threads.ForEach(t => t.Join());
                         threads.Clear();
+                        if(_abortScan)
+                        {
+                            return ScanResult.Aborted;
+                        }
                     }
-                    _abortIPScan = false;
                 }
-
-
-
-
-
-
-                DateTime prefix = new DateTime();
-
-
-
-
-                prefix = DateTime.Now;
-                string filenameprefix = prefix.ToString(GlobalVars.CustomFormat);
-                string filename = $"IP-skan log - {filenameprefix}";
-
-                StringBuilder sb = new StringBuilder(1000);
-                foreach (IPAddress ip in _responsivePLCs)
+                else
                 {
-                    sb.AppendLine(ip.ToString());
+                    Logger.Instance.LogMessage("Et scan prøvede at blive startet imens et scan allerede var i gang", TraceEventType.Warning);
+                    return ScanResult.LockTaken;
                 }
-                string output = sb.ToString();
-                string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                string combined = $"{path}\\{filename}.log";
-                //TODO: Remove before release/hand in
-                if (!File.Exists(combined))
-                {
-                    File.WriteAllText(combined, $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
-                }
-                else File.AppendAllText(combined, $"IP-adresser fundet kl. {prefix.ToString("hh:mm\n")}" + output);
 
             }
             finally
             {
                 if (_aquiredLock)
                 {
+                    if(_responsivePLCs.IsEmpty)
+                    {
+                        UIEventQueue.Instance.Push(new PopupWindowEvent(new PopupWindowArgs($"Ingen PLC Addresser fundet på {EnumToString.ProtocolType(protocol)} protokol!", PopupWindowType.WarningWindow)));
+                        Logger.Instance.LogMessage($"Ingen PLC IP-Addresser fundet i scan på protocol: {EnumToString.ProtocolType(protocol)}", TraceEventType.Warning);
+                    }
+                    else
+                    {
+                        foreach (IPAddress ip in _responsivePLCs)
+                        {
+                            Logger.Instance.LogMessage($"PLC IP-Addresse fundet i scan: {ip.ToString()} til protocol ", TraceEventType.Information);
+                        }
+                    }           
+                    _scanInProgress = false;
                     Monitor.Exit(scanMutex);
                 }
-                _scanInProgress = false;
-
             }
+            return ScanResult.Finished;
         }
         private ReadDeviceInformationData? StartModbusIdentification(IPAddress ip)
         {
@@ -272,24 +253,21 @@ namespace PLCompliant.Scanning
                         bool noError = ModBusResponseParsing.TryHandleReponseError(response, out byte errCode);
                         if (!noError)
                         {
-                            //TODO: Implement actual filewriter/logger 
-                            string path = "./errors.log";
-                            if (!File.Exists(path))
-                            {
-                                File.WriteAllText(path, $"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, fejlkode: {errCode}");
-                            }
-                            else
-                            {
-                                File.AppendAllText(path, $"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, fejlkode: {errCode}");
-                            }
+                            Logger.Instance.LogMessage($"\"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, fejlkode: {errCode}", TraceEventType.Error);
                             return null;
                         }
                         else
                         {
-
-                            ReadDeviceInformationData output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
-                            return output;
-
+                            if(response.Data._functionCode == (byte)ModBusCommandType.read_device_information)
+                            {
+                                ReadDeviceInformationData output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
+                                return output;
+                            }
+                            else
+                            {
+                                Logger.Instance.LogMessage($"\"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, PLC returnerede et ukendt funktionskode: {response.Data._functionCode}", TraceEventType.Error);
+                                return null;
+                            }
                         }
                     }
                     else return null;

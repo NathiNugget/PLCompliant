@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Interface;
+using PLCompliant.Utilities;
 using System.Diagnostics;
 
 namespace PLCompliant.Logging
@@ -11,7 +12,7 @@ namespace PLCompliant.Logging
 
         private Logger()
         {
-            _source = new("PLCompliant", SourceLevels.Information);
+            _source = new("[PLCompliant]", SourceLevels.Information);
             _source.Listeners.Add(new ConsoleTraceListener());
             _source.Listeners.Add(new TextWriterTraceListener("./Log.txt", FILE_LOGGER_NAME));
         }
@@ -40,7 +41,8 @@ namespace PLCompliant.Logging
         }
         public void LogMessage(string message, TraceEventType type)
         {
-            _source.TraceEvent(type, NEXT_LOG_MSG_ID, message);
+            DateTime time = DateTime.Now;
+            _source.TraceEvent(type, NEXT_LOG_MSG_ID, $"[{time.ToString(GlobalVars.CustomFormat)}] {message}");
             _source.Flush();
             Interlocked.Increment(ref NEXT_LOG_MSG_ID);
         }
