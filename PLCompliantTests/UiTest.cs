@@ -5,6 +5,7 @@ using OpenQA.Selenium.Appium.Windows;
 using PLCompliant;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,23 +21,15 @@ namespace PLCompliantTests
         [TestInitialize]
         public void Setup()
         {
-            // Replace with your application path
-            string AppPath = @"C:\Users\natha\source\repos\PLCompliant\PLCompliant\bin\Debug\net9.0-windows\PLCompliant.exe";
+            string userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string AppPath = userPath + "\\source\\repos\\PLCompliant\\PLCompliant\\bin\\Debug\\net9.0-windows\\PLCompliant.exe"; 
 
-            // 1. Instantiate AppiumOptions
             AppiumOptions opts = new();
-
-            // 2. Set standard required capabilities
+       
             opts.PlatformName = "Windows";
-
-
-            // 3. Use the strongly-typed .App property (creates 'appium:app')
-
-            // 4. THE WORKAROUND: Force the non-prefixed 'app' capability.
-            // This is the key line that should resolve the 400 Bad Request error.
+               
             opts.AddAdditionalCapability("app", AppPath);
 
-            // 5. Initialize the driver
             _driver = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723/"), opts);
         }
 
@@ -45,7 +38,6 @@ namespace PLCompliantTests
         {
 
             Assert.IsTrue(_driver.WindowHandles != null);
-            _driver.CloseApp();
 
 
 
@@ -83,14 +75,27 @@ namespace PLCompliantTests
         [TestMethod]
         public void InsertInvalidIP()
         {
+            var from_box = _driver.FindElementByAccessibilityId("FromTextBox");
+            var to_box = _driver.FindElementByAccessibilityId("ToTextBox");
+            from_box.SendKeys("255.255.255.256");
+            from_box.SendKeys("\t");
+            Thread.Sleep(1000);
+            //to_box.Click(); 
             
+
+            //var tooltipbox = _driver.FindElementByName("Ugyldig IP-addresse");
+            //string actual = tooltipbox.Text;    
+            //Assert.IsTrue(actual != null); 
+
 
         }
 
         [TestCleanup]
         public void TearDown()
         {
+
             _driver.Quit();
+            
             _driver = null;
 
         }
