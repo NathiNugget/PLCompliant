@@ -22,7 +22,7 @@ namespace PLCompliantTests
         public void Setup()
         {
             string userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string AppPath = userPath + "\\source\\repos\\PLCompliant\\PLCompliant\\bin\\Debug\\net9.0-windows\\PLCompliant.exe"; 
+            string AppPath = Path.Combine(userPath, "source\\repos\\PLCompliant\\PLCompliant\\bin\\Debug\\net9.0-windows\\PLCompliant.exe"); 
 
             AppiumOptions opts = new();
        
@@ -76,11 +76,11 @@ namespace PLCompliantTests
         public void InsertInvalidIP()
         {
             var from_box = _driver.FindElementByAccessibilityId("FromTextBox");
-            var to_box = _driver.FindElementByAccessibilityId("ToTextBox");
+            var modbus_button = _driver.FindElementByAccessibilityId("ModbusButton");
             from_box.SendKeys("255.255.255.256");
-            from_box.SendKeys("\t");
+            modbus_button.Click(); 
             Thread.Sleep(1000);
-            //to_box.Click(); 
+             
             
 
             //var tooltipbox = _driver.FindElementByName("Ugyldig IP-addresse");
