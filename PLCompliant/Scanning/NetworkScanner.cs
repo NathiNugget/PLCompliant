@@ -63,6 +63,8 @@ namespace PLCompliant.Scanning
         /// </summary>
         public ConcurrentBag<ResponseData> Responses { get { return _responses; } private set { _responses = value; } }
 
+        public ConcurrentBag<IPAddress> ResponsivePLCs { get { return _responsivePLCs; } }
+
         #endregion
 
         /// <summary>
