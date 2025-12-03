@@ -5,6 +5,7 @@ using OpenQA.Selenium.Appium.Windows;
 using PLCompliant;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,8 @@ namespace PLCompliantTests
         [TestInitialize]
         public void Setup()
         {
-            string AppPath = @"C:\Users\natha\source\repos\PLCompliant\PLCompliant\bin\Debug\net9.0-windows\PLCompliant.exe";
+            string userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string AppPath = userPath + "\\source\\repos\\PLCompliant\\PLCompliant\\bin\\Debug\\net9.0-windows\\PLCompliant.exe"; 
 
             AppiumOptions opts = new();
        
@@ -36,7 +38,6 @@ namespace PLCompliantTests
         {
 
             Assert.IsTrue(_driver.WindowHandles != null);
-            _driver.CloseApp();
 
 
 
@@ -77,8 +78,9 @@ namespace PLCompliantTests
             var from_box = _driver.FindElementByAccessibilityId("FromTextBox");
             var to_box = _driver.FindElementByAccessibilityId("ToTextBox");
             from_box.SendKeys("255.255.255.256");
-
-            to_box.Click(); 
+            from_box.SendKeys("\t");
+            Thread.Sleep(1000);
+            //to_box.Click(); 
             
 
             //var tooltipbox = _driver.FindElementByName("Ugyldig IP-addresse");
@@ -91,7 +93,9 @@ namespace PLCompliantTests
         [TestCleanup]
         public void TearDown()
         {
+
             _driver.Quit();
+            
             _driver = null;
 
         }
