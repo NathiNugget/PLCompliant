@@ -196,7 +196,7 @@ namespace PLCompliant.Scanning
                     {
                         foreach (IPAddress ip in _responsivePLCs)
                         {
-                            Logger.Instance.LogMessage($"PLC IP-Addresse fundet i scan: {ip.ToString()} til protocol ", TraceEventType.Information);
+                            Logger.Instance.LogMessage($"PLC IP-Addresse fundet i scan: {ip.ToString()} til protocol: {EnumToString.ProtocolType(protocol)}", TraceEventType.Information);
                         }
                     }
                     _scanInProgress = false;
