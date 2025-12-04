@@ -20,7 +20,6 @@ namespace PLCompliant.Scanning
     public class NetworkScanner
     {
         const int PINGTIMEOUT = 500;
-        const int SOCKETTIMEOUT = 3000;
         bool _abortScan = false;
 
         object scanMutex = new object();
@@ -213,50 +212,23 @@ namespace PLCompliant.Scanning
             {
 
                 using (TcpClient client = new TcpClient(ip.ToString(), ModBusMessage.MODBUS_TCP_PORT))
-                using (NetworkStream clientStream = client.GetStream())
+                using(NetworkStream stream = client.GetStream())
                 {
-                    clientStream.ReadTimeout = SOCKETTIMEOUT; // Written as milliseconds
                     if (client.Connected)
                     {
                         _responsivePLCs.Add(ip);
                         ModBusMessageFactory factory = new ModBusMessageFactory();
                         ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
-                        byte[] buffer = msg.Serialize();
-                        clientStream.Write(buffer, 0, buffer.Length);
-                        byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
-                        int readbytes = 0;
-                        byte[] headerbuffer = new byte[msg.Header.Size];
-                        bool readingHeader = true;
-                        ModBusMessage response = new(new ModBusHeader(), new ModBusData());
-
-                        while (true)
+                        ModBusMessage response = null;
+                        // new try catch cause there isn't supposed to be a socketexception here. Log it.
+                        try
                         {
-                            if (readingHeader)
-                            {
-                                int dataleft = msg.Header.Size - readbytes;
-                                int index = msg.Header.Size - dataleft;
-                                readbytes += clientStream.Read(headerbuffer, index, dataleft);
-                                if (readbytes == 7)
-                                {
-                                    response.DeserializeHeader(headerbuffer);
-                                    readingHeader = false;
-                                    readbytes = 0;
-                                    Array.Resize(ref databuffer, response.Header.length - 1); //Minus 1 because unit id is included. Standard Modbus stuff :/
-                                }
-
-                            }
-                            else
-                            {
-
-                                int dataleft = (response.Header.length - 1) - readbytes;
-                                int index = (response.Header.length - 1) - dataleft;
-                                readbytes += clientStream.Read(databuffer, index, dataleft);
-                                if (readbytes == response.Header.length - 1)
-                                {
-                                    response.DeserializeData(databuffer);
-                                    break;
-                                }
-                            }
+                            response = ModBusMessage.SendReceive(msg, stream);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Instance.LogMessage($"Netværksfejl til Modbus PLC med IP-Addresse {client.Client.RemoteEndPoint?.ToString()}: {ex.Message}", TraceEventType.Error);
+                            return null;
                         }
                         bool noError = ModBusResponseParsing.TryHandleReponseError(response, out byte errCode);
                         if (!noError)
