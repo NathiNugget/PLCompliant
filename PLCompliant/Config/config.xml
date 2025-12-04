@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <config>
-	<logging_level>warning</logging_level>
+	<logging_level>information</logging_level>
 	<log_path>.\logging\log.txt</log_path>
 </config>

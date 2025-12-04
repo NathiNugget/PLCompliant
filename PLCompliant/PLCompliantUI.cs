@@ -300,9 +300,19 @@ namespace PLCompliant
 
         }
 
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
 
+        }
 
+        private void ToTextBox_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+        {
 
+        }
 
+        private void logLabel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
