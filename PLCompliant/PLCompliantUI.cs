@@ -24,8 +24,10 @@ namespace PLCompliant
         public PLCompliantUI()
         {
 
-            running = false;
             InitializeComponent();
+            running = false;
+            CurrentStateLabel.Text = "Afventer brugerens instruks";
+
             FromTextBox.LostFocus += new EventHandler(IPAddressValidationHandling!);
             FromTextBox.MouseClick += new MouseEventHandler(MaskedTextBoxOnClick);
             FromTextBox.KeyDown += new KeyEventHandler(ControlField);
@@ -155,7 +157,7 @@ namespace PLCompliant
 
                 if (hasWriteAccess)
                 {
-                    if (from?.GetIPv4Addr() > to?.GetIPv4Addr()) // Take care of from and to range
+                    if (from?.GetIPv4AddrHost() > to?.GetIPv4AddrHost()) // Take care of from and to range
                     {
                         IPAddress? temp = null;
                         temp = from;
@@ -174,6 +176,7 @@ namespace PLCompliant
                                 return;
                             }
                         }
+                        CurrentStateLabel.Text = "Starter scan...";
                         UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange, Protocol)));
                         CurrentStateLabel.Visible = true;
 
@@ -300,9 +303,10 @@ namespace PLCompliant
 
         }
 
-
-
-
-
+        private void CurrentStateLabel_TextChanged(object sender, EventArgs e)
+        {
+            Label label = (Label)sender;
+            label.AccessibleName = label.Text;
+        }
     }
 }

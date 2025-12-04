@@ -2,7 +2,6 @@
 using PLCompliant.Modbus;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Windows.Forms;
 
 namespace PLCompliantTests
 {
@@ -43,7 +42,9 @@ namespace PLCompliantTests
         public static PLCompliantUI MockUI()
         {
 
-                return new PLCompliantUI();      
+            return new PLCompliantUI();
         }
+
+
     }
 }

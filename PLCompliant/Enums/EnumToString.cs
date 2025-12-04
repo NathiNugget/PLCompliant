@@ -6,7 +6,7 @@ namespace PLCompliant.Enums
     {
         public static string ProtocolType(PLCProtocolType protocolType)
         {
-            switch(protocolType)
+            switch (protocolType)
             {
                 case PLCProtocolType.Modbus:
                     return "Modbus";

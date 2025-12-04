@@ -59,14 +59,16 @@
             // 
             // CurrentStateLabel
             // 
+            CurrentStateLabel.AccessibleDescription = "";
+            CurrentStateLabel.AccessibleName = "";
             CurrentStateLabel.AutoSize = true;
             CurrentStateLabel.Location = new Point(920, 515);
             CurrentStateLabel.MaximumSize = new Size(300, 400);
             CurrentStateLabel.Name = "CurrentStateLabel";
-            CurrentStateLabel.Size = new Size(92, 15);
+            CurrentStateLabel.Size = new Size(133, 15);
             CurrentStateLabel.TabIndex = 1;
-            CurrentStateLabel.Text = "Starter scanning";
-            CurrentStateLabel.Visible = false;
+            CurrentStateLabel.Text = "After brugerens instruks";
+            CurrentStateLabel.TextChanged += CurrentStateLabel_TextChanged;
             // 
             // BrowseButton
             // 

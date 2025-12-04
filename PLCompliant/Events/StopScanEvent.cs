@@ -1,10 +1,4 @@
 ﻿using PLCompliant.EventArguments;
-using PLCompliant.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
@@ -14,7 +8,7 @@ namespace PLCompliant.Events
 
         public override void ExecuteEvent(UpdateThreadContext context)
         {
-            context.scanner.StopScan(); 
+            context.scanner.StopScan();
         }
     }
 }

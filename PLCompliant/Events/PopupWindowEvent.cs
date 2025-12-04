@@ -1,5 +1,4 @@
-﻿using PLCompliant.Enums;
-using PLCompliant.EventArguments;
+﻿using PLCompliant.EventArguments;
 using PLCompliant.Utilities;
 
 namespace PLCompliant.Events

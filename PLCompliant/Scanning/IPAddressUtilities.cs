@@ -66,5 +66,15 @@ namespace PLCompliant.Scanning
             return (long)ipUint;
         }
 
+        /// <summary>
+        /// Overload to check IP-address in host order
+        /// </summary>
+        /// <param name="ip">An IPv4 address</param>
+        /// <returns></returns>
+        public static long GetIPv4AddrHost(this IPAddress ip)
+        {
+            return EndianConverter.FromNetworkToHost((uint)ip.GetIPv4Addr());
+        }
+
     }
 }
