@@ -15,6 +15,7 @@ namespace PLCompliant.Logging
             _source = new("[PLCompliant]", SourceLevels.Information);
             _source.Listeners.Add(new ConsoleTraceListener());
             _source.Listeners.Add(new TextWriterTraceListener("./Log.txt", FILE_LOGGER_NAME));
+            _source.Listeners.Add(new WindowLogTraceListener());
         }
 
         private int NEXT_LOG_MSG_ID = 0;

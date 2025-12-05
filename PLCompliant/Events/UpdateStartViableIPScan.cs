@@ -37,9 +37,9 @@ namespace PLCompliant.Events
                 StartViableIPScanBeginCallback callback = new StartViableIPScanBeginCallback(null!);
                 UIEventQueue.Instance.Push(callback);
                 var scanResult = context.scanner.FindIPs(args.Protocol);
-                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol, scanResult)));
-
-
+                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol, scanResult, context.scanner.ResponsivePLCs)));
+                
+                
             });
             scanThread.Start();
         }

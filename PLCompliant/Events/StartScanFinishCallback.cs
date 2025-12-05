@@ -16,20 +16,21 @@ namespace PLCompliant.Events
             // Push the callback event back to the backend event queue
             var validatedVals = EventUtilities.ValidateContextAndArgs<PLCompliantUI, StartScanFinishCallbackArgs, Form, RaisedEventArgs>(context, Argument);
             var args = validatedVals.Item2;
+            var form = validatedVals.Item1;
             if (args.Result == ScanResult.LockTaken)
             {
-                validatedVals.Item1.CurrentStateLabel.Text = "Starter ikke scanning pga. en scanning er allerede igang";
+                form.CurrentStateLabel.Text = "Starter ikke scanning pga. en scanning er allerede igang";
             }
-            else if (args.Responses.Count() == 0)
+            else if(!args.Responses.Any())
             {
-                validatedVals.Item1.CurrentStateLabel.Text = "Ingen PLC'er fundet";
+                form.CurrentStateLabel.Text = $"{args.ResponsivePLCs.Count()} PLC'er fundet, men 0 returnerede brugbar data. Check log for detaljer";       
             }
             else
             {
-
-                UpdateEventQueue.Instance.Push(new GenerateCSVEvent(new GenerateCSVArgs(validatedVals.Item1.SavePath.Text, args.Responses, args.ScannedWith)));
+                 
+                UpdateEventQueue.Instance.Push(new GenerateCSVEvent(new GenerateCSVArgs(form.SavePath.Text, args.Responses, args.ScannedWith)));
             }
-            validatedVals.Item1.NotifyScanToggle();
+            form.NotifyScanToggle();
 
         }
     }
