@@ -2,7 +2,6 @@
 using OpenQA.Selenium.Appium.Windows;
 using OpenQA.Selenium.Interactions;
 using PLCompliant.Utilities;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PLCompliantTests
@@ -384,20 +383,12 @@ namespace PLCompliantTests
 
             }
             Thread.Sleep(2000);
-            string expected = $"Ugyldig skrive rettighed: Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe";
-            ReadOnlyCollection<WindowsElement> tooltipsFound = null;
 
-            while (true)
-            {
-                try
-                {
-                    tooltipsFound = _driver.FindElementsByXPath($"//ToolTip");
-                    if (tooltipsFound.Count > 0) break;
-                }
-                catch { }
-            }
-
-            Assert.IsNotNull(tooltipsFound);
+            startstop_button.Click();
+            // Verify the text on state label 
+            string expected = "Afventer brugerens instruks";
+            string actual = current_state_label.Text;
+            Assert.AreEqual(expected, actual);
 
 
 
