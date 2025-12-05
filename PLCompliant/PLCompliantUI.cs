@@ -149,7 +149,7 @@ namespace PLCompliant
             }
             else if (!Directory.Exists(SavePath.Text))
             {
-                ShowWarning(SavePath, "Ugyldig sti", "Du skal vælge en gyldig mappe hvor resultatet kan gemmes");
+                ShowWarning(SavePath, GlobalVars.WRITEWARNINGTITLE, GlobalVars.WRITEWARNINGTEXT);
             }
             else
             {
@@ -239,7 +239,7 @@ namespace PLCompliant
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowWarning(SavePath, "Ugyldig skrive rettighed", "Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe");
+                ShowWarning(SavePath, GlobalVars.WRITEWARNINGTITLE, GlobalVars.WRITEWARNINGTEXT);
                 return false;
             }
         }

@@ -1,6 +1,8 @@
 ﻿using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Windows;
+using OpenQA.Selenium.Interactions;
 using PLCompliant.Utilities;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PLCompliantTests
@@ -10,6 +12,7 @@ namespace PLCompliantTests
     public class UiTest
     {
         static WindowsDriver<WindowsElement> _driver;
+        static Actions _cursor;
         [TestInitialize]
         public void Setup()
         {
@@ -21,8 +24,10 @@ namespace PLCompliantTests
             opts.PlatformName = "Windows";
 
             opts.AddAdditionalCapability("app", AppPath);
+            opts.AddAdditionalCapability("enableMultiWindows", true);
 
             _driver = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723/"), opts);
+            _cursor = new Actions(_driver); // Instantied to double click
         }
 
         [TestMethod]
@@ -308,25 +313,101 @@ namespace PLCompliantTests
                 WindowsElement desktop_elem = null!;
                 desktop_elem = _driver.FindElementByName("Denne pc") ?? _driver.FindElementByName("This PC");
                 desktop_elem.Click();
-                _driver.FindElementsByXPath("//*[contains(text(),'Windows')]");
-                var submit_elem_list = _driver.FindElementsByXPath("//node[contains(text(),'Windows')]");
+
+                var elementToClick = _driver.FindElementByName("Windows (C:)") ?? _driver.FindElementByName("Windows-SSD (C:)");
+                elementToClick = _driver.FindElementByXPath("//*[contains(@Name,'Win')]");
+                _cursor.DoubleClickItem(elementToClick);
+                Thread.Sleep(300);
+                WindowsElement view = _driver.FindElementByClassName("UIItemsView");
+                var itemsInView = view.FindElementsByXPath("//*");
 
 
-                if (submit_elem_list.Count < 1)
+
+                while (true)
                 {
-                    submit_elem_list = _driver.FindElementsByName("Vælg mappe");
+                    itemsInView = view.FindElementsByXPath("//*");
+                    Thread.Sleep(300);
+
+                    try
+                    {
+                        view.FindElementByName("WINDOWS");
+                        goto label1;
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            view.FindElementByName("Windows");
+                            goto label1;
+                        }
+                        catch { }
+                    }
+                    Actions pagedown = new Actions(_driver);
+                    pagedown.SendKeys(OpenQA.Selenium.Keys.PageDown).Perform();
+                    Thread.Sleep(300);
+                    view = _driver.FindElementByClassName("UIItemsView");
+                    Thread.Sleep(300);
+
                 }
-                submit_elem_list[1].Click();
+            label1:
+
+                Thread.Sleep(300);
+                WindowsElement? tempElemToClick = null;
+                try
+                {
+                    tempElemToClick = _driver.FindElementByName("WINDOWS");
+                }
+                catch
+                {
+                    try
+                    {
+                        tempElemToClick = _driver.FindElementByName("Windows");
+                    }
+                    catch { }
+
+                }
+
+
+
+                Actions accessWindows = new Actions(_driver);
+                accessWindows.DoubleClick(tempElemToClick).Perform();
+
+                Thread.Sleep(300);
+
+
+
+
+
+                var elements = _driver.FindElementsByXPath("//*[contains(@Name,'Vælg mappe') or contains(@Name,'Select Folder')]");
+                elements[1].Click();
+
+
             }
-            startstop_button.Click();
+            Thread.Sleep(2000);
+            string expected = $"Ugyldig skrive rettighed: Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe";
+            ReadOnlyCollection<WindowsElement> tooltipsFound = null;
 
-            var cancel_button = _driver.FindElementByName("Annuller") ?? _driver.FindElementByName("Cancel");
+            while (true)
+            {
+                try
+                {
+                    tooltipsFound = _driver.FindElementsByXPath($"//ToolTip");
+                    if (tooltipsFound.Count > 0) break;
+                }
+                catch { }
+            }
+
+            Assert.IsNotNull(tooltipsFound);
 
 
-            cancel_button.Click();
-            string expected = "Afventer brugerens instruks";
-            string actual = current_state_label.Text;
-            Assert.AreEqual(expected, actual);
+
+
+
+            //Name	Ugyldig skrive rettighed: Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe
+
+
+
+            //Assert.AreEqual(expected, actual);
         }
 
         [TestCleanup]

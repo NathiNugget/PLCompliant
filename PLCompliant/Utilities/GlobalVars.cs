@@ -11,5 +11,8 @@ namespace PLCompliant.Utilities
         public const char CSV_SEPARATOR = ';';
         public static bool ABORT = false;
         public static string CustomFormat = "HH.mm.ss_dd-MM-yyyy";
+        public static string WRITEWARNINGTEXT = "Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe";
+        public static string WRITEWARNINGTITLE = "Ugyldig skrive rettighed";
+
     }
 }

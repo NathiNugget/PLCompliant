@@ -1,4 +1,6 @@
-﻿using PLCompliant;
+﻿using OpenQA.Selenium.Appium.Windows;
+using OpenQA.Selenium.Interactions;
+using PLCompliant;
 using PLCompliant.Modbus;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -43,6 +45,11 @@ namespace PLCompliantTests
         {
 
             return new PLCompliantUI();
+        }
+
+        public static void DoubleClickItem(this Actions action, WindowsElement elem)
+        {
+            action.DoubleClick(elem).Perform();
         }
 
 
