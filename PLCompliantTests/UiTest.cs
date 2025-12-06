@@ -23,10 +23,9 @@ namespace PLCompliantTests
             opts.PlatformName = "Windows";
 
             opts.AddAdditionalCapability("app", AppPath);
-            opts.AddAdditionalCapability("enableMultiWindows", true);
 
             _driver = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723/"), opts);
-            _cursor = new Actions(_driver); // Instantied to double click
+            _cursor = new Actions(_driver); // Instantied to perform double clicks
         }
 
         [TestMethod]
@@ -34,8 +33,6 @@ namespace PLCompliantTests
         {
 
             Assert.IsTrue(_driver.WindowHandles != null);
-
-
 
         }
 
@@ -59,9 +56,6 @@ namespace PLCompliantTests
                 }
 
                 submit_elem[1].Click();
-
-
-
             }
 
             var chosen_path = _driver.FindElementByAccessibilityId("SavePath");
@@ -76,8 +70,6 @@ namespace PLCompliantTests
             from_box.SendKeys("255.255.255.256");
             modbus_button.Click();
             Thread.Sleep(1000);
-
-
 
             //var tooltipbox = _driver.FindElementByName("Ugyldig IP-addresse");
             //string actual = tooltipbox.Text;    
@@ -118,9 +110,6 @@ namespace PLCompliantTests
                 }
 
                 submit_elem[1].Click();
-
-
-
             }
 
             startstop_button.Click();
@@ -135,11 +124,7 @@ namespace PLCompliantTests
             string expected_substring = expected.Substring(0, index_of_resulatat);
             string actual_substring = actual.Substring(0, index_of_resulatat);
 
-
             Assert.AreEqual(expected_substring, actual_substring);
-
-
-
         }
 
         [TestMethod]
@@ -319,6 +304,7 @@ namespace PLCompliantTests
                 Thread.Sleep(300);
                 WindowsElement view = _driver.FindElementByClassName("UIItemsView");
                 var itemsInView = view.FindElementsByXPath("//*");
+                )
 
 
 
@@ -366,20 +352,11 @@ namespace PLCompliantTests
 
                 }
 
-
-
                 Actions accessWindows = new Actions(_driver);
                 accessWindows.DoubleClick(tempElemToClick).Perform();
-
                 Thread.Sleep(300);
-
-
-
-
-
                 var elements = _driver.FindElementsByXPath("//*[contains(@Name,'Vælg mappe') or contains(@Name,'Select Folder')]");
                 elements[1].Click();
-
 
             }
             Thread.Sleep(2000);
@@ -388,17 +365,8 @@ namespace PLCompliantTests
             // Verify the text on state label 
             string expected = "Afventer brugerens instruks";
             string actual = current_state_label.Text;
+
             Assert.AreEqual(expected, actual);
-
-
-
-
-
-            //Name	Ugyldig skrive rettighed: Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe
-
-
-
-            //Assert.AreEqual(expected, actual);
         }
 
         [TestCleanup]

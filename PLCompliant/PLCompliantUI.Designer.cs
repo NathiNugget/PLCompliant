@@ -167,7 +167,6 @@
             ToTextBox.PromptChar = ' ';
             ToTextBox.Size = new Size(124, 27);
             ToTextBox.TabIndex = 6;
-            ToTextBox.MaskInputRejected += ToTextBox_MaskInputRejected;
             // 
             // FromLabel
             // 
@@ -208,7 +207,6 @@
             logTextBox.ScrollBars = ScrollBars.Vertical;
             logTextBox.Size = new Size(323, 507);
             logTextBox.TabIndex = 15;
-            logTextBox.TextChanged += textBox1_TextChanged;
             // 
             // logLabel
             // 
@@ -219,7 +217,7 @@
             logLabel.Size = new Size(98, 60);
             logLabel.TabIndex = 16;
             logLabel.Text = "Log";
-            logLabel.Click += logLabel_Click;
+            
             // 
             // PLCompliantUI
             // 
