@@ -304,7 +304,7 @@ namespace PLCompliantTests
                 Thread.Sleep(300);
                 WindowsElement view = _driver.FindElementByClassName("UIItemsView");
                 var itemsInView = view.FindElementsByXPath("//*");
-                )
+
 
 
 
