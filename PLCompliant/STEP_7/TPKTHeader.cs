@@ -1,0 +1,70 @@
+﻿using PLCompliant.Interface;
+using PLCompliant.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PLCompliant.STEP_7
+{
+    [StructLayout(LayoutKind.Explicit, Size = 4, CharSet = CharSet.Ansi)]
+    public struct TPKTHeader : IProtocolHeader
+    {
+        [FieldOffset(0)] private byte _version;
+        [FieldOffset(1)] private byte _reserved;
+        [FieldOffset(2)] private UInt16 _length;
+
+
+        public UInt16 Length 
+        {
+            get { return _length; } 
+            set { _length = value; }
+        
+        
+        }
+        public byte Reserved
+        {
+            get { return _reserved; }
+            set { _reserved = value; }
+        }
+
+
+
+
+
+        public byte Version
+        {
+            get { return _version; }
+            set { _version = value; }
+        }
+
+
+        public int Size
+        {
+            get
+            {
+                return Marshal.SizeOf(this);
+            }
+        }
+        public void Deserialize(byte[] inputBuffer, int startIndex)
+        {
+            _version = inputBuffer[startIndex];
+            _reserved = inputBuffer[startIndex + 1];
+            _length = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex + 2));
+        }
+
+        public byte[] Serialize()
+        {
+            byte[] outData = new byte[Size];
+            outData[0] = _version;
+            outData[1] = _reserved;
+            var lengthAsBytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(_length));
+            outData[2] = lengthAsBytes[0];
+            outData[3] = lengthAsBytes[1];
+            return outData;
+        }
+    }
+}
