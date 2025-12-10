@@ -1,4 +1,6 @@
 ﻿using PLCompliant.Interface;
+using PLCompliant.Utilities;
+using System.Net;
 using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
@@ -87,15 +89,78 @@ namespace PLCompliant.STEP_7
                 return size;
             }
         }
-
-        public void Deserialize(byte[] inputBuffer)
+        public STEP7Header(byte protocolId, byte messageType, UInt16 pduReference) 
         {
-            throw new NotImplementedException();
+            _protocolId = protocolId;
+            _messageType = messageType;
+            _pduReference = pduReference;
+            _dataLength = 0;
+            _parameterLength = 0;
+            _errorClass = 0;
+            _errorCode = 0;
+            _reserved = 0;
+        }
+        public void Deserialize(byte[] inputBuffer, int startIndex)
+        {
+            _protocolId = inputBuffer[startIndex];
+            startIndex += Marshal.SizeOf(_protocolId);
+            _messageType = inputBuffer[startIndex];
+            startIndex += Marshal.SizeOf(_messageType);
+            _reserved = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
+            startIndex += Marshal.SizeOf(_reserved);
+            _pduReference = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
+            startIndex += Marshal.SizeOf(_pduReference);
+
+            _parameterLength = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
+            startIndex += Marshal.SizeOf(_parameterLength);
+            _dataLength = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
+            startIndex += Marshal.SizeOf(_dataLength);
+
+            if(_messageType == 0x3)
+            {
+                _errorClass = inputBuffer[startIndex];
+                startIndex += Marshal.SizeOf(_errorClass);
+                _errorCode = inputBuffer[startIndex];
+                startIndex += Marshal.SizeOf(_errorCode);
+            }
         }
 
         public byte[] Serialize()
         {
-            throw new NotImplementedException();
+            int startIndex = 0;
+            byte[] outData = new byte[Size];
+            outData[startIndex] = _protocolId;
+            startIndex += Marshal.SizeOf(_protocolId);
+            outData[startIndex] = _messageType;
+            startIndex += Marshal.SizeOf(_messageType);
+
+            var reservedAsBytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(_reserved));
+            Array.Copy(reservedAsBytes, 0, outData, startIndex, reservedAsBytes.Length);
+            startIndex += reservedAsBytes.Length;
+
+            var pduRefAsBytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(_pduReference));
+            Array.Copy(pduRefAsBytes, 0, outData, startIndex, pduRefAsBytes.Length);
+            startIndex += pduRefAsBytes.Length;
+
+            var paramLengthAsBytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(_parameterLength));
+            Array.Copy(paramLengthAsBytes, 0, outData, startIndex, paramLengthAsBytes.Length);
+            startIndex += paramLengthAsBytes.Length;
+
+            var dataLengthAsBytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(_dataLength));
+            Array.Copy(dataLengthAsBytes, 0, outData, startIndex, dataLengthAsBytes.Length);
+            startIndex += dataLengthAsBytes.Length;
+
+            if (_messageType == 0x3)
+            {
+                outData[startIndex] = _errorClass;
+                startIndex += Marshal.SizeOf(_errorClass);
+                outData[startIndex] = _errorCode;
+                startIndex += Marshal.SizeOf(_errorCode);
+            }
+
+
+            return outData;
+
         }
     }
 }

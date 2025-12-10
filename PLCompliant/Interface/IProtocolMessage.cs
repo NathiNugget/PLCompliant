@@ -1,6 +1,4 @@
-﻿using PLCompliant.Modbus;
-
-namespace PLCompliant.Interface
+﻿namespace PLCompliant.Interface
 {
     /// <summary>
     /// This is an interface for the whole message to send over the protcol implementing this interface
@@ -32,12 +30,12 @@ namespace PLCompliant.Interface
         /// Deserialize header and fields to human readable format
         /// </summary>
         /// <param name="inputBuffer">The bytes received from the network</param>
-        public void DeserializeHeader(byte[] inputBuffer);
+        public void DeserializeHeader(byte[] inputBuffer, int startIndex = 0);
         /// <summary>
         /// Deserialize data and fields to human readable format
         /// </summary>
         /// <param name="inputBuffer">The bytes received from the network</param>
-        public void DeserializeData(byte[] inputBuffer);
+        public void DeserializeData(byte[] inputBuffer, int startIndex = 0);
 
         #endregion
 
@@ -47,9 +45,9 @@ namespace PLCompliant.Interface
         /// </summary>
         public int DataSize { get; }
         /// <summary>
-        /// The Data-field of the Message
+        /// Size of the entire network message in bytes
         /// </summary>
-        public ModBusData Data { get; }
+        public int Size { get; }
         #endregion
     }
 }

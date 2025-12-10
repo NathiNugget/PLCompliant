@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Interface;
+using PLCompliant.Utilities;
 using System.Runtime.InteropServices;
 
 namespace PLCompliant.Modbus
@@ -42,6 +43,47 @@ namespace PLCompliant.Modbus
         #endregion
 
         #region methods
+
+
+
+        public void AddData(UInt16 inputData)
+        {
+            var oldSize = _payload.Length;
+            var newSize = _payload.Length + Marshal.SizeOf<UInt16>();
+            Array.Resize(ref _payload, newSize);
+            byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
+            Array.Copy(bytes, 0, _payload, oldSize, bytes.Length);
+        }
+
+
+        /// <inheritdoc/>
+        public void AddData(byte inputData)
+        {
+            var newSize = _payload.Length + Marshal.SizeOf<byte>();
+            Array.Resize(ref _payload, newSize);
+            _payload[newSize - 1] = inputData;
+        }
+
+        /// <inheritdoc/>
+        public void AddData(byte[] stringData)
+        {
+            if (stringData.Length > byte.MaxValue)
+            {
+                throw new ArgumentException("Input length was greater than allowed in a byte");
+            }
+            byte stringSize = (byte)stringData.Length;
+            if (stringSize == 0) { return; }
+            var oldSize = _payload.Length;
+            var newSize = _payload.Length + stringSize;
+            Array.Resize(ref _payload, newSize);
+            Array.Copy(stringData, 0, _payload, oldSize, stringSize);
+        }
+
+
+
+
+
+
         /// <summary>
         /// Serialize the function code and data for network transmission
         /// </summary>
@@ -58,13 +100,12 @@ namespace PLCompliant.Modbus
         /// Deserialize the data to be human readable
         /// </summary>
         /// <param name="inputBuffer">The data in bytes received from the network</param>
-        public void Deserialize(byte[] inputBuffer)
+        public void Deserialize(byte[] inputBuffer, int startIndex = 0)
         {
-            var index = 0;
-            _functionCode = inputBuffer[index];
-            index += sizeof(byte);
-            Array.Resize(ref _payload, inputBuffer.Length - index);
-            Array.Copy(inputBuffer, index, _payload, 0, inputBuffer.Length - index);
+            _functionCode = inputBuffer[startIndex];
+            startIndex += sizeof(byte);
+            Array.Resize(ref _payload, inputBuffer.Length - startIndex);
+            Array.Copy(inputBuffer, startIndex, _payload, 0, inputBuffer.Length - startIndex);
         }
         /// <summary>
         /// Override equals to compare to another data-packet

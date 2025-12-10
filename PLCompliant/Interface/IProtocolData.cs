@@ -24,7 +24,16 @@
         /// Deserialization of data from network to be able to extract information
         /// </summary>
         /// <param name="inputBuffer">The serialized data from the network</param>
-        public void Deserialize(byte[] inputBuffer);
+        public void Deserialize(byte[] inputBuffer, int startIndex = 0);
+
+        public void AddData(UInt16 inputData);
+
+
+
+        public void AddData(byte inputData);
+
+
+        public void AddData(byte[] stringData);
 
         #endregion
     }

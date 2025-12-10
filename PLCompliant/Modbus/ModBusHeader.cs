@@ -51,16 +51,15 @@ namespace PLCompliant.Modbus
         /// Deserialize the struct from bytes to human readable header-data
         /// </summary>
         /// <param name="inputBuffer">Header bytes received from the network</param>
-        public void Deserialize(byte[] inputBuffer)
+        public void Deserialize(byte[] inputBuffer, int startIndex)
         {
-            var index = 0;
-            transactionIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index));
-            index += sizeof(UInt16);
-            protocolIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index));
-            index += sizeof(UInt16);
-            length = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, index));
-            index += sizeof(UInt16);
-            unitID = inputBuffer[index];
+            transactionIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
+            startIndex += sizeof(UInt16);
+            protocolIdentifier = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
+            startIndex += sizeof(UInt16);
+            length = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
+            startIndex += sizeof(UInt16);
+            unitID = inputBuffer[startIndex];
         }
         #endregion
 

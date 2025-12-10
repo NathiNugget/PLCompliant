@@ -1,22 +1,16 @@
 ﻿using PLCompliant.Interface;
-using PLCompliant.Modbus;
+using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
     public class STEP7Message : IProtocolMessage
     {
-        private TPKTHeader _tpkt;
-        private COTPHeader _cotpHeader;
-        private COTPData _cotpData;
         private STEP7Header _step7Header;
         private STEP7ParameterData? _step7ParamData;
         private STEP7Data? _step7Data;
 
-        public STEP7Message(TPKTHeader tpkt, COTPHeader cotpHeader, COTPData cotpData, STEP7Header step7Header, STEP7ParameterData step7ParamData, STEP7Data step7Data)
+        public STEP7Message(STEP7Header step7Header, STEP7ParameterData? step7ParamData, STEP7Data? step7Data)
         {
-            _tpkt = tpkt;
-            _cotpHeader = cotpHeader;
-            _cotpData = cotpData;
             _step7Header = step7Header;
             _step7Data = step7Data;
             _step7ParamData = step7ParamData;
@@ -43,39 +37,18 @@ namespace PLCompliant.STEP_7
         }
 
 
-        public COTPData COTPData
-        {
-            get { return _cotpData; }
-            set { _cotpData = value; }
-        }
 
 
-        public COTPHeader COTPHeader
-        {
-            get { return _cotpHeader; }
-            set { _cotpHeader = value; }
-        }
-
-
-        public TPKTHeader TPKT
-        {
-            get { return _tpkt; }
-            set { _tpkt = value; }
-        }
-
-
-
-
-        public int TotalSize
+        public int Size
         {
             get
             {
-                int size = _tpkt.Size + _cotpHeader.Size + _cotpData.Size + _step7Header.Size;
-                if(_step7ParamData != null)
+                int size = _step7Header.Size;
+                if (_step7ParamData != null)
                 {
                     size += _step7ParamData.Size;
                 }
-                if(_step7Data != null)
+                if (_step7Data != null)
                 {
                     size += _step7Data.Size;
                 }
@@ -86,62 +59,108 @@ namespace PLCompliant.STEP_7
 
         public int DataSize => throw new NotImplementedException();
 
-        public ModBusData Data => throw new NotImplementedException();
-
         public void AddData(ushort inputData)
         {
-            throw new NotImplementedException();
+            if (_step7Data == null)
+            {
+                throw new ArgumentNullException(nameof(inputData));
+            }
+            _step7Data.AddData(inputData);
+            _step7Header.DataLength += (ushort)Marshal.SizeOf(inputData);
         }
 
         public void AddData(byte inputData)
         {
-            throw new NotImplementedException();
+            if (_step7Data == null)
+            {
+                throw new ArgumentNullException(nameof(inputData));
+            }
+            _step7Data.AddData(inputData);
+            _step7Header.DataLength += (ushort)Marshal.SizeOf(inputData);
         }
 
         public void AddData(byte[] stringData)
         {
-            throw new NotImplementedException();
+            if (_step7Data == null)
+            {
+                throw new ArgumentNullException(nameof(stringData));
+            }
+            _step7Data.AddData(stringData);
+            _step7Header.DataLength += (ushort)stringData.Length;
         }
 
 
 
         public void AddParameterData(ushort inputData)
         {
-            throw new NotImplementedException();
+            if (_step7ParamData == null)
+            {
+                throw new ArgumentNullException(nameof(inputData));
+            }
+            _step7ParamData.AddData(inputData);
+            _step7Header.ParameterLength += (ushort)Marshal.SizeOf(inputData);
         }
 
         public void AddParameterData(byte inputData)
         {
-            throw new NotImplementedException();
+            if (_step7ParamData == null)
+            {
+                throw new ArgumentNullException(nameof(inputData));
+            }
+            _step7ParamData.AddData(inputData);
+            _step7Header.ParameterLength += (ushort)Marshal.SizeOf(inputData);
         }
 
         public void AddParameterData(byte[] stringData)
         {
-            throw new NotImplementedException();
+            if (_step7ParamData == null)
+            {
+                throw new ArgumentNullException(nameof(stringData));
+            }
+            _step7ParamData.AddData(stringData);
+            _step7Header.ParameterLength += (ushort)stringData.Length;
         }
 
-
-
-
-
-
-
-
-
-
-        public void DeserializeData(byte[] inputBuffer)
+        public void DeserializeData(byte[] inputBuffer, int startIndex)
         {
-            throw new NotImplementedException();
+            if (_step7ParamData != null)
+            {
+                _step7ParamData.Deserialize(inputBuffer, startIndex);
+                startIndex += _step7ParamData.Size;
+            }
+            if (_step7Data != null)
+            {
+                _step7Data.Deserialize(inputBuffer, startIndex);
+                startIndex += _step7Data.Size;
+            }
         }
 
-        public void DeserializeHeader(byte[] inputBuffer)
+        public void DeserializeHeader(byte[] inputBuffer, int startIndex)
         {
-            throw new NotImplementedException();
+            _step7Header.Deserialize(inputBuffer, startIndex);
+
         }
 
         public byte[] Serialize()
         {
-            throw new NotImplementedException();
+            byte[] outputData = new byte[Size];
+            int startIndex = 0;
+            Array.Copy(_step7Header.Serialize(), 0, outputData, startIndex, _step7Header.Size);
+            startIndex += _step7Header.Size;
+
+            if (_step7ParamData != null)
+            {
+                Array.Copy(_step7ParamData.Serialize(), 0, outputData, startIndex, _step7ParamData.Size);
+                startIndex += _step7ParamData.Size;
+            }
+            if (_step7Data != null)
+            {
+                Array.Copy(_step7Data.Serialize(), 0, outputData, startIndex, _step7Data.Size);
+                startIndex += _step7Data.Size;
+            }
+            return outputData;
+
+
         }
     }
 }

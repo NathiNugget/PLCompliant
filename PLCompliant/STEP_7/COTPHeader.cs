@@ -30,10 +30,17 @@ namespace PLCompliant.STEP_7
             }
         }
 
+        public COTPHeader(byte pduType)
+        {
+            _pduType = pduType;
+            _length = 0;
+        }
+
         public void Deserialize(byte[] inputBuffer, int startIndex)
         {
             _length = inputBuffer[startIndex];
-            _pduType = inputBuffer[startIndex + 1];
+            startIndex += Marshal.SizeOf(_length);
+            _pduType = inputBuffer[startIndex];
         }
 
         public byte[] Serialize()

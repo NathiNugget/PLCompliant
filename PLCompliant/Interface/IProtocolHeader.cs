@@ -22,7 +22,7 @@
         /// Deserialization of network bytes to be a human readable header
         /// </summary>
         /// <param name="inputBuffer">The header in bytes received from the network</param>
-        public void Deserialize(byte[] inputBuffer);
+        public void Deserialize(byte[] inputBuffer, int startIndex = 0);
         #endregion
     }
 }

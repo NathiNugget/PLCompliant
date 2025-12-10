@@ -1,12 +1,5 @@
-﻿using PLCompliant.Enums;
-using PLCompliant.Interface;
-using PLCompliant.Logging;
-using PLCompliant.Response;
-using PLCompliant.Utilities;
-using System.Diagnostics;
-using System.Net;
+﻿using PLCompliant.Interface;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 
 namespace PLCompliant.Modbus
 {
@@ -63,7 +56,7 @@ namespace PLCompliant.Modbus
                 }
             }
             return response;
-            
+
         }
 
         public static ushort MODBUS_TCP_PORT = 502;
@@ -125,11 +118,7 @@ namespace PLCompliant.Modbus
         /// <param name="inputData">The ushort to add</param>
         public void AddData(UInt16 inputData)
         {
-            var oldSize = _data.PayloadSize;
-            var newSize = _data._payload.Length + Marshal.SizeOf<UInt16>();
-            Array.Resize(ref _data._payload, newSize);
-            byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
-            Array.Copy(bytes, 0, _data._payload, oldSize, bytes.Length);
+            _data.AddData(inputData);
             _header.length += sizeof(UInt16);
         }
 
@@ -137,9 +126,7 @@ namespace PLCompliant.Modbus
         /// <inheritdoc/>
         public void AddData(byte inputData)
         {
-            var newSize = _data._payload.Length + Marshal.SizeOf<byte>();
-            Array.Resize(ref _data._payload, newSize);
-            _data._payload[newSize - 1] = inputData;
+            _data.AddData(inputData);
             _header.length += sizeof(byte);
         }
 
@@ -150,13 +137,8 @@ namespace PLCompliant.Modbus
             {
                 throw new ArgumentException("Input length was greater than allowed in a byte");
             }
-            byte stringSize = (byte)stringData.Length;
-            if (stringSize == 0) { return; }
-            var oldSize = Data._payload.Length;
-            var newSize = _data._payload.Length + stringSize;
-            Array.Resize(ref _data._payload, newSize);
-            Array.Copy(stringData, 0, _data._payload, oldSize, stringSize);
-            _header.length += (ushort)stringSize;
+            _data.AddData(stringData);
+            _header.length += (ushort)stringData.Length;
         }
 
         /// <inheritdoc/>
@@ -173,19 +155,21 @@ namespace PLCompliant.Modbus
         }
         /// <inheritdoc/>
 
-        public void DeserializeHeader(byte[] inputBuffer)
+        public void DeserializeHeader(byte[] inputBuffer, int startIndex = 0)
         {
-            _header.Deserialize(inputBuffer);
+            _header.Deserialize(inputBuffer, startIndex);
         }
         /// <inheritdoc/>
 
-        public void DeserializeData(byte[] inputBuffer)
+        public void DeserializeData(byte[] inputBuffer, int startIndex = 0)
         {
-            _data.Deserialize(inputBuffer);
+            _data.Deserialize(inputBuffer, startIndex);
         }
 
         /// <inheritdoc/>
         public int DataSize { get { return Data.Size; } }
+
+        public int Size => throw new NotImplementedException();
 
         /// <inheritdoc/>
         public override bool Equals(object? other)
