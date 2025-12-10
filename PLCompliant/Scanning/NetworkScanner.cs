@@ -211,7 +211,7 @@ namespace PLCompliant.Scanning
             {
 
                 using (TcpClient client = new TcpClient(ip.ToString(), ModBusMessage.MODBUS_TCP_PORT))
-                using(NetworkStream stream = client.GetStream())
+                using (NetworkStream stream = client.GetStream())
                 {
                     if (client.Connected)
                     {

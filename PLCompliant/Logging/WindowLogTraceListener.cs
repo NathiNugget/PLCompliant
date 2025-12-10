@@ -10,7 +10,7 @@ namespace PLCompliant.Logging
     {
         public override void Write(string? message)
         {
-            if(message == null)
+            if (message == null)
             {
                 throw new ArgumentNullException("message");
             }

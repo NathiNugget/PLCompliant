@@ -1,10 +1,5 @@
-﻿using PLCompliant.Enums;
-using PLCompliant.Interface;
-using PLCompliant.Logging;
-using PLCompliant.Response;
+﻿using PLCompliant.Interface;
 using PLCompliant.Utilities;
-using System.Diagnostics;
-using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
@@ -63,7 +58,7 @@ namespace PLCompliant.Modbus
                 }
             }
             return response;
-            
+
         }
 
         public static ushort MODBUS_TCP_PORT = 502;

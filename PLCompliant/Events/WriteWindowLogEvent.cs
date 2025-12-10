@@ -1,11 +1,5 @@
 ﻿using PLCompliant.EventArguments;
 using PLCompliant.Utilities;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.Events
 {
@@ -22,7 +16,7 @@ namespace PLCompliant.Events
             var args = validatedItems.Item2;
             form.logTextBox.AppendText(args.Message);
             form.logTextBox.AppendText(Environment.NewLine);
-            
+
         }
     }
 }
