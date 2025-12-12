@@ -1,10 +1,206 @@
 ﻿using PLCompliant.Interface;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
     public class IsoTcpMessage : IProtocolMessage
     {
+        public enum RecieveState : byte
+        {
+            ReadingTpktHeader,
+            ReadingCotpHeader,
+            ReadingCotpData,
+            ReadingSTEP7Header,
+            ReadingSTEP7HeaderPrelude,
+            ReadingSTEP7Parameters,
+            ReadingSTEP7Data,
+            Finished
+        }
+        const int SOCKETTIMEOUT = 3000;
+
+        public static IsoTcpMessage SendReceive(IsoTcpMessage messageToSend, NetworkStream stream)
+        {
+            stream.ReadTimeout = SOCKETTIMEOUT;
+            byte[] buffer = messageToSend.Serialize();
+            stream.Write(buffer);
+            byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
+            int readbytes = 0;
+            bool Step7Exists = false;
+
+            TPKTHeader TPKTheader = new TPKTHeader();
+            COTPHeader COTPheader = new COTPHeader();
+            COTPData COTPData = new COTPData(0);
+            STEP7Header STEP7Header = new STEP7Header();
+            STEP7ParameterData STEP7ParamData = null;
+            STEP7Data STEP7Data = null;
+            byte[] headerbuffer = new byte[TPKTheader.Size];
+
+            int TotalMsgSize = 0;
+
+            RecieveState recvState = RecieveState.ReadingTpktHeader;
+
+            int dataleft = 0;
+            int index = 0;
+
+            int dataBufferLeft = 0;
+
+            while (recvState != RecieveState.Finished)
+            {
+                switch (recvState)
+                {
+                    case RecieveState.ReadingTpktHeader:
+                        dataleft = TPKTheader.Size - readbytes;
+                        index = TPKTheader.Size - dataleft;
+                        readbytes += stream.Read(headerbuffer, index, dataleft);
+                        if (readbytes == TPKTheader.Size)
+                        {
+                            TPKTheader.Deserialize(headerbuffer, 0);
+                            recvState = RecieveState.ReadingCotpHeader;
+                            readbytes = 0;
+                            /*"length" is the field for the lenght of the entire packet, including itself.
+                            Therefore, to find the length of the rest we must subtract its own size
+                              */
+                            TotalMsgSize = TPKTheader.Length;
+                            // set size to be correct for the next header
+                            Array.Resize(ref headerbuffer, COTPheader.Size);
+
+                        }
+                        break;
+                    case RecieveState.ReadingCotpHeader:
+                        dataleft = COTPheader.Size - readbytes;
+                        index = COTPheader.Size - dataleft;
+                        readbytes += stream.Read(headerbuffer, index, dataleft);
+                        if (readbytes == COTPheader.Size)
+                        {
+                            COTPheader.Deserialize(headerbuffer, 0);
+                            recvState = RecieveState.ReadingCotpData;
+                            readbytes = 0;
+
+                            Array.Resize(ref databuffer, COTPheader.Length);
+
+                        }
+                        break;
+                    case RecieveState.ReadingCotpData:
+                        dataleft = databuffer.Length - readbytes;
+                        index = databuffer.Length - dataleft;
+                        readbytes += stream.Read(databuffer, index, dataleft);
+                        if (readbytes == databuffer.Length)
+                        {
+                            COTPData.Deserialize(databuffer, 0);
+                            readbytes = 0;
+                            // check if there are any data left in the message. If there is, attempt to get STEP7 msg
+                            if (TotalMsgSize > COTPData.Size + COTPheader.Size + TPKTheader.Size)
+                            {
+                                Step7Exists = true;
+                                recvState = RecieveState.ReadingSTEP7HeaderPrelude;
+                                Array.Resize(ref headerbuffer, STEP7Header.PRELUDE_LEN);
+                            }
+                            else
+                            {
+                                recvState = RecieveState.Finished;
+                            }
+
+                        }
+                        break;
+
+                    case RecieveState.ReadingSTEP7HeaderPrelude:
+                        dataleft = STEP7Header.PRELUDE_LEN - readbytes;
+                        index = STEP7Header.PRELUDE_LEN - dataleft;
+                        readbytes += stream.Read(headerbuffer, index, dataleft);
+                        if (readbytes == STEP7Header.PRELUDE_LEN)
+                        {
+                            STEP7Header.DeserializePrelude(headerbuffer, 0);
+                            readbytes = 0;
+                            /*"length" is the field for the lenght of the entire packet, including itself.
+                            Therefore, to find the length of the rest we must subtract its own size
+                              */
+                            recvState = RecieveState.ReadingSTEP7Header;
+                            Array.Resize(ref headerbuffer, STEP7Header.Size - STEP7Header.PRELUDE_LEN);
+
+                        }
+                        break;
+                    case RecieveState.ReadingSTEP7Header:
+                        dataleft = (STEP7Header.Size - STEP7Header.PRELUDE_LEN) - readbytes;
+                        index = (STEP7Header.Size - STEP7Header.PRELUDE_LEN) - dataleft;
+                        readbytes += stream.Read(headerbuffer, index, dataleft);
+                        if (readbytes == (STEP7Header.Size - STEP7Header.PRELUDE_LEN))
+                        {
+                            STEP7Header.Deserialize(headerbuffer, 0);
+                            readbytes = 0;
+                            if (STEP7Header.ParameterLength != 0)
+                            {
+                                recvState = RecieveState.ReadingSTEP7Parameters;
+                                Array.Resize(ref databuffer, STEP7Header.ParameterLength);
+                            }
+                            else if (STEP7Header.DataLength != 0)
+                            {
+                                recvState = RecieveState.ReadingSTEP7Data;
+                                Array.Resize(ref databuffer, STEP7Header.DataLength);
+                            }
+                            else
+                            {
+                                recvState = RecieveState.Finished;
+                            }
+
+                        }
+                        break;
+                    case RecieveState.ReadingSTEP7Parameters:
+                        dataleft = databuffer.Length - readbytes;
+                        index = databuffer.Length - dataleft;
+                        readbytes += stream.Read(databuffer, index, dataleft);
+                        if (readbytes == databuffer.Length)
+                        {
+                            STEP7ParamData = new(0);
+                            STEP7ParamData.Deserialize(databuffer, 0);
+                            readbytes = 0;
+                            /*"length" is the field for the lenght of the entire packet, including itself.
+                            Therefore, to find the length of the rest we must subtract its own size
+                              */
+                            if (STEP7Header.DataLength != 0)
+                            {
+                                recvState = RecieveState.ReadingSTEP7Data;
+                                Array.Resize(ref databuffer, STEP7Header.DataLength);
+                            }
+                            else
+                            {
+                                recvState = RecieveState.Finished;
+                            }
+
+                        }
+                        break;
+                    case RecieveState.ReadingSTEP7Data:
+                        dataleft = databuffer.Length - readbytes;
+                        index = databuffer.Length - dataleft;
+                        readbytes += stream.Read(databuffer, index, dataleft);
+                        if (readbytes == databuffer.Length)
+                        {
+                            STEP7Data = new(0, 0);
+                            STEP7Data.Deserialize(databuffer, 0);
+                            readbytes = 0;
+                            recvState = RecieveState.Finished;
+
+                        }
+                        break;
+                }
+
+            }
+            if (Step7Exists)
+            {
+                return new IsoTcpMessage(TPKTheader, new COTPMessage(COTPheader, COTPData), new STEP7Message(STEP7Header, STEP7ParamData, STEP7Data));
+            }
+            else
+            {
+                return new IsoTcpMessage(TPKTheader, new COTPMessage(COTPheader, COTPData), null);
+            }
+        }
+
+
+
+
+
+
+
         private TPKTHeader _tpkt;
         private COTPMessage _cotp;
         private STEP7Message? _step7;

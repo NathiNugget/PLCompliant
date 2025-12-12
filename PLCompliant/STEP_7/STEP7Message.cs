@@ -1,10 +1,10 @@
 ﻿using PLCompliant.Interface;
-using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
     public class STEP7Message : IProtocolMessage
     {
+        public const ushort STEP7_TCP_PORT = 102;
         private STEP7Header _step7Header;
         private STEP7ParameterData? _step7ParamData;
         private STEP7Data? _step7Data;
@@ -66,7 +66,7 @@ namespace PLCompliant.STEP_7
                 throw new ArgumentNullException(nameof(inputData));
             }
             _step7Data.AddData(inputData);
-            _step7Header.DataLength += (ushort)Marshal.SizeOf(inputData);
+            _step7Header.DataLength = (UInt16)_step7Data.Size;
         }
 
         public void AddData(byte inputData)
@@ -76,7 +76,7 @@ namespace PLCompliant.STEP_7
                 throw new ArgumentNullException(nameof(inputData));
             }
             _step7Data.AddData(inputData);
-            _step7Header.DataLength += (ushort)Marshal.SizeOf(inputData);
+            _step7Header.DataLength = (UInt16)_step7Data.Size;
         }
 
         public void AddData(byte[] stringData)
@@ -86,7 +86,7 @@ namespace PLCompliant.STEP_7
                 throw new ArgumentNullException(nameof(stringData));
             }
             _step7Data.AddData(stringData);
-            _step7Header.DataLength += (ushort)stringData.Length;
+            _step7Header.DataLength = (UInt16)_step7Data.Size;
         }
 
 
@@ -98,7 +98,7 @@ namespace PLCompliant.STEP_7
                 throw new ArgumentNullException(nameof(inputData));
             }
             _step7ParamData.AddData(inputData);
-            _step7Header.ParameterLength += (ushort)Marshal.SizeOf(inputData);
+            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
         }
 
         public void AddParameterData(byte inputData)
@@ -108,7 +108,7 @@ namespace PLCompliant.STEP_7
                 throw new ArgumentNullException(nameof(inputData));
             }
             _step7ParamData.AddData(inputData);
-            _step7Header.ParameterLength += (ushort)Marshal.SizeOf(inputData);
+            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
         }
 
         public void AddParameterData(byte[] stringData)
@@ -118,7 +118,7 @@ namespace PLCompliant.STEP_7
                 throw new ArgumentNullException(nameof(stringData));
             }
             _step7ParamData.AddData(stringData);
-            _step7Header.ParameterLength += (ushort)stringData.Length;
+            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
         }
 
         public void DeserializeData(byte[] inputBuffer, int startIndex)

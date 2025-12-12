@@ -9,10 +9,10 @@ namespace PLCompliant.STEP_7
 
 
             var msg = new IsoTcpMessage(
-                new TPKTHeader(),
+                new TPKTHeader(0x3),
                 new COTPMessage(
-                    new COTPHeader(0x0e),
-                    new COTPData()),
+                    new COTPHeader(),
+                    new COTPData(0xe0)),
                 null);
             msg.AddCOTPData((UInt16)0x0000); // destination reference
             msg.AddCOTPData((UInt16)0x0005); // source reference
@@ -34,10 +34,10 @@ namespace PLCompliant.STEP_7
         public IsoTcpMessage CreateCRConnectRequestTwo()
         {
             var msg = new IsoTcpMessage(
-                new TPKTHeader(),
+                new TPKTHeader(0x3),
                 new COTPMessage(
-                    new COTPHeader(0x0e),
-                    new COTPData()),
+                    new COTPHeader(),
+                    new COTPData(0xe0)),
                 null);
 
             msg.AddCOTPData((UInt16)0x0000); // destination reference
@@ -65,18 +65,18 @@ namespace PLCompliant.STEP_7
         public IsoTcpMessage CreateSetupCommunication()
         {
             var msg = new IsoTcpMessage(
-                new TPKTHeader(),
+                new TPKTHeader(0x3),
                 new COTPMessage(
-                    new COTPHeader(0x0f),
-                    new COTPData()),
+                    new COTPHeader(),
+                    new COTPData(0xf0)),
                 new STEP7Message(
                     new STEP7Header(0x32, 0x1, 0),
                     new STEP7ParameterData(0xf0),
-                    new STEP7Data(0x0ff, 0x09)));
+                    null));
             msg.AddCOTPData((byte)0x80); // TPDU number
             msg.AddParameterData((byte)0x0); // add reserved field
-            msg.AddParameterData((byte)0x1); // Max AMQ (parallel jobs with ack) calling
-            msg.AddParameterData((byte)0x1); // Max AMQ (parallel jobs with ack) called
+            msg.AddParameterData((UInt16)0x1); // Max AMQ (parallel jobs with ack) calling
+            msg.AddParameterData((UInt16)0x1); // Max AMQ (parallel jobs with ack) called
             msg.AddParameterData((UInt16)0x1e0); // PDU length
 
             return msg;
@@ -84,16 +84,20 @@ namespace PLCompliant.STEP_7
         public IsoTcpMessage CreateReadSZL()
         {
             var msg = new IsoTcpMessage(
-                new TPKTHeader(),
+                new TPKTHeader(0x3),
                 new COTPMessage(
-                    new COTPHeader(0x0f),
-                    new COTPData()),
+                    new COTPHeader(),
+                    new COTPData(0xf0)),
                 new STEP7Message(
                     new STEP7Header(0x32, 0x7, 0),
-                    new STEP7ParameterData(0xf0),
-                    null));
-            msg.AddCOTPData((byte)0x0); // Function: CPU services
+                    new STEP7ParameterData(0x00),
+                    new STEP7Data(0xff, 0x09)));
+            msg.AddCOTPData((byte)0x80); // tpdu number mask
+
+            msg.AddParameterData((byte)0x1); // item count
+
             msg.AddParameterData((byte)0x12); // Variable specification
+            msg.AddParameterData((byte)0x4); // len of var specification
             msg.AddParameterData((byte)0x11); // syntax id
             msg.AddParameterData((byte)0x44); // function group bitmask
 

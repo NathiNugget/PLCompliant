@@ -1,6 +1,5 @@
 ﻿using PLCompliant.Interface;
 using PLCompliant.Utilities;
-using System.Net;
 using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
@@ -8,6 +7,7 @@ namespace PLCompliant.STEP_7
     [StructLayout(LayoutKind.Explicit, Size = 12, CharSet = CharSet.Ansi)]
     public struct STEP7Header : IProtocolHeader
     {
+        public const byte PRELUDE_LEN = 2;
         [FieldOffset(0)] private byte _protocolId;
         [FieldOffset(1)] private byte _messageType;
         [FieldOffset(2)] private UInt16 _reserved;
@@ -53,7 +53,7 @@ namespace PLCompliant.STEP_7
             get { return _pduReference; }
             set { _pduReference = value; }
         }
-        
+
         public UInt16 Reserved
         {
             get { return _reserved; }
@@ -82,14 +82,14 @@ namespace PLCompliant.STEP_7
             {
                 // if messagetype is not 0x3 (ack_data), don't include the error codes in size
                 int size = Marshal.SizeOf(this);
-                if(_messageType != 0x3)
+                if (_messageType != 0x3)
                 {
                     size -= (Marshal.SizeOf(_errorClass) + Marshal.SizeOf(_errorCode));
                 }
                 return size;
             }
         }
-        public STEP7Header(byte protocolId, byte messageType, UInt16 pduReference) 
+        public STEP7Header(byte protocolId, byte messageType, UInt16 pduReference)
         {
             _protocolId = protocolId;
             _messageType = messageType;
@@ -100,12 +100,15 @@ namespace PLCompliant.STEP_7
             _errorCode = 0;
             _reserved = 0;
         }
-        public void Deserialize(byte[] inputBuffer, int startIndex)
+
+        public void DeserializePrelude(byte[] inputBuffer, int startIndex)
         {
             _protocolId = inputBuffer[startIndex];
             startIndex += Marshal.SizeOf(_protocolId);
             _messageType = inputBuffer[startIndex];
-            startIndex += Marshal.SizeOf(_messageType);
+        }
+        public void Deserialize(byte[] inputBuffer, int startIndex)
+        {
             _reserved = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
             startIndex += Marshal.SizeOf(_reserved);
             _pduReference = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
@@ -116,7 +119,7 @@ namespace PLCompliant.STEP_7
             _dataLength = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
             startIndex += Marshal.SizeOf(_dataLength);
 
-            if(_messageType == 0x3)
+            if (_messageType == 0x3)
             {
                 _errorClass = inputBuffer[startIndex];
                 startIndex += Marshal.SizeOf(_errorClass);

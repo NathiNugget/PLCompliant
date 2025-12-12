@@ -4,6 +4,7 @@ using PLCompliant.Events;
 using PLCompliant.Logging;
 using PLCompliant.Modbus;
 using PLCompliant.Response;
+using PLCompliant.STEP_7;
 using PLCompliant.Utilities;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -146,8 +147,17 @@ namespace PLCompliant.Scanning
 
                                                     }
                                                     break;
+                                                case PLCProtocolType.Step_7:
+                                                    ReadSZLResponseData? step7Response = StartSTEP7Identification(ip);
+                                                    if (step7Response != null)
+                                                    {
+                                                        step7Response.IPAddr = ip;
+                                                        _responses.Add(step7Response);
+                                                    }
+                                                    break;
+
                                                 default:
-                                                    break; //TODO: IMPLEMENT when we get to this perhaps maybe necessarily
+                                                    break;
 
                                             }
                                         }
@@ -211,7 +221,7 @@ namespace PLCompliant.Scanning
             {
 
                 using (TcpClient client = new TcpClient(ip.ToString(), ModBusMessage.MODBUS_TCP_PORT))
-                using(NetworkStream stream = client.GetStream())
+                using (NetworkStream stream = client.GetStream())
                 {
                     if (client.Connected)
                     {
@@ -262,5 +272,94 @@ namespace PLCompliant.Scanning
             }
         }
 
+
+
+
+
+
+
+        private ReadSZLResponseData? StartSTEP7Identification(IPAddress ip)
+        {
+
+            IsoTcpMessage COTPResponse = null;
+            IsoTcpMessageFactory factory = new IsoTcpMessageFactory();
+            IsoTcpMessage connectMsgOne = factory.CreateCRConnectRequestOne();
+            IsoTcpMessage connectMsgTwo = factory.CreateCRConnectRequestTwo();
+            TcpClient client = null;
+            NetworkStream stream = null;
+            bool connected = false;
+
+            // try first message
+            try
+            {
+                client = new TcpClient(ip.ToString(), STEP7Message.STEP7_TCP_PORT);
+                stream = client.GetStream();
+                COTPResponse = IsoTcpMessage.SendReceive(connectMsgOne, stream);
+                connected = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage($"Fejl ved 1. forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Warning);
+                stream.Dispose();
+                client.Close();
+            }
+
+            if (!connected)
+            {
+                // and then the 2nd
+                try
+                {
+                    client = new TcpClient(ip.ToString(), STEP7Message.STEP7_TCP_PORT);
+                    stream = client.GetStream();
+                    COTPResponse = IsoTcpMessage.SendReceive(connectMsgTwo, stream);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogMessage($"Netværksfejl ved 2. forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
+                    stream.Dispose();
+                    client.Close();
+                    return null;
+                }
+            }
+
+            IsoTcpMessage setupCommMsg = factory.CreateSetupCommunication();
+            IsoTcpMessage setupCommResponse = null;
+            IsoTcpMessage ReadSZLResponse = null;
+            try
+            {
+
+                setupCommResponse = IsoTcpMessage.SendReceive(setupCommMsg, stream);
+                STEP7ErrorInfo err = new STEP7ErrorInfo();
+                bool isError = STEP7ResponseParsing.TryHandleReponseError(setupCommResponse.STEP7, out err);
+                if (isError)
+                {
+                    //Logger.Instance.LogMessage($"Fejl ved i svar fra Setup Communication. Fejlklasse: {err.errClass}")
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                Logger.Instance.LogMessage($"Netværksfejl ved Setup Communication i forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
+                stream.Dispose();
+                client.Close();
+                return null;
+            }
+            try
+            {
+                IsoTcpMessage ReadSZLDataMsg = factory.CreateReadSZL();
+                ReadSZLResponse = IsoTcpMessage.SendReceive(ReadSZLDataMsg, stream);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage($"Fejl ved aflæsning af SZL data i forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
+                stream.Dispose();
+                client.Close();
+                return null;
+            }
+            return STEP7ResponseParsing.ParseReadSZLResponse(ReadSZLResponse, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
+        }
+
     }
 }
+

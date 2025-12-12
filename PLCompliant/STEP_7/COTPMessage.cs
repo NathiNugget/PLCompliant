@@ -1,5 +1,4 @@
 ﻿using PLCompliant.Interface;
-using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
@@ -40,19 +39,19 @@ namespace PLCompliant.STEP_7
         public void AddData(ushort inputData)
         {
             _data.AddData(inputData);
-            _header.Length += (byte)Marshal.SizeOf(inputData);
+            _header.Length = (byte)Data.Size;
         }
 
         public void AddData(byte inputData)
         {
             _data.AddData(inputData);
-            _header.Length += (byte)Marshal.SizeOf(inputData);
+            _header.Length = (byte)Data.Size;
         }
 
         public void AddData(byte[] stringData)
         {
             _data.AddData(stringData);
-            _header.Length += (byte)stringData.Length;
+            _header.Length = (byte)Data.Size;
         }
 
         public void DeserializeData(byte[] inputBuffer, int startIndex)

@@ -37,6 +37,9 @@ namespace PLCompliant.Events
                 case PLCProtocolType.Modbus:
                     writer = new ModBusCSVWriter();
                     break;
+                case PLCProtocolType.Step_7:
+                    writer = new STEP7CSVWriter();
+                    break;
                 default:
                     break;
             }

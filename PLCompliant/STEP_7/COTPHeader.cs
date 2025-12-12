@@ -1,6 +1,4 @@
 ﻿using PLCompliant.Interface;
-using System;
-using System.Net;
 using System.Runtime.InteropServices;
 namespace PLCompliant.STEP_7
 {
@@ -8,18 +6,11 @@ namespace PLCompliant.STEP_7
     public struct COTPHeader : IProtocolHeader
     {
         [FieldOffset(0)] private byte _length;
-        [FieldOffset(1)] private byte _pduType;
 
         public byte Length
         {
             get { return _length; }
             set { _length = value; }
-        }
-        public byte PduType
-        {
-            get { return _pduType; }
-            set { _pduType = value; }
-
         }
 
         public int Size
@@ -30,9 +21,8 @@ namespace PLCompliant.STEP_7
             }
         }
 
-        public COTPHeader(byte pduType)
+        public COTPHeader()
         {
-            _pduType = pduType;
             _length = 0;
         }
 
@@ -40,14 +30,12 @@ namespace PLCompliant.STEP_7
         {
             _length = inputBuffer[startIndex];
             startIndex += Marshal.SizeOf(_length);
-            _pduType = inputBuffer[startIndex];
         }
 
         public byte[] Serialize()
         {
             byte[] outData = new byte[Size];
             outData[0] = _length;
-            outData[1] = _pduType;
             return outData;
         }
     }

@@ -4,6 +4,18 @@ namespace PLCompliant.Enums
 {
     static public class EnumToString
     {
+        public static string STEP7ReturnCode(STEP7ReturnCode code)
+        {
+            if (Enum.IsDefined(typeof(STEP7ReturnCode), code))
+            {
+                return code.ToString();
+            }
+            else
+            {
+                return "Ukendt Fejl";
+            }
+
+        }
         public static string ProtocolType(PLCProtocolType protocolType)
         {
             switch (protocolType)

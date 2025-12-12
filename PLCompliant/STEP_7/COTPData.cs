@@ -7,10 +7,19 @@ namespace PLCompliant.STEP_7
     public class COTPData : IProtocolData
     {
 
-        public COTPData()
+        public COTPData(byte pduType)
         {
+            _pduType = pduType;
             _data = [];
         }
+        private byte _pduType;
+
+        public byte PduType
+        {
+            get { return _pduType; }
+            set { _pduType = value; }
+        }
+
         private byte[] _data;
 
         public byte[] Data
@@ -26,7 +35,7 @@ namespace PLCompliant.STEP_7
         {
             get
             {
-                return _data.Length;
+                return Marshal.SizeOf(_pduType) + _data.Length;
             }
         }
 
@@ -68,14 +77,19 @@ namespace PLCompliant.STEP_7
 
         public void Deserialize(byte[] inputBuffer, int startIndex)
         {
-            Array.Resize(ref _data, inputBuffer.Length);
-            Array.Copy(inputBuffer, startIndex, _data , 0, _data.Length);
+            _pduType = inputBuffer[startIndex];
+            startIndex += Marshal.SizeOf(_pduType);
+            Array.Resize(ref _data, inputBuffer.Length - startIndex);
+            Array.Copy(inputBuffer, startIndex, _data, 0, inputBuffer.Length - startIndex);
         }
 
         public byte[] Serialize()
         {
+            int startIndex = 0;
             byte[] outData = new byte[Size];
-            Array.Copy(_data, 0, outData, 0, _data.Length);
+            outData[startIndex] = _pduType;
+            startIndex += Marshal.SizeOf(_pduType);
+            Array.Copy(_data, 0, outData, startIndex, _data.Length);
             return outData;
         }
     }
