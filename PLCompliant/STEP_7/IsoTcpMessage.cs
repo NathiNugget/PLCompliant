@@ -1,9 +1,4 @@
-﻿using PLCompliant.Enums;
-using PLCompliant.Interface;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-
-namespace PLCompliant.STEP_7
+﻿namespace PLCompliant.STEP_7
 {
     public class IsoTcpMessage : IProtocolMessage
     {
@@ -49,9 +44,7 @@ namespace PLCompliant.STEP_7
                             TPKTheader.Deserialize(headerbuffer, 0);
                             recvState = RecieveState.ReadingCotpHeader;
                             readbytes = 0;
-                            /*"length" is the field for the lenght of the entire packet, including itself.
-                            Therefore, to find the length of the rest we must subtract its own size
-                              */
+                            /*"length" is the field for the lenght of the entire packet, including itself. */
                             TotalMsgSize = TPKTheader.Length;
                             // set size to be correct for the next header
                             Array.Resize(ref headerbuffer, COTPheader.Size);
@@ -290,6 +283,7 @@ namespace PLCompliant.STEP_7
 
         public void DeserializeData(byte[] inputBuffer, int startIndex)
         {
+            //TODO: Fix this if we are to use it later, and prehaps consolidate deserializedata and deserializeheader?
             _cotp.DeserializeHeader(inputBuffer, startIndex);
             _cotp.DeserializeData(inputBuffer, startIndex);
             if (_step7 != null)
