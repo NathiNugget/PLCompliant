@@ -72,7 +72,7 @@ namespace PLCompliant
             char[] chararr = textbox.Text.ToCharArray();
             List<char> charlist = chararr.ToList();
 
-            if (e.KeyCode == Keys.OemPeriod || e.KeyCode == Keys.Oemcomma || e.KeyCode == Keys.Right)
+            if (e.KeyCode == Keys.OemPeriod || e.KeyCode == Keys.Oemcomma || e.KeyCode == Keys.Right || e.KeyCode == Keys.Space)
             {
                 var range = charlist.GetRange(index, charlist.Count - index);
                 if (range.Count == 0)
