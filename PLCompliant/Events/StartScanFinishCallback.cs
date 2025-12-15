@@ -21,13 +21,13 @@ namespace PLCompliant.Events
             {
                 form.CurrentStateLabel.Text = "Starter ikke scanning pga. en scanning er allerede igang";
             }
-            else if(!args.Responses.Any())
+            else if (!args.Responses.Any())
             {
-                form.CurrentStateLabel.Text = $"{args.ResponsivePLCs.Count()} PLC'er fundet, men 0 returnerede brugbar data. Check log for detaljer";       
+                form.CurrentStateLabel.Text = $"{args.ResponsivePLCs.Count()} PLC'er fundet, men 0 returnerede brugbar data. Check log for detaljer";
             }
             else
             {
-                 
+
                 UpdateEventQueue.Instance.Push(new GenerateCSVEvent(new GenerateCSVArgs(form.SavePath.Text, args.Responses, args.ScannedWith)));
             }
             form.NotifyScanToggle();

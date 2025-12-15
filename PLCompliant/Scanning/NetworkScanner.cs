@@ -111,6 +111,7 @@ namespace PLCompliant.Scanning
                     _abortScan = false;
                     _scanInProgress = true;
                     _responsivePLCs.Clear();
+                    _responses.Clear();
                     List<Thread> threads = new List<Thread>();
                     int ipspinged = 1;
 
@@ -153,6 +154,7 @@ namespace PLCompliant.Scanning
                                                     {
                                                         step7Response.IPAddr = ip;
                                                         _responses.Add(step7Response);
+
                                                     }
                                                     break;
 
@@ -275,11 +277,19 @@ namespace PLCompliant.Scanning
 
 
 
-
+        private void TryAddPLC(IPAddress ip, ref bool added)
+        {
+            if (!added)
+            {
+                _responsivePLCs.Add(ip);
+                added = true;
+            }
+        }
 
 
         private ReadSZLResponseData? StartSTEP7Identification(IPAddress ip)
         {
+            bool addedToCollection = false;
 
             IsoTcpMessage COTPResponse = null;
             IsoTcpMessageFactory factory = new IsoTcpMessageFactory();
@@ -295,6 +305,8 @@ namespace PLCompliant.Scanning
                 client = new TcpClient(ip.ToString(), STEP7Message.STEP7_TCP_PORT);
                 stream = client.GetStream();
                 COTPResponse = IsoTcpMessage.SendReceive(connectMsgOne, stream);
+                _responsivePLCs.Add(ip);
+                TryAddPLC(ip, ref addedToCollection);
                 connected = true;
             }
             catch (Exception ex)
@@ -310,6 +322,7 @@ namespace PLCompliant.Scanning
                 try
                 {
                     client = new TcpClient(ip.ToString(), STEP7Message.STEP7_TCP_PORT);
+                    TryAddPLC(ip, ref addedToCollection);
                     stream = client.GetStream();
                     COTPResponse = IsoTcpMessage.SendReceive(connectMsgTwo, stream);
                 }

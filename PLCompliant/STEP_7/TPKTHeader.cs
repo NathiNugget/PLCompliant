@@ -1,12 +1,6 @@
 ﻿using PLCompliant.Interface;
 using PLCompliant.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLCompliant.STEP_7
 {
@@ -18,12 +12,12 @@ namespace PLCompliant.STEP_7
         [FieldOffset(2)] private UInt16 _length;
 
 
-        public UInt16 Length 
+        public UInt16 Length
         {
-            get { return _length; } 
+            get { return _length; }
             set { _length = value; }
-        
-        
+
+
         }
         public byte Reserved
         {
@@ -51,7 +45,7 @@ namespace PLCompliant.STEP_7
         }
         public TPKTHeader(byte version)
         {
-            _version= version;
+            _version = version;
             _length = 0;
             _reserved = 0;
         }
@@ -73,7 +67,7 @@ namespace PLCompliant.STEP_7
             outData[startIndex] = _reserved;
             startIndex += Marshal.SizeOf(_reserved);
             var lengthAsBytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(_length));
-            Array.Copy(lengthAsBytes, 0 , outData, startIndex, lengthAsBytes.Length);
+            Array.Copy(lengthAsBytes, 0, outData, startIndex, lengthAsBytes.Length);
             return outData;
         }
     }

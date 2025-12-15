@@ -1,6 +1,5 @@
 ﻿using PLCompliant.Interface;
 using PLCompliant.Utilities;
-using System;
 using System.Runtime.InteropServices;
 
 
@@ -42,7 +41,7 @@ namespace PLCompliant.STEP_7
             FunctionCode = inputBuffer[startIndex];
             startIndex += Marshal.SizeOf(FunctionCode);
             Array.Resize(ref _data, inputBuffer.Length - startIndex);
-            Array.Copy(inputBuffer, startIndex,_data,0, _data.Length);
+            Array.Copy(inputBuffer, startIndex, _data, 0, _data.Length);
         }
 
         public byte[] Serialize()
