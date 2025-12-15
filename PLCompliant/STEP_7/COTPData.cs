@@ -7,20 +7,20 @@ namespace PLCompliant.STEP_7
     public class COTPData : IProtocolData
     {
 
+        private byte _pduType;
+        private byte[] _data;
+
         public COTPData(byte pduType)
         {
             _pduType = pduType;
             _data = [];
         }
-        private byte _pduType;
 
         public byte PduType
         {
             get { return _pduType; }
             set { _pduType = value; }
         }
-
-        private byte[] _data;
 
         public byte[] Data
         {

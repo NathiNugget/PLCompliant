@@ -1,4 +1,5 @@
-﻿using PLCompliant.Interface;
+﻿using PLCompliant.Enums;
+using PLCompliant.Interface;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
@@ -6,17 +7,7 @@ namespace PLCompliant.STEP_7
 {
     public class IsoTcpMessage : IProtocolMessage
     {
-        public enum RecieveState : byte
-        {
-            ReadingTpktHeader,
-            ReadingCotpHeader,
-            ReadingCotpData,
-            ReadingSTEP7Header,
-            ReadingSTEP7HeaderPrelude,
-            ReadingSTEP7Parameters,
-            ReadingSTEP7Data,
-            Finished
-        }
+
         const int SOCKETTIMEOUT = 3000;
 
         public static IsoTcpMessage SendReceive(IsoTcpMessage messageToSend, NetworkStream stream)
@@ -194,12 +185,6 @@ namespace PLCompliant.STEP_7
                 return new IsoTcpMessage(TPKTheader, new COTPMessage(COTPheader, COTPData), null);
             }
         }
-
-
-
-
-
-
 
         private TPKTHeader _tpkt;
         private COTPMessage _cotp;

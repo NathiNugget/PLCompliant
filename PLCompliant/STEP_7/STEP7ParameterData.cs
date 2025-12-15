@@ -9,6 +9,11 @@ namespace PLCompliant.STEP_7
     {
         private byte _functionCode;
         private byte[] _data;
+        public STEP7ParameterData(byte functionCode)
+        {
+            _functionCode = functionCode;
+            _data = [];
+        }
 
         public byte[] Data
         {
@@ -29,11 +34,6 @@ namespace PLCompliant.STEP_7
             {
                 return Marshal.SizeOf(_functionCode) + _data.Length;
             }
-        }
-        public STEP7ParameterData(byte functionCode)
-        {
-            _functionCode = functionCode;
-            _data = [];
         }
 
         public void Deserialize(byte[] inputBuffer, int startIndex)

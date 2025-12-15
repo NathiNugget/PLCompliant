@@ -11,6 +11,14 @@ namespace PLCompliant.STEP_7
         private UInt16 _length;
         private byte[] _data;
 
+        public STEP7Data(byte returnCode, byte transportType)
+        {
+            _returnCode = returnCode;
+            _transportType = transportType;
+            _length = 0;
+            _data = [];
+        }
+
         public byte[] Data
         {
             get { return _data; }
@@ -44,13 +52,7 @@ namespace PLCompliant.STEP_7
                 return Marshal.SizeOf(_returnCode) + Marshal.SizeOf(_transportType) + Marshal.SizeOf(_length) + _data.Length;
             }
         }
-        public STEP7Data(byte returnCode, byte transportType)
-        {
-            _returnCode = returnCode;
-            _transportType = transportType;
-            _length = 0;
-            _data = [];
-        }
+
 
         public void Deserialize(byte[] inputBuffer, int startIndex)
         {
