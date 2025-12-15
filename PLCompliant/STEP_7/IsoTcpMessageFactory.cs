@@ -73,7 +73,8 @@ namespace PLCompliant.STEP_7
                     new STEP7Header(0x32, 0x1, 0),
                     new STEP7ParameterData(0xf0),
                     null));
-            msg.AddCOTPData((byte)0x80); // TPDU number
+            msg.AddCOTPData((byte)0x80); // T
+                                         // number
             msg.AddParameterData((byte)0x0); // add reserved field
             msg.AddParameterData((UInt16)0x1); // Max AMQ (parallel jobs with ack) calling
             msg.AddParameterData((UInt16)0x1); // Max AMQ (parallel jobs with ack) called

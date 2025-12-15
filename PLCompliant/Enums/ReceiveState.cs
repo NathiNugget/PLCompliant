@@ -1,6 +1,6 @@
 ﻿namespace PLCompliant.Enums
 {
-    public enum RecieveState : byte
+    public enum ReceiveState : byte
     {
         ReadingTpktHeader,
         ReadingCotpHeader,
