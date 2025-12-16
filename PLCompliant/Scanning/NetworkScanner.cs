@@ -286,91 +286,98 @@ namespace PLCompliant.Scanning
             }
         }
 
+        private IsoTcpMessage TryCOTPConnect(IsoTcpMessage connectionMsg, IPAddress ip, NetworkStream stream)
+        {
 
+            var COTPResponse = IsoTcpMessage.SendReceive(connectionMsg, stream);
+            return COTPResponse;
+
+
+        }
         private ReadSZLResponseData? StartSTEP7Identification(IPAddress ip)
         {
-            bool addedToCollection = false;
+            List<IsoTcpMessage> messages = new List<IsoTcpMessage>();
 
-            IsoTcpMessage COTPResponse = null;
             IsoTcpMessageFactory factory = new IsoTcpMessageFactory();
-            IsoTcpMessage connectMsgOne = factory.CreateCRConnectRequestOne();
-            IsoTcpMessage connectMsgTwo = factory.CreateCRConnectRequestTwo();
+            messages.Add(factory.CreateCRConnectRequestOne());
+            messages.Add(factory.CreateCRConnectRequestTwo());
             TcpClient client = null;
             NetworkStream stream = null;
             bool connected = false;
-
-            // try first message
-            try
+            foreach (var connectionMsg in messages)
             {
-                client = new TcpClient(ip.ToString(), STEP7Message.STEP7_TCP_PORT);
-                stream = client.GetStream();
-                COTPResponse = IsoTcpMessage.SendReceive(connectMsgOne, stream);
-                _responsivePLCs.Add(ip);
-                TryAddPLC(ip, ref addedToCollection);
-                connected = true;
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogMessage($"Fejl ved 1. forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Warning);
-                stream.Dispose();
-                client.Close();
-            }
-
-            if (!connected)
-            {
-                // and then the 2nd
                 try
                 {
                     client = new TcpClient(ip.ToString(), STEP7Message.STEP7_TCP_PORT);
-                    TryAddPLC(ip, ref addedToCollection);
                     stream = client.GetStream();
-                    COTPResponse = IsoTcpMessage.SendReceive(connectMsgTwo, stream);
+                    TryAddPLC(ip, ref connected);
+                }
+                catch
+                {
+                    stream?.Dispose();
+                    client?.Close();
+                    return null;
+                }
+                try
+                {
+                    var responseMsg = TryCOTPConnect(connectionMsg, ip, stream);
+                    if (responseMsg != null)
+                    {
+                        break;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.LogMessage($"Netværksfejl ved 2. forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
-                    stream.Dispose();
-                    client.Close();
+                    Logger.Instance.LogMessage($"Fejl ved COTP-forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Warning);
+                    stream?.Dispose();
+                    client?.Close();
+                }
+            }
+            // If no COTP connections was accepted
+            if (client == null || stream == null)
+            {
+                Logger.Instance.LogMessage($"Ingen COTP forbindelser virkede på IP {ip}, skipping", TraceEventType.Error);
+                return null;
+            }
+            using (client)
+            using (stream)
+            {
+                IsoTcpMessage setupCommMsg = factory.CreateSetupCommunication();
+                IsoTcpMessage setupCommResponse = null;
+                IsoTcpMessage ReadSZLResponse = null;
+                try
+                {
+
+                    setupCommResponse = IsoTcpMessage.SendReceive(setupCommMsg, stream);
+                    STEP7ErrorInfo err = new STEP7ErrorInfo();
+                    bool isError = STEP7ResponseParsing.TryHandleReponseError(setupCommResponse.STEP7, out err);
+                    if (isError)
+                    {
+                        Logger.Instance.LogMessage($"Fejl ved i svar fra Setup Communication. Fejlklasse: {err.errClass}, Fejlkode: {err.errValue}", TraceEventType.Error);
+                        return null;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    Logger.Instance.LogMessage($"Netværksfejl ved Setup Communication i forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
                     return null;
                 }
-            }
-
-            IsoTcpMessage setupCommMsg = factory.CreateSetupCommunication();
-            IsoTcpMessage setupCommResponse = null;
-            IsoTcpMessage ReadSZLResponse = null;
-            try
-            {
-
-                setupCommResponse = IsoTcpMessage.SendReceive(setupCommMsg, stream);
-                STEP7ErrorInfo err = new STEP7ErrorInfo();
-                bool isError = STEP7ResponseParsing.TryHandleReponseError(setupCommResponse.STEP7, out err);
-                if (isError)
+                try
                 {
-                    //Logger.Instance.LogMessage($"Fejl ved i svar fra Setup Communication. Fejlklasse: {err.errClass}")
+                    IsoTcpMessage ReadSZLDataMsg = factory.CreateReadSZL();
+                    ReadSZLResponse = IsoTcpMessage.SendReceive(ReadSZLDataMsg, stream);
                 }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogMessage($"Fejl ved aflæsning af SZL data i forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
+                    return null;
+                }
+                return STEP7ResponseParsing.ParseReadSZLResponse(ReadSZLResponse, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
+            }
 
-            }
-            catch (Exception ex)
-            {
 
-                Logger.Instance.LogMessage($"Netværksfejl ved Setup Communication i forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
-                stream.Dispose();
-                client.Close();
-                return null;
-            }
-            try
-            {
-                IsoTcpMessage ReadSZLDataMsg = factory.CreateReadSZL();
-                ReadSZLResponse = IsoTcpMessage.SendReceive(ReadSZLDataMsg, stream);
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogMessage($"Fejl ved aflæsning af SZL data i forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
-                stream.Dispose();
-                client.Close();
-                return null;
-            }
-            return STEP7ResponseParsing.ParseReadSZLResponse(ReadSZLResponse, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
         }
 
     }

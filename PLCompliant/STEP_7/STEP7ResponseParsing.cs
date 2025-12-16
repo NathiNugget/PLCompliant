@@ -49,8 +49,7 @@ namespace PLCompliant.STEP_7
 
             var result = new ReadSZLResponseData();
             int startIndex = 0;
-            // no need to endian convert cause it is a bitmask
-            result.DiagnosticTypeMask = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
+            result.DiagnosticTypeMask = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex)); // TODO: Double check endianness of this one if its important
             startIndex += Marshal.SizeOf<UInt16>();
 
             result.SZLIndex = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
