@@ -38,7 +38,7 @@ namespace PLCompliant
 
             _timer = new System.Windows.Forms.Timer();
             _timer.Tick += new EventHandler(UIOnTick!);
-            _timer.Interval = 10; // This interval is is milliseconds. 
+            _timer.Interval = 100; // This interval is is milliseconds. 
             _timer.Start();
         }
 

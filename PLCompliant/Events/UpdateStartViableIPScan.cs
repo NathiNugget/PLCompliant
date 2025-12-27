@@ -21,7 +21,7 @@ namespace PLCompliant.Events
         /// Start scan of IPs as well as scanning PLCs
         /// </summary>
         /// <param name="context"></param>
-        public override void ExecuteEvent(UpdateThreadContext context)
+        public override async void ExecuteEvent(UpdateThreadContext context)
         {
             var validatedTypes = EventUtilities.ValidateContextAndArgs<UpdateThreadContext, StartViableIPsScanArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
             StartViableIPsScanArgs? args = validatedTypes.Item2;
@@ -31,17 +31,15 @@ namespace PLCompliant.Events
                 return;
             }
 
-            Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
-            {
-                Logger.Instance.LogMessage($"PLC scan startet på protokol {EnumToString.ProtocolType(args.Protocol)}", TraceEventType.Information);
-                StartViableIPScanBeginCallback callback = new StartViableIPScanBeginCallback(null!);
-                UIEventQueue.Instance.Push(callback);
-                var scanResult = context.scanner.FindIPs(args.Protocol);
-                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol, scanResult, context.scanner.ResponsivePLCs)));
+            Logger.Instance.LogMessage($"PLC scan startet på protokol {EnumToString.ProtocolType(args.Protocol)}", TraceEventType.Information);
+            StartViableIPScanBeginCallback callback = new StartViableIPScanBeginCallback(null!);
+            UIEventQueue.Instance.Push(callback);
+            ScanResult scanResult = await context.scanner.FindIPs(args.Protocol);
+            UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol, scanResult, context.scanner.ResponsivePLCs)));
 
 
-            });
-            scanThread.Start();
+            
+            
         }
     }
 }

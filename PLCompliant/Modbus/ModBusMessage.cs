@@ -15,11 +15,11 @@ namespace PLCompliant.Modbus
         /// <param name="messageToSend">The modbus message to send</param>
         /// <param name="stream">The stream to send it to</param>
         /// <returns>The response as a ModBusMessage</returns>
-        public static ModBusMessage SendReceive(ModBusMessage messageToSend, NetworkStream stream)
+        public static async Task<ModBusMessage> SendReceive(ModBusMessage messageToSend, NetworkStream stream)
         {
             stream.ReadTimeout = SOCKETTIMEOUT;
             byte[] buffer = messageToSend.Serialize();
-            stream.Write(buffer, 0, buffer.Length);
+            await stream.WriteAsync(buffer, 0, buffer.Length);
             byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
             int readbytes = 0;
             byte[] headerbuffer = new byte[messageToSend.Header.Size];
@@ -32,7 +32,7 @@ namespace PLCompliant.Modbus
                 {
                     int dataleft = messageToSend.Header.Size - readbytes;
                     int index = messageToSend.Header.Size - dataleft;
-                    readbytes += stream.Read(headerbuffer, index, dataleft);
+                    readbytes += await stream.ReadAsync(headerbuffer, index, dataleft);
                     if (readbytes == 7)
                     {
                         response.DeserializeHeader(headerbuffer);
@@ -47,7 +47,7 @@ namespace PLCompliant.Modbus
 
                     int dataleft = (response.Header.length - 1) - readbytes;
                     int index = (response.Header.length - 1) - dataleft;
-                    readbytes += stream.Read(databuffer, index, dataleft);
+                    readbytes += await stream.ReadAsync(databuffer, index, dataleft);
                     if (readbytes == response.Header.length - 1)
                     {
                         response.DeserializeData(databuffer);
