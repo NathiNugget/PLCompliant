@@ -114,14 +114,14 @@ namespace PLCompliant.Scanning
 
                 if (_scanCancelToken.Token.IsCancellationRequested)
                 {
-                    return ScanResult.Aborted;
+                    _scanCancelToken.Token.ThrowIfCancellationRequested();
                 }
                 foreach (IPAddress ip in _scanRange)
                 {
                        
                     if (_scanCancelToken.Token.IsCancellationRequested)
                     {
-                        break;
+                        _scanCancelToken.Token.ThrowIfCancellationRequested();
                     }
                     try
                     {
@@ -153,6 +153,10 @@ namespace PLCompliant.Scanning
                 }
                 foreach(var response in responses)
                 {
+                    if(_scanCancelToken.Token.IsCancellationRequested)
+                    {
+                        _scanCancelToken.Token.ThrowIfCancellationRequested();
+                    }
                     ResponseData? result = await response;
                     if (result != null)
                     {
@@ -194,7 +198,7 @@ namespace PLCompliant.Scanning
         {
             try
             {
-
+                _scanCancelToken.Token.ThrowIfCancellationRequested();
                 using TcpClient client = new TcpClient();
                 try
                 {

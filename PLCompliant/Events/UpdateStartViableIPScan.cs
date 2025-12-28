@@ -3,6 +3,7 @@ using PLCompliant.Enums;
 using PLCompliant.EventArguments;
 using PLCompliant.Logging;
 using PLCompliant.Utilities;
+using System.CodeDom;
 using System.Diagnostics;
 
 namespace PLCompliant.Events
@@ -34,12 +35,15 @@ namespace PLCompliant.Events
             Logger.Instance.LogMessage($"PLC scan startet på protokol {EnumToString.ProtocolType(args.Protocol)}", TraceEventType.Information);
             StartViableIPScanBeginCallback callback = new StartViableIPScanBeginCallback(null!);
             UIEventQueue.Instance.Push(callback);
-            ScanResult scanResult = await context.scanner.FindIPs(args.Protocol);
-            UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol, scanResult, context.scanner.ResponsivePLCs)));
-
-
-            
-            
+            try
+            {
+                ScanResult scanResult = await context.scanner.FindIPs(args.Protocol);
+                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol, scanResult, context.scanner.ResponsivePLCs)));
+            }
+            catch(OperationCanceledException)
+            {
+                UIEventQueue.Instance.Push(new StartScanFinishCallback(new StartScanFinishCallbackArgs(context.scanner.Responses, args.Protocol, ScanResult.Aborted, context.scanner.ResponsivePLCs)));
+            }
         }
     }
 }
