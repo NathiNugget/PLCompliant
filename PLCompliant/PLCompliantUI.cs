@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
+using System.Timers;
 
 namespace PLCompliant
 {
@@ -18,12 +19,15 @@ namespace PLCompliant
         /// instance field used while testing out capabilities of timer
         /// </summary>
         bool running;
+        bool executingEvents = false;
+        System.Timers.Timer eventsTimer = new System.Timers.Timer(new TimeSpan(TimeSpan.TicksPerMillisecond * 10));
         System.Windows.Forms.Timer _timer;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public PLCProtocolType Protocol { get; private set; } = PLCProtocolType.Modbus;
         public PLCompliantUI()
         {
-
+            eventsTimer.Elapsed += Timer_Elapsed;
+            eventsTimer.AutoReset = false;
             InitializeComponent();
             running = false;
             CurrentStateLabel.Text = "Afventer brugerens instruks";
@@ -38,8 +42,13 @@ namespace PLCompliant
 
             _timer = new System.Windows.Forms.Timer();
             _timer.Tick += new EventHandler(UIOnTick!);
-            _timer.Interval = 100; // This interval is is milliseconds. 
+            _timer.Interval = 10; // This interval is is milliseconds. 
             _timer.Start();
+        }
+
+        private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
+        {
+            executingEvents = false;
         }
 
         private void PLCompliantUI_Load(object sender, EventArgs e)
@@ -49,17 +58,20 @@ namespace PLCompliant
 
         private void UIOnTick(object? sender, EventArgs args)
         {
+
             UIEventQueue queue = UIEventQueue.Instance;
-            int processedEvents = 0;
-            while (!queue.Empty && processedEvents < 1000)
+            executingEvents = true;
+            eventsTimer.Start();
+            while (!queue.Empty && executingEvents)
             {
                 if (queue.TryPop(out var evt))
                 {
                     evt.ExecuteEvent(this);
-                    processedEvents++;
 
                 }
             }
+            eventsTimer.Stop();
+            executingEvents = false;
         }
 
 

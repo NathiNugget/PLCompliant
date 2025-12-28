@@ -1,5 +1,6 @@
 ﻿using PLCompliant.Interface;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace PLCompliant.Modbus
 {
@@ -15,11 +16,11 @@ namespace PLCompliant.Modbus
         /// <param name="messageToSend">The modbus message to send</param>
         /// <param name="stream">The stream to send it to</param>
         /// <returns>The response as a ModBusMessage</returns>
-        public static async Task<ModBusMessage> SendReceive(ModBusMessage messageToSend, NetworkStream stream)
+        public static async Task<ModBusMessage> SendReceive(ModBusMessage messageToSend, NetworkStream stream, CancellationToken cancellationToken)
         {
             stream.ReadTimeout = SOCKETTIMEOUT;
             byte[] buffer = messageToSend.Serialize();
-            await stream.WriteAsync(buffer, 0, buffer.Length);
+            await stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
             byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
             int readbytes = 0;
             byte[] headerbuffer = new byte[messageToSend.Header.Size];
@@ -32,7 +33,7 @@ namespace PLCompliant.Modbus
                 {
                     int dataleft = messageToSend.Header.Size - readbytes;
                     int index = messageToSend.Header.Size - dataleft;
-                    readbytes += await stream.ReadAsync(headerbuffer, index, dataleft);
+                    readbytes += await stream.ReadAsync(headerbuffer, index, dataleft, cancellationToken);
                     if (readbytes == 7)
                     {
                         response.DeserializeHeader(headerbuffer);
@@ -47,7 +48,7 @@ namespace PLCompliant.Modbus
 
                     int dataleft = (response.Header.length - 1) - readbytes;
                     int index = (response.Header.length - 1) - dataleft;
-                    readbytes += await stream.ReadAsync(databuffer, index, dataleft);
+                    readbytes += await stream.ReadAsync(databuffer, index, dataleft, cancellationToken);
                     if (readbytes == response.Header.length - 1)
                     {
                         response.DeserializeData(databuffer);

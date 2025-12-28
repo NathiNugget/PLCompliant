@@ -28,6 +28,7 @@ namespace PLCompliant.Scanning
         ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>();
         ConcurrentBag<ResponseData> _responses = new ConcurrentBag<ResponseData>();
         IPAddressRange _scanRange;
+        CancellationTokenSource _scanCancelToken = new CancellationTokenSource();
 
         /// <summary>
         /// Constructor to specify the range to scan
@@ -89,7 +90,7 @@ namespace PLCompliant.Scanning
         /// </summary>
         public void StopScan()
         {
-            _abortScan = true;
+            _scanCancelToken.Cancel();
 
         }
 
@@ -104,76 +105,68 @@ namespace PLCompliant.Scanning
             bool _aquiredLock = false;
             try
             {
+                _abortScan = false;
+                _scanInProgress = true;
+                _responsivePLCs.Clear();
+                _responses.Clear();
+                List<Task<ResponseData?>> responses = [];
+                int ipspinged = 1;
 
-               
-                    _abortScan = false;
-                    _scanInProgress = true;
-                    _responsivePLCs.Clear();
-                    _responses.Clear();
-                    List<Task<ResponseData?>> responses = [];
-                    int ipspinged = 1;
-
-                    if (_abortScan)
-                    {
-                        return ScanResult.Aborted;
-                    }
-                    foreach (IPAddress ip in _scanRange)
-                    {
+                if (_scanCancelToken.Token.IsCancellationRequested)
+                {
+                    return ScanResult.Aborted;
+                }
+                foreach (IPAddress ip in _scanRange)
+                {
                        
-                        if (_abortScan)
-                        {
-                            break;
-                        }
-                        try
-                        {
+                    if (_scanCancelToken.Token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    try
+                    {
                             
-                            switch (protocol)
-                            {
-                                case PLCProtocolType.Modbus:
-                                    responses.Add(StartModbusIdentification(ip));
-                                    break;
-                                case PLCProtocolType.Step_7:
-                                    ReadSZLResponseData? step7Response = StartSTEP7Identification(ip);
-                                    if (step7Response != null)
-                                    {
-                                        step7Response.IPAddr = ip;
-                                        _responses.Add(step7Response);
+                        switch (protocol)
+                        {
+                            case PLCProtocolType.Modbus:
+                                responses.Add(StartModbusIdentification(ip));
+                                break;
+                            case PLCProtocolType.Step_7:
+                                ReadSZLResponseData? step7Response = StartSTEP7Identification(ip);
+                                if (step7Response != null)
+                                {
+                                    step7Response.IPAddr = ip;
+                                    _responses.Add(step7Response);
 
-                                    }
-                                    break;
+                                }
+                                break;
 
-                                default:
-                                    break;
+                            default:
+                                break;
 
-                            }
-                                
-                            
-                        }
-                        catch (PingException) { }
-                        catch (IOException) { }
+                        }   
+                    }
+                    catch (PingException) { }
+                    catch (IOException) { }
                         
 
-                    }
-                    if (_abortScan)
+                }
+                foreach(var response in responses)
+                {
+                    ResponseData? result = await response;
+                    if (result != null)
                     {
-                        return ScanResult.Aborted;
+                        _responses.Add(result);
+
                     }
-                    foreach(var response in responses)
+                    Interlocked.Increment(ref ipspinged);
+                    if (!_abortScan) // To prevent erraneous update of state label in UI. 
                     {
-                        ResponseData? result = await response;
-                        if (result != null)
-                        {
-                            _responses.Add(result);
-
-                        }
-                        Interlocked.Increment(ref ipspinged);
-                        if (!_abortScan) // To prevent erraneous update of state label in UI. 
-                        {
-                            UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
-
-                        }
+                        UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
 
                     }
+
+                }
                 
 
             }
@@ -203,10 +196,9 @@ namespace PLCompliant.Scanning
             {
 
                 using TcpClient client = new TcpClient();
-                var cts = new CancellationTokenSource();
                 try
                 {
-                    await client.ConnectAsync(ip, 502).WaitAsync(new TimeSpan(TimeSpan.TicksPerMillisecond * 1000));
+                    await client.ConnectAsync(ip, 502,_scanCancelToken.Token).AsTask().WaitAsync(new TimeSpan(TimeSpan.TicksPerMillisecond * 1000));
                 }
                 catch(TimeoutException)
                 {
@@ -224,7 +216,7 @@ namespace PLCompliant.Scanning
                     // new try catch cause there isn't supposed to be a socketexception here. Log it.
                     try
                     {
-                        response = await ModBusMessage.SendReceive(msg, stream);
+                        response = await ModBusMessage.SendReceive(msg, stream, _scanCancelToken.Token);
                     }
                     catch (Exception ex)
                     {
@@ -259,6 +251,10 @@ namespace PLCompliant.Scanning
                 return null;
             }
             catch (IOException)
+            {
+                return null;
+            }
+            catch(OperationCanceledException)
             {
                 return null;
             }
