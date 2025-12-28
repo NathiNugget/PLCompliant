@@ -105,9 +105,7 @@ namespace PLCompliant.Scanning
             try
             {
 
-                Monitor.TryEnter(scanMutex, ref _aquiredLock);
-                if (_aquiredLock)
-                {
+               
                     _abortScan = false;
                     _scanInProgress = true;
                     _responsivePLCs.Clear();
@@ -176,18 +174,12 @@ namespace PLCompliant.Scanning
                         }
 
                     }
-                }
-                else
-                {
-                    Logger.Instance.LogMessage("Et scan prøvede at blive startet imens et scan allerede var i gang", TraceEventType.Warning);
-                    return ScanResult.LockTaken;
-                }
+                
 
             }
             finally
             {
-                if (_aquiredLock)
-                {
+                
                     if (_responsivePLCs.IsEmpty)
                     {
                         UIEventQueue.Instance.Push(new PopupWindowEvent(new PopupWindowArgs($"Ingen PLC Addresser fundet på {EnumToString.ProtocolType(protocol)} protokol!", PopupWindowType.WarningWindow)));
@@ -201,8 +193,7 @@ namespace PLCompliant.Scanning
                         }
                     }
                     _scanInProgress = false;
-                    Monitor.Exit(scanMutex);
-                }
+                
             }
             return ScanResult.Finished;
         }
@@ -213,7 +204,15 @@ namespace PLCompliant.Scanning
 
                 using TcpClient client = new TcpClient();
                 var cts = new CancellationTokenSource();
-                await client.ConnectAsync(ip, 502).WaitAsync(new TimeSpan(TimeSpan.TicksPerMillisecond * 1000));
+                try
+                {
+                    await client.ConnectAsync(ip, 502).WaitAsync(new TimeSpan(TimeSpan.TicksPerMillisecond * 1000));
+                }
+                catch(TimeoutException)
+                {
+                    return null;
+                }
+                
                 using NetworkStream stream = client.GetStream();
                 
                 if (client.Connected)

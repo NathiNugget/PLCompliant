@@ -50,11 +50,13 @@ namespace PLCompliant
         private void UIOnTick(object? sender, EventArgs args)
         {
             UIEventQueue queue = UIEventQueue.Instance;
-            while (!queue.Empty)
+            int processedEvents = 0;
+            while (!queue.Empty && processedEvents < 1000)
             {
                 if (queue.TryPop(out var evt))
                 {
                     evt.ExecuteEvent(this);
+                    processedEvents++;
 
                 }
             }
