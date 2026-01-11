@@ -1,0 +1,309 @@
+\doxysection{PLCompliant.\+Modbus.\+Mod\+Bus\+Message Class Reference}
+\hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+
+
+This class represents a full \doxylink{namespace_p_l_compliant_1_1_modbus}{Modbus} packet wrapped in TCP, so it has to contains all the header fields as well as the data that follows.  
+
+
+Inheritance diagram for PLCompliant.\+Modbus.\+Mod\+Bus\+Message:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abc10e09dedab87235f53381e51e89317}{Mod\+Bus\+Message}} (\doxymbox{\hyperlink{struct_p_l_compliant_1_1_modbus_1_1_mod_bus_header}{Mod\+Bus\+Header}} header, \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_data}{Mod\+Bus\+Data}} data)
+\begin{DoxyCompactList}\small\item\em Normal constructor for the class with header and data passed. \end{DoxyCompactList}\item 
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a2b164f74e4600ef31abc8e3123e4d878}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a2b164f74e4600ef31abc8e3123e4d878} 
+{\bfseries Mod\+Bus\+Message} ()
+\begin{DoxyCompactList}\small\item\em Empty constructor for easy initialization;. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_adfcbf2ddfe452292b1f4ef7bf0a1c630}{Add\+Data}} (UInt16 input\+Data)
+\begin{DoxyCompactList}\small\item\em Addition of a ushort/\+\+UInt16, which is then converted to bytes and endianness is made into network order if host-\/machine is little endian. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a6946b44280e48a2e9a316972acf7bfb3}{Add\+Data}} (byte input\+Data)
+\begin{DoxyCompactList}\small\item\em Add data to the data field of the protocol.
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\+Data} & The byte to add\\
+\hline
+\end{DoxyParams}
+ \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_acbcadb17d99f5b2ce6729c378c896d04}{Add\+Data}} (byte\+[$\,$]\+ string\+Data)
+\begin{DoxyCompactList}\small\item\em Add data to the data field of the protocol.
+
+
+\begin{DoxyParams}{Parameters}
+{\em string\+Data} & Usually a string converted to UTF-\/8 bytes\\
+\hline
+\end{DoxyParams}
+ \end{DoxyCompactList}\item 
+byte\+[$\,$]\+ \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a36b97262ac7d6a164602927f74973555}{Serialize}} ()
+\begin{DoxyCompactList}\small\item\em Serialize every data field, header and other fields that may be present in the protocol.
+
+\begin{DoxyReturn}{Returns}
+The final byte array for network transmission
+\end{DoxyReturn}
+ \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_aeb9d752eb2af78e2f9e1d3c2ee34bdf7}{Deserialize\+Header}} (byte\+[$\,$]\+ input\+Buffer, int start\+Index=0)
+\begin{DoxyCompactList}\small\item\em Deserialize header and fields to human readable format.
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\+Buffer} & The bytes received from the network\\
+\hline
+\end{DoxyParams}
+ \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abf20b902b6dbf754e169e2147fb8a54f}{Deserialize\+Data}} (byte\+[$\,$]\+ input\+Buffer, int start\+Index=0)
+\begin{DoxyCompactList}\small\item\em Deserialize data and fields to human readable format.
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\+Buffer} & The bytes received from the network\\
+\hline
+\end{DoxyParams}
+ \end{DoxyCompactList}\item 
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a9b0e196eb932d565adfa672f2a9cda00}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a9b0e196eb932d565adfa672f2a9cda00} 
+override bool {\bfseries Equals} (object? other)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abc10e09dedab87235f53381e51e89317}{Mod\+Bus\+Message}} \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a3a140e603a03df15aee8fcc884d5ea34}{Send\+Receive}} (\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abc10e09dedab87235f53381e51e89317}{Mod\+Bus\+Message}} message\+To\+Send, Network\+Stream stream)
+\begin{DoxyCompactList}\small\item\em Sends a Mod\+Bus message to the specified socket, and returns the response. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abbb63c44fd64773c0f5f11d64b371c55}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abbb63c44fd64773c0f5f11d64b371c55} 
+static ushort {\bfseries MODBUS\+\_\+\+TCP\+\_\+\+PORT} = 502
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_ad88d654e9793351a0070d936e420282c}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_ad88d654e9793351a0070d936e420282c} 
+\doxymbox{\hyperlink{struct_p_l_compliant_1_1_modbus_1_1_mod_bus_header}{Mod\+Bus\+Header}} {\bfseries Header}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Property to get the Header member. \end{DoxyCompactList}\item 
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a9ec85dff5b43d5f58ac958b5429521d4}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a9ec85dff5b43d5f58ac958b5429521d4} 
+\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_data}{Mod\+Bus\+Data}} {\bfseries Data}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Property to get the Data member. \end{DoxyCompactList}\item 
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a34152e9571d02cff580b03e03e614f71}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a34152e9571d02cff580b03e03e614f71} 
+ushort {\bfseries Payload\+Size}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Property to get the payload size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a86072f8a839f44aef029683537b6ef54}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a86072f8a839f44aef029683537b6ef54} 
+ushort {\bfseries Total\+Size}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Property to get the total size of the Data and Header in bytes. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a019fc0d08faa458ed9d04981f75cc410}{Data\+Size}}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Size of the Data in bytes. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a9a8769167c1bcd893fed6001158b513e}{Size}}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Size of the entire network message in bytes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This class represents a full \doxylink{namespace_p_l_compliant_1_1_modbus}{Modbus} packet wrapped in TCP, so it has to contains all the header fields as well as the data that follows. 
+
+\label{doc-constructors}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abc10e09dedab87235f53381e51e89317}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!ModBusMessage@{ModBusMessage}}
+\index{ModBusMessage@{ModBusMessage}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{ModBusMessage()}{ModBusMessage()}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abc10e09dedab87235f53381e51e89317} 
+PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Mod\+Bus\+Message (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_p_l_compliant_1_1_modbus_1_1_mod_bus_header}{Mod\+Bus\+Header}}}]{header}{, }\item[{\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_data}{Mod\+Bus\+Data}}}]{data}{}\end{DoxyParamCaption})}
+
+
+
+Normal constructor for the class with header and data passed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em header} & The header for the packet\\
+\hline
+{\em data} & The data for the packet\\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-func-members}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a6946b44280e48a2e9a316972acf7bfb3}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!AddData@{AddData}}
+\index{AddData@{AddData}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{AddData()}{AddData()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a6946b44280e48a2e9a316972acf7bfb3} 
+void PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Add\+Data (\begin{DoxyParamCaption}\item[{byte}]{input\+Data}{}\end{DoxyParamCaption})}
+
+
+
+Add data to the data field of the protocol.
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\+Data} & The byte to add\\
+\hline
+\end{DoxyParams}
+ 
+
+
+
+Implements \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_protocol_message_a2ce1f6cc17db08cc325d2c8b8eb28e38}{PLCompliant.\+Interface.\+IProtocol\+Message}}.
+
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_acbcadb17d99f5b2ce6729c378c896d04}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!AddData@{AddData}}
+\index{AddData@{AddData}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{AddData()}{AddData()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_acbcadb17d99f5b2ce6729c378c896d04} 
+void PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Add\+Data (\begin{DoxyParamCaption}\item[{byte\+[$\,$]\+}]{string\+Data}{}\end{DoxyParamCaption})}
+
+
+
+Add data to the data field of the protocol.
+
+
+\begin{DoxyParams}{Parameters}
+{\em string\+Data} & Usually a string converted to UTF-\/8 bytes\\
+\hline
+\end{DoxyParams}
+ 
+
+
+
+Implements \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_protocol_message_a82dd84780da95d7b5e1c68cfa11486f0}{PLCompliant.\+Interface.\+IProtocol\+Message}}.
+
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_adfcbf2ddfe452292b1f4ef7bf0a1c630}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!AddData@{AddData}}
+\index{AddData@{AddData}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{AddData()}{AddData()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_adfcbf2ddfe452292b1f4ef7bf0a1c630} 
+void PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Add\+Data (\begin{DoxyParamCaption}\item[{UInt16}]{input\+Data}{}\end{DoxyParamCaption})}
+
+
+
+Addition of a ushort/\+\+UInt16, which is then converted to bytes and endianness is made into network order if host-\/machine is little endian. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\+Data} & The ushort to add\\
+\hline
+\end{DoxyParams}
+
+
+Implements \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_protocol_message_ab68f6d4c42ff3c7a38f08b6391a37239}{PLCompliant.\+Interface.\+IProtocol\+Message}}.
+
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abf20b902b6dbf754e169e2147fb8a54f}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!DeserializeData@{DeserializeData}}
+\index{DeserializeData@{DeserializeData}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{DeserializeData()}{DeserializeData()}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abf20b902b6dbf754e169e2147fb8a54f} 
+void PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Deserialize\+Data (\begin{DoxyParamCaption}\item[{byte\+[$\,$]\+}]{input\+Buffer}{, }\item[{int}]{start\+Index}{ = {\ttfamily 0}}\end{DoxyParamCaption})}
+
+
+
+Deserialize data and fields to human readable format.
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\+Buffer} & The bytes received from the network\\
+\hline
+\end{DoxyParams}
+ 
+
+
+
+Implements \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_protocol_message_afa5265082fce082eec5f66623d996260}{PLCompliant.\+Interface.\+IProtocol\+Message}}.
+
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_aeb9d752eb2af78e2f9e1d3c2ee34bdf7}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!DeserializeHeader@{DeserializeHeader}}
+\index{DeserializeHeader@{DeserializeHeader}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{DeserializeHeader()}{DeserializeHeader()}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_aeb9d752eb2af78e2f9e1d3c2ee34bdf7} 
+void PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Deserialize\+Header (\begin{DoxyParamCaption}\item[{byte\+[$\,$]\+}]{input\+Buffer}{, }\item[{int}]{start\+Index}{ = {\ttfamily 0}}\end{DoxyParamCaption})}
+
+
+
+Deserialize header and fields to human readable format.
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\+Buffer} & The bytes received from the network\\
+\hline
+\end{DoxyParams}
+ 
+
+
+
+Implements \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_protocol_message_a48f7fcf9d3e152c8a8d4dbc5fdb7365e}{PLCompliant.\+Interface.\+IProtocol\+Message}}.
+
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a3a140e603a03df15aee8fcc884d5ea34}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!SendReceive@{SendReceive}}
+\index{SendReceive@{SendReceive}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{SendReceive()}{SendReceive()}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a3a140e603a03df15aee8fcc884d5ea34} 
+\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abc10e09dedab87235f53381e51e89317}{Mod\+Bus\+Message}} PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Send\+Receive (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_abc10e09dedab87235f53381e51e89317}{Mod\+Bus\+Message}}}]{message\+To\+Send}{, }\item[{Network\+Stream}]{stream}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Sends a Mod\+Bus message to the specified socket, and returns the response. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em message\+To\+Send} & The modbus message to send\\
+\hline
+{\em stream} & The stream to send it to\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The response as a \doxylink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message}
+\end{DoxyReturn}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a36b97262ac7d6a164602927f74973555}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!Serialize@{Serialize}}
+\index{Serialize@{Serialize}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{Serialize()}{Serialize()}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a36b97262ac7d6a164602927f74973555} 
+byte\+[$\,$]\+ PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Serialize (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Serialize every data field, header and other fields that may be present in the protocol.
+
+\begin{DoxyReturn}{Returns}
+The final byte array for network transmission
+\end{DoxyReturn}
+ 
+
+
+
+Implements \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_protocol_message_abd0c7a41cd33fb3d87691694c0319568}{PLCompliant.\+Interface.\+IProtocol\+Message}}.
+
+
+
+\label{doc-property-members}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_doc-property-members}
+\doxysubsection{Property Documentation}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a019fc0d08faa458ed9d04981f75cc410}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!DataSize@{DataSize}}
+\index{DataSize@{DataSize}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{DataSize}{DataSize}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a019fc0d08faa458ed9d04981f75cc410} 
+int PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Data\+Size\hspace{0.3cm}{\ttfamily [get]}}
+
+
+
+Size of the Data in bytes. 
+
+
+
+Implements \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_protocol_message_ac54a604becc73f1ae9be2f8e533dd2c8}{PLCompliant.\+Interface.\+IProtocol\+Message}}.
+
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a9a8769167c1bcd893fed6001158b513e}\index{PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}!Size@{Size}}
+\index{Size@{Size}!PLCompliant.Modbus.ModBusMessage@{PLCompliant.Modbus.ModBusMessage}}
+\doxysubsubsection{\texorpdfstring{Size}{Size}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_a9a8769167c1bcd893fed6001158b513e} 
+int PLCompliant.\+Modbus.\+Mod\+Bus\+Message.\+Size\hspace{0.3cm}{\ttfamily [get]}}
+
+
+
+Size of the entire network message in bytes. 
+
+
+
+Implements \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_protocol_message_aad3cd0636cd17a1267a16086b4cf24da}{PLCompliant.\+Interface.\+IProtocol\+Message}}.
+
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+PLCompliant/\+\+Modbus/\+Mod\+Bus\+Message.\+cs\end{DoxyCompactItemize}

@@ -1,0 +1,79 @@
+\doxysection{PLCompliant.\+Interface.\+ICSVWriter Interface Reference}
+\hypertarget{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer}{}\label{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer}\index{PLCompliant.Interface.ICSVWriter@{PLCompliant.Interface.ICSVWriter}}
+
+
+\doxylink{namespace_p_l_compliant_1_1_interface}{Interface} for writing \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV}\textquotesingle{}s for diffrent protocols.  
+
+
+Inheritance diagram for PLCompliant.\+Interface.\+ICSVWriter:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+string \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer_a1c3060b348becc23696f02a4a34d68fe}{Generate\+CSVFile}} (string dir\+Path, string CSVText)
+\begin{DoxyCompactList}\small\item\em Generates a \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV} file with the given \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV} data string, and auto-\/generating a filename. \end{DoxyCompactList}\item 
+string \doxymbox{\hyperlink{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer_a132b10291df825cda04ab7c2c8d0d850}{Generate\+CSVString}} (IEnumerable$<$ \doxymbox{\hyperlink{class_p_l_compliant_1_1_response_1_1_response_data}{Response\+Data}} $>$ responses)
+\begin{DoxyCompactList}\small\item\em Generates a \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV} string of a IEnumerable of \doxylink{class_p_l_compliant_1_1_response_1_1_response_data}{Response\+Data} objects. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{namespace_p_l_compliant_1_1_interface}{Interface} for writing \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV}\textquotesingle{}s for diffrent protocols. 
+
+\label{doc-func-members}
+\Hypertarget{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer_a1c3060b348becc23696f02a4a34d68fe}\index{PLCompliant.Interface.ICSVWriter@{PLCompliant.Interface.ICSVWriter}!GenerateCSVFile@{GenerateCSVFile}}
+\index{GenerateCSVFile@{GenerateCSVFile}!PLCompliant.Interface.ICSVWriter@{PLCompliant.Interface.ICSVWriter}}
+\doxysubsubsection{\texorpdfstring{GenerateCSVFile()}{GenerateCSVFile()}}
+{\footnotesize\ttfamily \label{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer_a1c3060b348becc23696f02a4a34d68fe} 
+string PLCompliant.\+Interface.\+ICSVWriter.\+Generate\+CSVFile (\begin{DoxyParamCaption}\item[{string}]{dir\+Path}{, }\item[{string}]{CSVText}{}\end{DoxyParamCaption})}
+
+
+
+Generates a \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV} file with the given \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV} data string, and auto-\/generating a filename. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em dir\+Path} & Path to the directory\\
+\hline
+{\em CSVText} & String of \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV} data to write\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The name of the auto-\/generated file
+\end{DoxyReturn}
+
+
+Implemented in \doxymbox{\hyperlink{class_p_l_compliant_1_1_c_s_v_1_1_mod_bus_c_s_v_writer_ac888244c06d808851f8e2047672f46d2}{PLCompliant.\+CSV.\+Mod\+Bus\+CSVWriter}}, and \doxymbox{\hyperlink{class_p_l_compliant_1_1_c_s_v_1_1_s_t_e_p7_c_s_v_writer_ab0871c776c5f1817d26f493779c8c29b}{PLCompliant.\+CSV.\+STEP7\+CSVWriter}}.
+
+\Hypertarget{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer_a132b10291df825cda04ab7c2c8d0d850}\index{PLCompliant.Interface.ICSVWriter@{PLCompliant.Interface.ICSVWriter}!GenerateCSVString@{GenerateCSVString}}
+\index{GenerateCSVString@{GenerateCSVString}!PLCompliant.Interface.ICSVWriter@{PLCompliant.Interface.ICSVWriter}}
+\doxysubsubsection{\texorpdfstring{GenerateCSVString()}{GenerateCSVString()}}
+{\footnotesize\ttfamily \label{interface_p_l_compliant_1_1_interface_1_1_i_c_s_v_writer_a132b10291df825cda04ab7c2c8d0d850} 
+string PLCompliant.\+Interface.\+ICSVWriter.\+Generate\+CSVString (\begin{DoxyParamCaption}\item[{IEnumerable$<$ \doxymbox{\hyperlink{class_p_l_compliant_1_1_response_1_1_response_data}{Response\+Data}} $>$}]{responses}{}\end{DoxyParamCaption})}
+
+
+
+Generates a \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV} string of a IEnumerable of \doxylink{class_p_l_compliant_1_1_response_1_1_response_data}{Response\+Data} objects. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em responses} & Enumerable of responses to convert to \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV}\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+String representing the \doxylink{namespace_p_l_compliant_1_1_c_s_v}{CSV} formatted data
+\end{DoxyReturn}
+
+
+Implemented in \doxymbox{\hyperlink{class_p_l_compliant_1_1_c_s_v_1_1_mod_bus_c_s_v_writer_a57d8afd72f7867955f7e974d18c46e77}{PLCompliant.\+CSV.\+Mod\+Bus\+CSVWriter}}, and \doxymbox{\hyperlink{class_p_l_compliant_1_1_c_s_v_1_1_s_t_e_p7_c_s_v_writer_a667cad31b45e86f00040b9fd1d3f32cc}{PLCompliant.\+CSV.\+STEP7\+CSVWriter}}.
+
+
+
+The documentation for this interface was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+PLCompliant/\+\+Interface/\+ICSVWriter.\+cs\end{DoxyCompactItemize}

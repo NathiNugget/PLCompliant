@@ -1,0 +1,51 @@
+\doxysection{PLCompliant.\+Modbus Namespace Reference}
+\hypertarget{namespace_p_l_compliant_1_1_modbus}{}\label{namespace_p_l_compliant_1_1_modbus}\index{PLCompliant.Modbus@{PLCompliant.Modbus}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_data}{Mod\+Bus\+Data}}
+\begin{DoxyCompactList}\small\item\em This class represents the data field for the \doxylink{namespace_p_l_compliant_1_1_modbus}{Modbus} protocol. \end{DoxyCompactList}\item 
+struct \doxymbox{\hyperlink{struct_p_l_compliant_1_1_modbus_1_1_mod_bus_header}{Mod\+Bus\+Header}}
+\begin{DoxyCompactList}\small\item\em This struct is the header of a \doxylink{namespace_p_l_compliant_1_1_modbus}{Modbus} message sent over TCP. Because of the protcol, we have to specify order of the bytes as well as specifying the size to be 7 bytes explicitely. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message}}
+\begin{DoxyCompactList}\small\item\em This class represents a full \doxylink{namespace_p_l_compliant_1_1_modbus}{Modbus} packet wrapped in TCP, so it has to contains all the header fields as well as the data that follows. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory}{Mod\+Bus\+Message\+Factory}}
+\item 
+class {\bfseries Mod\+Bus\+Response\+Parsing}
+\begin{DoxyCompactList}\small\item\em This is a static class with capability to read the response from the network. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \doxymbox{\hyperlink{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376}{Mod\+Bus\+Command\+Type}} :\+ byte \{ \doxymbox{\hyperlink{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376acab92ca53de76c4c5f932c259365b3c1}{get\+\_\+slave\+\_\+id}} = 17
+, \doxymbox{\hyperlink{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376a0cc3d68576daf1a64019d51fcfdcc263}{read\+\_\+device\+\_\+information}} = 43
+ \}
+\begin{DoxyCompactList}\small\item\em An enum for the implemented function codes for PLCs using \doxylink{namespace_p_l_compliant_1_1_modbus}{Modbus} TCP/\+\+IP 502. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-enum-members}
+\Hypertarget{namespace_p_l_compliant_1_1_modbus_doc-enum-members}
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376}\index{PLCompliant.Modbus@{PLCompliant.Modbus}!ModBusCommandType@{ModBusCommandType}}
+\index{ModBusCommandType@{ModBusCommandType}!PLCompliant.Modbus@{PLCompliant.Modbus}}
+\doxysubsubsection{\texorpdfstring{ModBusCommandType}{ModBusCommandType}}
+{\footnotesize\ttfamily \label{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376} 
+enum \doxymbox{\hyperlink{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376}{PLCompliant.\+Modbus.\+Mod\+Bus\+Command\+Type}} :\+ byte}
+
+
+
+An enum for the implemented function codes for PLCs using \doxylink{namespace_p_l_compliant_1_1_modbus}{Modbus} TCP/\+\+IP 502. 
+
+\begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{get\_slave\_id@{get\_slave\_id}!PLCompliant.Modbus@{PLCompliant.Modbus}}
+\index{PLCompliant.Modbus@{PLCompliant.Modbus}!get\_slave\_id@{get\_slave\_id}}
+}\Hypertarget{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376acab92ca53de76c4c5f932c259365b3c1}\label{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376acab92ca53de76c4c5f932c259365b3c1} 
+get\+\_\+slave\+\_\+id&Function code for reading about the PLC id. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{read\_device\_information@{read\_device\_information}!PLCompliant.Modbus@{PLCompliant.Modbus}}
+\index{PLCompliant.Modbus@{PLCompliant.Modbus}!read\_device\_information@{read\_device\_information}}
+}\Hypertarget{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376a0cc3d68576daf1a64019d51fcfdcc263}\label{namespace_p_l_compliant_1_1_modbus_a3d0b4a358f6ea3d834abfe2f6e102376a0cc3d68576daf1a64019d51fcfdcc263} 
+read\+\_\+device\+\_\+information&Function code for reading about the PLC device information. \\
+\hline
+
+\end{DoxyEnumFields}

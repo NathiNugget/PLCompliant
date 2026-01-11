@@ -1,0 +1,57 @@
+\doxysection{PLCompliant.\+Modbus.\+Mod\+Bus\+Message\+Factory Class Reference}
+\hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory}{}\label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory}\index{PLCompliant.Modbus.ModBusMessageFactory@{PLCompliant.Modbus.ModBusMessageFactory}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message}} \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory_af51dd41496b0d5dd3411de21b1b9fe25}{Create\+Read\+Device\+Information}} (\doxymbox{\hyperlink{struct_p_l_compliant_1_1_modbus_1_1_mod_bus_header}{Mod\+Bus\+Header}} header, byte product\+ID=2)
+\begin{DoxyCompactList}\small\item\em Constuction of a \doxylink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message} for when reading PLC device information. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message}} \doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory_a02693f4a1c5e2f6f39a0b5d952f04daf}{Create\+Get\+Slave\+ID}} (\doxymbox{\hyperlink{struct_p_l_compliant_1_1_modbus_1_1_mod_bus_header}{Mod\+Bus\+Header}} header)
+\begin{DoxyCompactList}\small\item\em Construction of a \doxylink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message} with the function code to read the slave ID. This is not currently working. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory_a02693f4a1c5e2f6f39a0b5d952f04daf}\index{PLCompliant.Modbus.ModBusMessageFactory@{PLCompliant.Modbus.ModBusMessageFactory}!CreateGetSlaveID@{CreateGetSlaveID}}
+\index{CreateGetSlaveID@{CreateGetSlaveID}!PLCompliant.Modbus.ModBusMessageFactory@{PLCompliant.Modbus.ModBusMessageFactory}}
+\doxysubsubsection{\texorpdfstring{CreateGetSlaveID()}{CreateGetSlaveID()}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory_a02693f4a1c5e2f6f39a0b5d952f04daf} 
+\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message}} PLCompliant.\+Modbus.\+Mod\+Bus\+Message\+Factory.\+Create\+Get\+Slave\+ID (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_p_l_compliant_1_1_modbus_1_1_mod_bus_header}{Mod\+Bus\+Header}}}]{header}{}\end{DoxyParamCaption})}
+
+
+
+Construction of a \doxylink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message} with the function code to read the slave ID. This is not currently working. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em header} & The header for the packet\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A \doxylink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message} to send the function. It is not yet serialized
+\end{DoxyReturn}
+\Hypertarget{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory_af51dd41496b0d5dd3411de21b1b9fe25}\index{PLCompliant.Modbus.ModBusMessageFactory@{PLCompliant.Modbus.ModBusMessageFactory}!CreateReadDeviceInformation@{CreateReadDeviceInformation}}
+\index{CreateReadDeviceInformation@{CreateReadDeviceInformation}!PLCompliant.Modbus.ModBusMessageFactory@{PLCompliant.Modbus.ModBusMessageFactory}}
+\doxysubsubsection{\texorpdfstring{CreateReadDeviceInformation()}{CreateReadDeviceInformation()}}
+{\footnotesize\ttfamily \label{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message_factory_af51dd41496b0d5dd3411de21b1b9fe25} 
+\doxymbox{\hyperlink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message}} PLCompliant.\+Modbus.\+Mod\+Bus\+Message\+Factory.\+Create\+Read\+Device\+Information (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_p_l_compliant_1_1_modbus_1_1_mod_bus_header}{Mod\+Bus\+Header}}}]{header}{, }\item[{byte}]{product\+ID}{ = {\ttfamily 2}}\end{DoxyParamCaption})}
+
+
+
+Constuction of a \doxylink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message} for when reading PLC device information. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em header} & The header for the command\\
+\hline
+{\em product\+ID} & Is expected to be 2 because the command respons with 3 indexes for objects\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A \doxylink{class_p_l_compliant_1_1_modbus_1_1_mod_bus_message}{Mod\+Bus\+Message} to send the function. It is not yet serialized
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+PLCompliant/\+\+Modbus/\+Mod\+Bus\+Message\+Factory.\+cs\end{DoxyCompactItemize}
