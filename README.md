@@ -27,8 +27,6 @@ If you'd rather just attempt running it for yourself, please download [release 1
 ### Release-build 
 >Run **PLCompliant.exe** inside `bin\Release\net9.0-windows` if you want to run the official release build. 
 
-
-
 ## Docs
-[Go here](./doxygen/html/index.html) if you want to read the docs generated using doxygen. <br>XML-documentation inside Visual Studio is also available.
+XML-based documentation inside Visual Studio is available.
 
