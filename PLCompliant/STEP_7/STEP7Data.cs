@@ -6,6 +6,10 @@ namespace PLCompliant.STEP_7
 {
     public class STEP7Data : IProtocolData
     {
+        /// <summary>
+        /// Size of the preliminary returnCode, transportType and Length properties
+        /// </summary>
+        public const int PRELUDE_SIZE = 4;
         private byte _returnCode;
         private byte _transportType;
         private UInt16 _length;
@@ -15,6 +19,13 @@ namespace PLCompliant.STEP_7
         {
             _returnCode = returnCode;
             _transportType = transportType;
+            _length = 0;
+            _data = [];
+        }
+        public STEP7Data()
+        {
+            _returnCode = 0;
+            _transportType = 0;
             _length = 0;
             _data = [];
         }

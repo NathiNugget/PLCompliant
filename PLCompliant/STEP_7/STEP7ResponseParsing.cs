@@ -67,10 +67,10 @@ namespace PLCompliant.STEP_7
                 UInt16 index = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
                 startIndex += Marshal.SizeOf<UInt16>();
 
-                OrderNumBuffer orderNum = new OrderNumBuffer();
+                char[] orderNum = new char[20];
 
                 // Ugly, one memcpy call could fix all of this, but alas we must stay safe  ):
-                for (int j = 0; j < OrderNumBuffer.SIZE; j++)
+                for (int j = 0; j < orderNum.Length; j++)
                 {
                     orderNum[j] = (char)msg.STEP7.STEP7Data.Data[startIndex + j];
                 }
@@ -83,7 +83,7 @@ namespace PLCompliant.STEP_7
 
                 UInt16 pgDescription = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
                 startIndex += Marshal.SizeOf<UInt16>();
-                result.Objects.Add(new ReadSZLDataItem(index, ref orderNum, moduleTypeId, version, pgDescription));
+                result.Objects.Add(new ReadSZLDataItem(index, orderNum, moduleTypeId, version, pgDescription));
             }
             return result;
         }

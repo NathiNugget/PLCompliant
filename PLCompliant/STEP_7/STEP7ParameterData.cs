@@ -14,6 +14,11 @@ namespace PLCompliant.STEP_7
             _functionCode = functionCode;
             _data = [];
         }
+        public STEP7ParameterData()
+        {
+            _functionCode = 0;
+            _data = [];
+        }
 
         public byte[] Data
         {

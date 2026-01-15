@@ -16,6 +16,12 @@ namespace PLCompliant.STEP_7
             _step7ParamData = step7ParamData;
 
         }
+        public STEP7Message()
+        {
+            _step7Header = new();
+            _step7ParamData = new();
+            _step7ParamData = new();
+        }
 
         public STEP7Data STEP7Data
         {

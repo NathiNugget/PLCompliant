@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Utilities;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PLCompliant.Response
@@ -116,13 +117,14 @@ namespace PLCompliant.Response
     public struct ReadSZLDataItem
     {
         private UInt16 _index;
-        private OrderNumBuffer _orderNum;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+        private char[] _orderNum;
         private UInt16 _moduleTypeId;
         private UInt16 _version;
         private UInt16 _pgDescriptionFile;
 
 
-        public ReadSZLDataItem(UInt16 index, ref OrderNumBuffer orderNum, UInt16 moduleTypeId, UInt16 version, UInt16 pgDescriptionFile)
+        public ReadSZLDataItem(UInt16 index, char[] orderNum, UInt16 moduleTypeId, UInt16 version, UInt16 pgDescriptionFile)
         {
             _index = index;
             _orderNum = orderNum;
@@ -152,7 +154,7 @@ namespace PLCompliant.Response
         }
 
 
-        public OrderNumBuffer OrderNum
+        public char[] OrderNum
         {
             get { return _orderNum; }
             set { _orderNum = value; }
@@ -217,7 +219,7 @@ namespace PLCompliant.Response
             {
                 if (item.Index == 0x0007)
                 {
-                    string orderNumber = item.OrderNum.ToString();
+                    string orderNumber = new string(item.OrderNum);
                     byte[] versionBytes = BitConverter.GetBytes(item.Version);
                     byte[] releaseBytes = BitConverter.GetBytes(item.PgDescriptionFile);
                     char versionChar = (char)versionBytes[1];
