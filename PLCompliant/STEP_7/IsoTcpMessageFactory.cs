@@ -92,7 +92,7 @@ namespace PLCompliant.STEP_7
                 new STEP7Message(
                     new STEP7Header(0x32, 0x7, 0),
                     new STEP7ParameterData(0x00),
-                    new STEP7Data(0xff, 0x09)));
+                    new STEP7DataPayload(0xff, 0x09)));
             msg.AddCOTPData((byte)0x80); // tpdu number mask
 
             msg.AddParameterData((byte)0x1); // item count

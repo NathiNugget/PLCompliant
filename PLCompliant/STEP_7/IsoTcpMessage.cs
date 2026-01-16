@@ -1,7 +1,9 @@
 ﻿using PLCompliant.Enums;
 using PLCompliant.Interface;
 using System.Net.Sockets;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PLCompliant.STEP_7
 {
@@ -24,7 +26,7 @@ namespace PLCompliant.STEP_7
             COTPData COTPData = new COTPData(0);
             STEP7Header STEP7Header = new STEP7Header();
             STEP7ParameterData STEP7ParamData = null;
-            STEP7Data STEP7Data = null;
+            STEP7DataPayload STEP7Data = null;
             byte[] headerbuffer = new byte[TPKTheader.Size];
 
             int TotalMsgSize = 0;
@@ -228,99 +230,120 @@ namespace PLCompliant.STEP_7
             _step7 = step7;
             _tpkt.Length = (ushort)Size;
         }
-        public void AddParameterData(ushort inputData)
+        public void Serialize(Span<byte> serializedObj)
         {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _step7.AddParameterData(inputData);
-        }
-
-        public void AddParameterData(byte inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _step7.AddParameterData(inputData);
-        }
-
-        public void AddParameterData(byte[] stringData)
-        {
-            _tpkt.Length += (ushort)stringData.Length;
-            _step7.AddParameterData(stringData);
-        }
-
-        public void AddData(ushort inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _step7.AddData(inputData);
-        }
-
-        public void AddData(byte inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _step7.AddData(inputData);
-        }
-
-        public void AddData(byte[] stringData)
-        {
-            _tpkt.Length += (ushort)stringData.Length;
-            _step7.AddData(stringData);
-        }
-
-
-        public void AddCOTPData(ushort inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _cotp.AddData(inputData);
-        }
-
-        public void AddCOTPData(byte inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _cotp.AddData(inputData);
-        }
-
-        public void AddCOTPData(byte[] stringData)
-        {
-            _tpkt.Length += (ushort)stringData.Length;
-            _cotp.AddData(stringData);
-        }
-
-        public void DeserializeData(byte[] inputBuffer, int startIndex)
-        {
-            //TODO: Fix this if we are to use it later, and prehaps consolidate deserializedata and deserializeheader?
-            _cotp.DeserializeHeader(inputBuffer, startIndex);
-            _cotp.DeserializeData(inputBuffer, startIndex);
-            if (_step7 != null)
+            int index = 0;
+            _tpkt.Serialize(serializedObj.Slice(index, _tpkt.Size));
+            index += _tpkt.Size;
+            _cotp.Serialize(serializedObj.Slice(index, _cotp.Size));
+            index += _cotp.Size;
+            if( _step7 != null )
             {
-                _step7.DeserializeHeader(inputBuffer, startIndex);
-                _step7.DeserializeData(inputBuffer, startIndex);
+                _step7.Serialize(serializedObj.Slice(index, _step7.Size));
+                index = _step7.Size;
             }
         }
 
-        public void DeserializeHeader(byte[] inputBuffer, int startIndex)
+        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
         {
-            _tpkt.Deserialize(inputBuffer, startIndex);
-
+            _tpkt.Deserialize(inputBuffer.Slice(0, _tpkt.Size));
         }
 
-        public byte[] Serialize()
+        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
         {
-            byte[] outputData = new byte[Size];
-            int startIndex = 0;
-            Array.Copy(_tpkt.Serialize(), 0, outputData, startIndex, _tpkt.Size);
-            startIndex += _tpkt.Size;
+            int index = 0;
+            
+            _cotp.DeserializeHeader(inputBuffer.Slice(0, _cotp.Header.Size));
+            index += _cotp.Header.Size;
+            _cotp.DeserializeData(inputBuffer.Slice(index, _cotp.Header.Length));
 
-            Array.Copy(_cotp.Serialize(), 0, outputData, startIndex, _cotp.Size);
-            startIndex += _cotp.Size;
-
-            if (_step7 != null)
+            if(_step7 != null )
             {
-                Array.Copy(_step7.Serialize(), 0, outputData, startIndex, _step7.Size);
-                startIndex += _step7.Size;
+                int effectiveStep7Size = _tpkt.Length - (_tpkt.Size + _cotp.Size); // Size of step7 segment is equal to the total length from tpkt header, minus the non-step7 stuff
+                _step7.DeserializeHeader(inputBuffer.Slice(index, _step7.STEP7Header.Size));
+                // If the messagetype is ACK-Data, then take we increment by the whole size since it includes every field
+                // Otherwise, we take NON_ERROR_LENGTH, since it will exclude the error fields
+                if(_step7.STEP7Header.MessageType == 0x3)
+                {
+                    index += _step7.STEP7Header.Size;
+                }
+                else
+                {
+                    index += STEP7Header.NON_ERROR_LENGTH;
+                }
+                _step7.DeserializeData(inputBuffer.Slice(index, _step7.STEP7Header.ParameterLength + _step7.STEP7Header.DataLength));
             }
 
+            
+        }
 
-            return outputData;
+        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        {
+            var flags = (IsoTcpDataType)type;
+            if(flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                _cotp.AddData<T>(inputData, type);
+                _tpkt.Length += (ushort)Marshal.SizeOf<T>();
+            }
+            else
+            {
+                _step7.AddData<T>(inputData, type);
+                _tpkt.Length += (ushort)Marshal.SizeOf<T>();
+            }
+        }
 
+        public void AddData(ushort inputData, byte type)
+        {
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                _cotp.AddData(inputData, type);
+                _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
+            }
+            else
+            {
+                _step7.AddData(inputData, type);
+                _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
+            }
+        }
 
+        public void AddData(byte inputData, byte type)
+        {
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                _cotp.AddData(inputData, type);
+                _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
+            }
+            else
+            {
+                _step7.AddData(inputData, type);
+                _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
+            }
+        }
+
+        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        {
+            if (binaryData.Length > byte.MaxValue)
+            {
+                throw new ArgumentException("Input length was greater than allowed in a byte");
+            }
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                _cotp.AddData(binaryData, type);
+                _tpkt.Length += (ushort)binaryData.Length;
+            }
+            else
+            {
+                _step7.AddData(binaryData, type);
+                _tpkt.Length += (ushort)binaryData.Length;
+            }
+        }
+
+        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        {
+            throw new NotImplementedException();
         }
     }
 }

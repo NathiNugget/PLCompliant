@@ -12,7 +12,7 @@ namespace PLCompliantTests.STEP7
     {
         public STEP7Message CreateSTEP7Msg()
         {
-            STEP7Message msg = new(new STEP7Header(), new STEP7ParameterData(0), new STEP7Data(0, 0));
+            STEP7Message msg = new(new STEP7Header(), new STEP7ParameterData(0), new STEP7DataPayload(0, 0));
             return msg;
         }
         [TestMethod()]
@@ -34,7 +34,7 @@ namespace PLCompliantTests.STEP7
 
         public void AddDataTest(ushort param1, byte param2, ushort param3, byte param4)
         {
-            ushort expectedLength = STEP7Data.PRELUDE_SIZE;
+            ushort expectedLength = STEP7DataPayload.PRELUDE_SIZE;
             STEP7Message msg = CreateSTEP7Msg();
             msg.AddData(param1);
             expectedLength += (ushort)Marshal.SizeOf(param1);
@@ -69,7 +69,7 @@ namespace PLCompliantTests.STEP7
         [DataRow((uint)255)]
         public void AddDataByteArrayTest(uint size)
         {
-            uint expectedlength = STEP7Data.PRELUDE_SIZE;
+            uint expectedlength = STEP7DataPayload.PRELUDE_SIZE;
             STEP7Message msg = CreateSTEP7Msg();
             byte[] arr = new byte[size];
             expectedlength += size;

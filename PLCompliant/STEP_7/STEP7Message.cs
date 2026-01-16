@@ -1,4 +1,6 @@
-﻿using PLCompliant.Interface;
+﻿using PLCompliant.Enums;
+using PLCompliant.Interface;
+using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
@@ -7,9 +9,9 @@ namespace PLCompliant.STEP_7
         public const ushort STEP7_TCP_PORT = 102;
         private STEP7Header _step7Header;
         private STEP7ParameterData? _step7ParamData;
-        private STEP7Data? _step7Data;
+        private STEP7DataMessage? _step7Data;
 
-        public STEP7Message(STEP7Header step7Header, STEP7ParameterData? step7ParamData, STEP7Data? step7Data)
+        public STEP7Message(STEP7Header step7Header, STEP7ParameterData? step7ParamData, STEP7DataMessage? step7Data)
         {
             _step7Header = step7Header;
             _step7Data = step7Data;
@@ -23,13 +25,13 @@ namespace PLCompliant.STEP_7
             _step7ParamData = new();
         }
 
-        public STEP7Data STEP7Data
+        public STEP7DataMessage? STEP7Data
         {
             get { return _step7Data; }
             set { _step7Data = value; }
         }
 
-        public STEP7ParameterData STEP7ParamData
+        public STEP7ParameterData? STEP7ParamData
         {
             get { return _step7ParamData; }
             set { _step7ParamData = value; }
@@ -42,9 +44,7 @@ namespace PLCompliant.STEP_7
             set { _step7Header = value; }
         }
 
-
-
-
+        /// <inheritdoc/>
         public int Size
         {
             get
@@ -62,111 +62,132 @@ namespace PLCompliant.STEP_7
 
             }
         }
-
-        public int DataSize => throw new NotImplementedException();
-
-        public void AddData(ushort inputData)
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
         {
-            if (_step7Data == null)
+
+            int index = 0;
+            _step7Header.Serialize(serializedObj.Slice(index, _step7Header.Size));
+            // If the messagetype is ACK-DATA, then we expect to receive the two errorcodes aswell. Otherwise we only use NON_ERROR_LENGTH size instead
+            if(_step7Header.MessageType == 0x3)
             {
-                throw new ArgumentNullException(nameof(inputData));
+                index += STEP7Header.NON_ERROR_LENGTH;
             }
-            _step7Data.AddData(inputData);
-            _step7Header.DataLength = (UInt16)_step7Data.Size;
-        }
-
-        public void AddData(byte inputData)
-        {
-            if (_step7Data == null)
+            else
             {
-                throw new ArgumentNullException(nameof(inputData));
-            }
-            _step7Data.AddData(inputData);
-            _step7Header.DataLength = (UInt16)_step7Data.Size;
-        }
-
-        public void AddData(byte[] stringData)
-        {
-            if (_step7Data == null)
+                index += _step7Header.Size;
+            }      
+            if( _step7ParamData != null)
             {
-                throw new ArgumentNullException(nameof(stringData));
+                _step7ParamData.Serialize(serializedObj.Slice(index, _step7ParamData.Size));
+                index += _step7ParamData.Size;
             }
-            _step7Data.AddData(stringData);
-            _step7Header.DataLength = (UInt16)_step7Data.Size;
-        }
-
-
-
-        public void AddParameterData(ushort inputData)
-        {
-            if (_step7ParamData == null)
+            if( _step7Data != null)
             {
-                throw new ArgumentNullException(nameof(inputData));
+                _step7Data.Serialize(serializedObj.Slice(index, _step7Data.Size));
+                index += _step7Data.Size;
             }
-            _step7ParamData.AddData(inputData);
-            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
-        }
 
-        public void AddParameterData(byte inputData)
-        {
-            if (_step7ParamData == null)
-            {
-                throw new ArgumentNullException(nameof(inputData));
-            }
-            _step7ParamData.AddData(inputData);
-            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
         }
-
-        public void AddParameterData(byte[] stringData)
+        /// <inheritdoc/>
+        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
         {
-            if (_step7ParamData == null)
-            {
-                throw new ArgumentNullException(nameof(stringData));
-            }
-            _step7ParamData.AddData(stringData);
-            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
+            _step7Header.Deserialize(inputBuffer.Slice(0, Marshal.SizeOf<STEP7Header>())); // Marshal.sizeof here because header may not have some fields depending on the messagetype
         }
-
-        public void DeserializeData(byte[] inputBuffer, int startIndex)
+        /// <inheritdoc/>
+        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
         {
+            int index = 0;
             if (_step7ParamData != null)
             {
-                _step7ParamData.Deserialize(inputBuffer, startIndex);
-                startIndex += _step7ParamData.Size;
+                _step7ParamData.ResizeStorage(_step7Header.ParameterLength); 
+                _step7ParamData.Deserialize(inputBuffer.Slice(index, _step7Header.ParameterLength));
+                index += _step7Header.ParameterLength;
             }
             if (_step7Data != null)
             {
-                _step7Data.Deserialize(inputBuffer, startIndex);
-                startIndex += _step7Data.Size;
+                _step7Data.DeserializeHeader(inputBuffer.Slice(index, _step7Data.Header.Size));
+                index += _step7Data.Header.Size;
+                _step7Data.DeserializeData(inputBuffer.Slice(index, _step7Data.Header.Length));
+                index += _step7Header.DataLength;
             }
         }
-
-        public void DeserializeHeader(byte[] inputBuffer, int startIndex)
+        /// <inheritdoc/>
+        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
-            _step7Header.Deserialize(inputBuffer, startIndex);
-
+            var flags = (IsoTcpDataType)type;
+            if(flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                _step7ParamData.AddData<T>(inputData, type);
+                _step7Header.ParameterLength += (ushort)Marshal.SizeOf<T>();
+            }
+            else
+            {
+                _step7Data.AddData<T>(inputData, type);
+                _step7Header.DataLength += (ushort)Marshal.SizeOf<T>();
+            }
         }
-
-        public byte[] Serialize()
+        /// <inheritdoc/>
+        public void AddData(ushort inputData, byte type)
         {
-            byte[] outputData = new byte[Size];
-            int startIndex = 0;
-            Array.Copy(_step7Header.Serialize(), 0, outputData, startIndex, _step7Header.Size);
-            startIndex += _step7Header.Size;
-
-            if (_step7ParamData != null)
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                Array.Copy(_step7ParamData.Serialize(), 0, outputData, startIndex, _step7ParamData.Size);
-                startIndex += _step7ParamData.Size;
+                _step7ParamData.AddData(inputData, type);
+                _step7Header.ParameterLength += (ushort)Marshal.SizeOf(inputData);
             }
-            if (_step7Data != null)
+            else
             {
-                Array.Copy(_step7Data.Serialize(), 0, outputData, startIndex, _step7Data.Size);
-                startIndex += _step7Data.Size;
+                _step7Data.AddData(inputData, type);
+                _step7Header.DataLength += (ushort)Marshal.SizeOf(inputData);
             }
-            return outputData;
-
-
+        }
+        /// <inheritdoc/>
+        public void AddData(byte inputData, byte type)
+        {
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                _step7ParamData.AddData(inputData, type);
+                _step7Header.ParameterLength += (ushort)Marshal.SizeOf(inputData);
+            }
+            else
+            {
+                _step7Data.AddData(inputData, type);
+                _step7Header.DataLength += (ushort)Marshal.SizeOf(inputData);
+            }
+        }
+        /// <inheritdoc/>
+        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        {
+            if (binaryData.Length > byte.MaxValue)
+            {
+                throw new ArgumentException("Input length was greater than allowed in a byte");
+            }
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                _step7ParamData.AddData(binaryData, type);
+                _step7Header.ParameterLength += (ushort)binaryData.Length;
+            }
+            else
+            {
+                _step7Data.AddData(binaryData, type);
+                _step7Header.DataLength += (ushort)binaryData.Length;
+            }
+        }
+        /// <inheritdoc/>
+        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        {
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                return _step7ParamData.GetData<T>(index, type);
+            }
+            else
+            {
+                return _step7Data.GetData<T>(index, type);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using PLCompliant.Interface;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace PLCompliant.Modbus
 {
@@ -77,14 +78,6 @@ namespace PLCompliant.Modbus
         /// Property to get the Data member
         /// </summary>
         public ModBusData Data { get { return _data; } }
-        /// <summary>
-        /// Property to get the payload size in bytes
-        /// </summary>
-        public ushort PayloadSize { get => (ushort)_data.PayloadSize; }
-        /// <summary>
-        /// Property to get the total size of the Data and Header in bytes
-        /// </summary>
-        public ushort TotalSize { get => (ushort)(Data.Size + Header.Size); }
 
         /// <summary>
         /// Normal constructor for the class with header and data passed
@@ -111,66 +104,11 @@ namespace PLCompliant.Modbus
         }
         #endregion
 
-        #region methods
-        /// <summary>
-        /// Addition of a ushort/UInt16, which is then converted to bytes and endianness is made into network order if host-machine is little endian
-        /// </summary>
-        /// <param name="inputData">The ushort to add</param>
-        public void AddData(UInt16 inputData)
-        {
-            _data.AddData(inputData);
-            _header.length += sizeof(UInt16);
-        }
-
-
+        #region Properties
         /// <inheritdoc/>
-        public void AddData(byte inputData)
-        {
-            _data.AddData(inputData);
-            _header.length += sizeof(byte);
-        }
-
-        /// <inheritdoc/>
-        public void AddData(byte[] stringData)
-        {
-            if (stringData.Length > byte.MaxValue)
-            {
-                throw new ArgumentException("Input length was greater than allowed in a byte");
-            }
-            _data.AddData(stringData);
-            _header.length += (ushort)stringData.Length;
-        }
-
-        /// <inheritdoc/>
-
-        public byte[] Serialize()
-        {
-            byte[] headerData = _header.Serialize();
-            byte[] payloadData = _data.Serialize();
-            byte[] result = new byte[headerData.Length + payloadData.Length];
-            Array.Copy(headerData, result, headerData.Length);
-            Array.Copy(payloadData, 0, result, headerData.Length, payloadData.Length);
-            return result;
-
-        }
-        /// <inheritdoc/>
-
-        public void DeserializeHeader(byte[] inputBuffer, int startIndex = 0)
-        {
-            _header.Deserialize(inputBuffer, startIndex);
-        }
-        /// <inheritdoc/>
-
-        public void DeserializeData(byte[] inputBuffer, int startIndex = 0)
-        {
-            _data.Deserialize(inputBuffer, startIndex);
-        }
-
-        /// <inheritdoc/>
-        public int DataSize { get { return Data.Size; } }
-
-        public int Size => throw new NotImplementedException();
-
+        public int Size {  get { return _data.Size + _header.Size; } }
+        #endregion
+        #region Methods
         /// <inheritdoc/>
         public override bool Equals(object? other)
         {
@@ -179,6 +117,60 @@ namespace PLCompliant.Modbus
             ModBusMessage other_msg = (ModBusMessage)other;
             return (Data.Equals(other_msg.Data) && Header.Equals(other_msg.Header));
 
+        }
+        /// <inheritdoc/>
+        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
+        {
+            _header.Deserialize(inputBuffer.Slice(0, _header.Size));
+        }
+        /// <inheritdoc/>
+        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
+        {
+            _data.ResizeStorage(Header.length - 1); // - 1 because it includes function code
+            _data.Deserialize(inputBuffer);
+        }
+        /// <inheritdoc/>
+        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        {
+            _data.AddData<T>(inputData, type);
+            _header.length += (ushort)Marshal.SizeOf<T>();
+            //ReadOnlySpan<T> span = [inputData];
+            //MemoryMarshal.AsBytes(span);
+        }
+        /// <inheritdoc/>
+        public void AddData(ushort inputData, byte type)
+        {
+            _data.AddData(inputData, type);
+            _header.length += sizeof(ushort);
+        }
+        /// <inheritdoc/>
+        public void AddData(byte inputData, byte type)
+        {
+            _data.AddData(inputData, type);
+            _header.length += sizeof(byte);
+        }
+        /// <inheritdoc/>
+        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        {
+            if (binaryData.Length > byte.MaxValue)
+            {
+                throw new ArgumentException("Input length was greater than allowed in a byte");
+            }
+            _data.AddData(binaryData, type);
+            _header.length += (ushort)binaryData.Length;
+        }
+        /// <inheritdoc/>
+        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        {
+            return _data.GetData<T>(index, type);
+        }
+
+        public void Serialize(Span<byte> serializedObj)
+        {
+            int index = 0;
+            _header.Serialize(serializedObj.Slice(index, _header.Size));
+            index += _header.Size;
+            _data.Serialize(serializedObj.Slice(index, _data.Size));
         }
         #endregion
 

@@ -12,7 +12,7 @@ namespace PLCompliant.STEP_7
             get { return _length; }
             set { _length = value; }
         }
-
+        /// <inheritdoc/>
         public int Size
         {
             get
@@ -25,18 +25,15 @@ namespace PLCompliant.STEP_7
         {
             _length = 0;
         }
-
-        public void Deserialize(byte[] inputBuffer, int startIndex)
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
         {
-            _length = inputBuffer[startIndex];
-            startIndex += Marshal.SizeOf(_length);
+            serializedObj[0] = _length;
         }
-
-        public byte[] Serialize()
+        /// <inheritdoc/>
+        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            byte[] outData = new byte[Size];
-            outData[0] = _length;
-            return outData;
+            _length = inputBuffer[0];
         }
     }
 }

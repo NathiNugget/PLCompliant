@@ -1,4 +1,6 @@
 ﻿using PLCompliant.Interface;
+using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PLCompliant.STEP_7
 {
@@ -34,51 +36,53 @@ namespace PLCompliant.STEP_7
             _data = data;
         }
 
-        public int DataSize => throw new NotImplementedException();
-
-        public void AddData(ushort inputData)
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
         {
-            _data.AddData(inputData);
-            _header.Length = (byte)Data.Size;
+            int index = 0;
+            _header.Serialize(serializedObj.Slice(index));
+            index += _header.Size;
+            _data.Serialize(serializedObj.Slice(index));
         }
-
-        public void AddData(byte inputData)
+        /// <inheritdoc/>
+        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
         {
-            _data.AddData(inputData);
-            _header.Length = (byte)Data.Size;
+            _header.Deserialize(inputBuffer);
         }
-
-        public void AddData(byte[] stringData)
+        /// <inheritdoc/>
+        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
         {
-            _data.AddData(stringData);
-            _header.Length = (byte)Data.Size;
+            _data.ResizeStorage(Header.Length);
+            _data.Deserialize(inputBuffer);
         }
-
-        public void DeserializeData(byte[] inputBuffer, int startIndex)
+        /// <inheritdoc/>
+        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
-            _data.Deserialize(inputBuffer, startIndex);
+            _data.AddData(inputData, type);
+            _header.Length += (byte)Marshal.SizeOf<T>();
         }
-
-        public void DeserializeHeader(byte[] inputBuffer, int startIndex)
+        /// <inheritdoc/>
+        public void AddData(ushort inputData, byte type)
         {
-            _header.Deserialize(inputBuffer, startIndex);
-
+            _data.AddData(inputData, type);
+            _header.Length += (byte)Marshal.SizeOf(inputData);
         }
-
-        public byte[] Serialize()
+        /// <inheritdoc/>
+        public void AddData(byte inputData, byte type)
         {
-            byte[] outputData = new byte[Size];
-            int startIndex = 0;
-            Array.Copy(_header.Serialize(), 0, outputData, startIndex, _header.Size);
-            startIndex += _header.Size;
-
-            Array.Copy(_data.Serialize(), 0, outputData, startIndex, _data.Size);
-            startIndex += _data.Size;
-
-
-            return outputData;
-
-
+            _data.AddData(inputData, type);
+            _header.Length += (byte)Marshal.SizeOf(inputData);
+        }
+        /// <inheritdoc/>
+        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        {
+            _data.AddData(binaryData, type);
+            _header.Length += (byte)binaryData.Length;
+        }
+        /// <inheritdoc/>
+        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        {
+            return _data.GetData<T>(index, type);
         }
     }
 }
