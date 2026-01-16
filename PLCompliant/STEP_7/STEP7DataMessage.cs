@@ -2,6 +2,7 @@
 
 using PLCompliant.Interface;
 using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PLCompliant.STEP_7
 {
@@ -41,16 +42,15 @@ namespace PLCompliant.STEP_7
             index += _data.Size;
         }
         /// <inheritdoc/>
-        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
+        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            _header.Deserialize(inputBuffer.Slice(0, _header.Size));
-        }
-        /// <inheritdoc/>
-        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
-        {
+            int index = 0;
+            _header.Deserialize(inputBuffer.Slice(index, _header.Size));
+            index += _header.Size;
             _data.ResizeStorage(_header.Length);
-            _data.Deserialize(inputBuffer.Slice(0, _header.Length));
+            _data.Deserialize(inputBuffer.Slice(index, _header.Length));
         }
+
         /// <inheritdoc/>
         public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
@@ -84,5 +84,7 @@ namespace PLCompliant.STEP_7
         {
             return _data.GetData<T>(index, type);
         }
+
+       
     }
 }

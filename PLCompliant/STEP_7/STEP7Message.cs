@@ -21,8 +21,8 @@ namespace PLCompliant.STEP_7
         public STEP7Message()
         {
             _step7Header = new();
-            _step7ParamData = new();
-            _step7ParamData = new();
+            _step7ParamData = null;
+            _step7ParamData = null;
         }
 
         public STEP7DataMessage? STEP7Data
@@ -89,28 +89,34 @@ namespace PLCompliant.STEP_7
             }
 
         }
-        /// <inheritdoc/>
-        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
-        {
-            _step7Header.Deserialize(inputBuffer.Slice(0, Marshal.SizeOf<STEP7Header>())); // Marshal.sizeof here because header may not have some fields depending on the messagetype
-        }
-        /// <inheritdoc/>
-        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
+        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             int index = 0;
-            if (_step7ParamData != null)
+            _step7Header.Deserialize(inputBuffer.Slice(index, Marshal.SizeOf<STEP7Header>())); // Marshal.sizeof here because header may not have some fields depending on the messagetype
+            // Only read NON_ERROR_LENGTH bytes if the messagetype is ACK-Data, since the error fields wont be present
+            if(_step7Header.MessageType == 0x3)
             {
-                _step7ParamData.ResizeStorage(_step7Header.ParameterLength); 
+                index += _step7Header.Size;
+            }
+            else
+            {
+                index += STEP7Header.NON_ERROR_LENGTH;
+            }
+
+            if (_step7Header.ParameterLength > 0)
+            {
+                _step7ParamData = new();
+                _step7ParamData.ResizeStorage(_step7Header.ParameterLength);
                 _step7ParamData.Deserialize(inputBuffer.Slice(index, _step7Header.ParameterLength));
                 index += _step7Header.ParameterLength;
             }
-            if (_step7Data != null)
+            if (_step7Header.DataLength > 0)
             {
-                _step7Data.DeserializeHeader(inputBuffer.Slice(index, _step7Data.Header.Size));
-                index += _step7Data.Header.Size;
-                _step7Data.DeserializeData(inputBuffer.Slice(index, _step7Data.Header.Length));
-                index += _step7Header.DataLength;
+                _step7Data = new();
+                _step7Data.Deserialize(inputBuffer.Slice(index, _step7Data.Size));
+                index += _step7Data.Size;
             }
+
         }
         /// <inheritdoc/>
         public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
@@ -189,5 +195,7 @@ namespace PLCompliant.STEP_7
                 return _step7Data.GetData<T>(index, type);
             }
         }
+
+       
     }
 }

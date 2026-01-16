@@ -7,7 +7,7 @@ namespace PLCompliant.Modbus
     /// <summary>
     /// This class represents a full Modbus packet wrapped in TCP, so it has to contains all the header fields as well as the data that follows
     /// </summary>
-    public class ModBusMessage : IProtocolMessage
+    public class ModBusMessage : IProtocolMessage, INetworkMessageDeserializable
     {
         const int SOCKETTIMEOUT = 3000;
         /// <summary>
@@ -19,7 +19,8 @@ namespace PLCompliant.Modbus
         public static ModBusMessage SendReceive(ModBusMessage messageToSend, NetworkStream stream)
         {
             stream.ReadTimeout = SOCKETTIMEOUT;
-            byte[] buffer = messageToSend.Serialize();
+            byte[] buffer = new byte[messageToSend.Size];
+            messageToSend.Serialize(buffer);
             stream.Write(buffer, 0, buffer.Length);
             byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
             int readbytes = 0;
@@ -34,7 +35,7 @@ namespace PLCompliant.Modbus
                     int dataleft = messageToSend.Header.Size - readbytes;
                     int index = messageToSend.Header.Size - dataleft;
                     readbytes += stream.Read(headerbuffer, index, dataleft);
-                    if (readbytes == 7)
+                    if (readbytes == response.Header.Size)
                     {
                         response.DeserializeHeader(headerbuffer);
                         readingHeader = false;
@@ -127,7 +128,14 @@ namespace PLCompliant.Modbus
         public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
         {
             _data.ResizeStorage(Header.length - 1); // - 1 because it includes function code
-            _data.Deserialize(inputBuffer);
+            _data.Deserialize(inputBuffer.Slice(0, _data.Size));
+        }
+        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        {
+            int index = 0;
+            DeserializeHeader(inputBuffer.Slice(index, _header.Size));
+            index += _header.Size;
+            DeserializeData(inputBuffer.Slice(index, _data.Size));
         }
         /// <inheritdoc/>
         public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
@@ -172,6 +180,8 @@ namespace PLCompliant.Modbus
             index += _header.Size;
             _data.Serialize(serializedObj.Slice(index, _data.Size));
         }
+
+       
         #endregion
 
 

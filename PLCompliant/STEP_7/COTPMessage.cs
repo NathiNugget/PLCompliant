@@ -35,6 +35,11 @@ namespace PLCompliant.STEP_7
             _header = header;
             _data = data;
         }
+        public COTPMessage()
+        {
+            _header = new();
+            _data = new();
+        }
 
         /// <inheritdoc/>
         public void Serialize(Span<byte> serializedObj)
@@ -44,16 +49,13 @@ namespace PLCompliant.STEP_7
             index += _header.Size;
             _data.Serialize(serializedObj.Slice(index));
         }
-        /// <inheritdoc/>
-        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
+        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            _header.Deserialize(inputBuffer);
-        }
-        /// <inheritdoc/>
-        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
-        {
-            _data.ResizeStorage(Header.Length);
-            _data.Deserialize(inputBuffer);
+            int index = 0;
+            _header.Deserialize(inputBuffer.Slice(index, _header.Size));
+            index += _header.Size;
+            _data.ResizeStorage(_header.Length);
+            _data.Deserialize(inputBuffer.Slice(index, _data.Size));
         }
         /// <inheritdoc/>
         public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
@@ -84,5 +86,7 @@ namespace PLCompliant.STEP_7
         {
             return _data.GetData<T>(index, type);
         }
+
+        
     }
 }
