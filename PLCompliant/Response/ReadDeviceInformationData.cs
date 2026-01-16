@@ -8,6 +8,7 @@ namespace PLCompliant.Response
     /// </summary>
     public class ReadDeviceInformationData : ResponseData
     {
+        #region properties
         /// <summary>
         /// Property to get the number of objects
         /// </summary>
@@ -16,7 +17,9 @@ namespace PLCompliant.Response
         /// Contains the response strings indexed by object index
         /// </summary>
         public Dictionary<int, string> Objects { get; set; } = new Dictionary<int, string>();
+        #endregion
 
+        #region methods
         /// <summary>
         /// Method to convert this class into a CSV-string based on number of items and by the order in which they are indexed. It does check if values are skipped
         /// </summary>
@@ -42,5 +45,6 @@ namespace PLCompliant.Response
             }
             return sb.ToString();
         }
+        #endregion
     }
 }

@@ -5,17 +5,29 @@ using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
+    /// <summary>
+    /// This is the main container class for a whole packet to communicate with STEP7-PLCs
+    /// </summary>
     public class IsoTcpMessage : IProtocolMessage
     {
-
+        #region fields
         const int SOCKETTIMEOUT = 3000;
+        const uint DEFUALTBUFFERSIZE = 1024;
+        #endregion
 
+        #region static methods
+        /// <summary>
+        /// This method sends an IsoTcpMessage by the open stream passed
+        /// </summary>
+        /// <param name="messageToSend">The read-packet to send</param>
+        /// <param name="stream">The network-stream on port 102</param>
+        /// <returns>IsoTcpMessage read from the remote PLC</returns>
         public static IsoTcpMessage SendReceive(IsoTcpMessage messageToSend, NetworkStream stream)
         {
             stream.ReadTimeout = SOCKETTIMEOUT;
             byte[] buffer = messageToSend.Serialize();
             stream.Write(buffer);
-            byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
+            byte[] databuffer = new byte[DEFUALTBUFFERSIZE]; //Actual size is decided by header. 
             int readbytes = 0;
             bool Step7Exists = false;
 
@@ -23,8 +35,8 @@ namespace PLCompliant.STEP_7
             COTPHeader COTPheader = new COTPHeader();
             COTPData COTPData = new COTPData(0);
             STEP7Header STEP7Header = new STEP7Header();
-            STEP7ParameterData STEP7ParamData = null;
-            STEP7Data STEP7Data = null;
+            STEP7ParameterData STEP7ParamData = null!;
+            STEP7Data STEP7Data = null!;
             byte[] headerbuffer = new byte[TPKTheader.Size];
 
             int TotalMsgSize = 0;
@@ -33,8 +45,6 @@ namespace PLCompliant.STEP_7
 
             int dataleft = 0;
             int index = 0;
-
-            int dataBufferLeft = 0;
 
             while (recvState != ReceiveState.Finished)
             {
@@ -180,11 +190,18 @@ namespace PLCompliant.STEP_7
                 return new IsoTcpMessage(TPKTheader, new COTPMessage(COTPheader, COTPData), null);
             }
         }
+        #endregion
 
+        #region fields
         private TPKTHeader _tpkt;
         private COTPMessage _cotp;
         private STEP7Message? _step7;
+        #endregion
 
+        #region properties
+        /// <summary>
+        /// Property for the STEP7-segment
+        /// </summary>
         public STEP7Message STEP7
         {
             get { return _step7; }
@@ -192,6 +209,9 @@ namespace PLCompliant.STEP_7
         }
 
 
+        /// <summary>
+        /// Property to get COTP-segment
+        /// </summary>
         public COTPMessage COTP
         {
             get { return _cotp; }
@@ -199,15 +219,24 @@ namespace PLCompliant.STEP_7
         }
 
 
-
+        /// <summary>
+        /// Property for the TPKT-segment
+        /// </summary>
         public TPKTHeader TPKT
         {
             get { return _tpkt; }
             set { _tpkt = value; }
         }
 
+        /// <summary>
+        /// Unused method
+        /// </summary>
+        [Obsolete]
         public int DataSize => throw new NotImplementedException();
 
+        /// <summary>
+        /// Get the size of the IsoTCPMessage
+        /// </summary>
         public int Size
         {
             get
@@ -220,7 +249,15 @@ namespace PLCompliant.STEP_7
                 return size;
             }
         }
+        #endregion
 
+        #region constructor
+        /// <summary>
+        /// Constructor for this class
+        /// </summary>
+        /// <param name="tpkt">TPKT header</param>
+        /// <param name="cotp">COTP segment</param>
+        /// <param name="step7">STEP7-segment</param>
         public IsoTcpMessage(TPKTHeader tpkt, COTPMessage cotp, STEP7Message? step7)
         {
             _tpkt = tpkt;
@@ -228,6 +265,9 @@ namespace PLCompliant.STEP_7
             _step7 = step7;
             _tpkt.Length = (ushort)Size;
         }
+        #endregion
+
+        #region methods
         public void AddParameterData(ushort inputData)
         {
             _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
@@ -322,5 +362,6 @@ namespace PLCompliant.STEP_7
 
 
         }
+        #endregion
     }
 }

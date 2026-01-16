@@ -7,8 +7,25 @@ using System.Text;
 
 namespace PLCompliant.CSV
 {
+    /// <summary>
+    /// CSV Writer for STEP7-protocol
+    /// </summary>
     public class STEP7CSVWriter : ICSVWriter
     {
+
+        #region static fields
+        /// <summary>
+        /// Headers to be inserted at the top of the generated CSV file
+        /// </summary>
+        static readonly string[] HeaderNames = {
+           "IP-Address",
+            "OrderNumber" ,
+            "FirmwareVersion"
+        };
+        #endregion
+
+        #region methods
+        /// <inheritdoc/>
         public string GenerateCSVFile(string dirPath, string CSVText)
         {
             DateTime currentTime = DateTime.Now;
@@ -21,11 +38,9 @@ namespace PLCompliant.CSV
 
             return filename;
         }
-        static readonly string[] HeaderNames = {
-           "IP-Address",
-            "OrderNumber" ,
-            "FirmwareVersion"
-        };
+
+
+        /// <inheritdoc/>
         public string GenerateCSVString(IEnumerable<ResponseData> responses)
         {
             StringBuilder sb = new StringBuilder();
@@ -37,5 +52,7 @@ namespace PLCompliant.CSV
             return sb.ToString();
 
         }
+        #endregion
+
     }
 }

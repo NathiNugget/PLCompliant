@@ -7,15 +7,19 @@
     /// <typeparam name="A">Type of the event argument</typeparam>
     public interface IRaisedEvent<T, A>
     {
+        #region properties
         /// <summary>
         /// Event argument 
         /// </summary>
         public A Argument { get; }
+        #endregion
+
+        #region methods
         /// <summary>
         /// Executes the event with the given context parameter
         /// </summary>
         /// <param name="context"></param>
         public void ExecuteEvent(T context);
-
+        #endregion
     }
 }

@@ -8,6 +8,7 @@ namespace PLCompliant.EventArguments
     /// </summary>
     public class GenerateCSVArgs : RaisedEventArgs
     {
+        #region properties
         /// <summary>
         /// Path of where to save the file
         /// </summary>
@@ -20,6 +21,9 @@ namespace PLCompliant.EventArguments
         /// The protocol used for scanning
         /// </summary>
         public PLCProtocolType WithProtocol { get; private set; }
+        #endregion
+
+        #region constructor
         /// <summary>
         /// Set the arguments
         /// </summary>
@@ -32,5 +36,7 @@ namespace PLCompliant.EventArguments
             Responses = responses;
             WithProtocol = withProtocol;
         }
+        #endregion
+
     }
 }

@@ -9,6 +9,7 @@ namespace PLCompliant.Scanning
     /// </summary>
     public static class IPAddressUtilities
     {
+        #region methods
         /// <summary>
         /// Gets the count of how many IPs are between (both inclusive) from and to IP addresses
         /// </summary>
@@ -75,6 +76,7 @@ namespace PLCompliant.Scanning
         {
             return EndianConverter.FromNetworkToHost((uint)ip.GetIPv4Addr());
         }
+        #endregion
 
     }
 }

@@ -1,5 +1,8 @@
 ﻿namespace PLCompliant.Enums
 {
+    /// <summary>
+    /// This enum contains a range of return codes in a STEP7-response from a PLC
+    /// </summary>
     public enum STEP7ReturnCode : byte
     {
         Reserved = 0x0,
@@ -16,6 +19,9 @@
         ParameterHasNoIndex = 0x24,
         ParameterImperssibile = 0x34,
         DriveESError = 0x39,
+        /// <summary>
+        /// Default, expected value for when a response is valid
+        /// </summary>
         Sucess = 0xff,
     }
 }

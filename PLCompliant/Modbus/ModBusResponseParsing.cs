@@ -9,6 +9,7 @@ namespace PLCompliant.Modbus
     /// </summary>
     public static class ModBusResponseParsing
     {
+        #region static methods
         /// <summary>
         /// Method to try and read the incoming packet.
         /// </summary>
@@ -60,5 +61,6 @@ namespace PLCompliant.Modbus
             }
             return result;
         }
+        #endregion
     }
 }

@@ -10,17 +10,23 @@ using System.Net.Sockets;
 
 namespace PLCompliant
 {
+    /// <summary>
+    /// The main GUI-window the user interacts with
+    /// </summary>
     [ExcludeFromCodeCoverage]
     public partial class PLCompliantUI : Form
     {
-        //TODO: DELETE running field; 
-        /// <summary>
-        /// instance field used while testing out capabilities of timer
-        /// </summary>
         bool running;
         System.Windows.Forms.Timer _timer;
+        /// <summary>
+        /// Which protocol to scan for
+        /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public PLCProtocolType Protocol { get; private set; } = PLCProtocolType.Modbus;
+
+        /// <summary>
+        /// Constructor for the form to setup fields and properties
+        /// </summary>
         public PLCompliantUI()
         {
 
@@ -42,11 +48,14 @@ namespace PLCompliant
             _timer.Start();
         }
 
-        private void PLCompliantUI_Load(object sender, EventArgs e)
-        {
+        /// <summary>
+        /// This method is a standard method we do not care about
+        /// </summary>
+        private void PLCompliantUI_Load(object sender, EventArgs e) { }
 
-        }
-
+        /// <summary>
+        /// Delegate to handle UI-updates based on events from the UIEventQueue. Reference to this from is always sent to the ExecuteEvent-handler.
+        /// </summary>
         private void UIOnTick(object? sender, EventArgs args)
         {
             UIEventQueue queue = UIEventQueue.Instance;
@@ -62,7 +71,11 @@ namespace PLCompliant
 
 
 
-
+        /// <summary>
+        /// Method to move the cursor based on the user's inputs. <br></br>Will move either or forward based on index of '.' depending on which buttons they pressed
+        /// </summary>
+        /// <param name="sender">The source the event was called from</param>
+        /// <param name="e">The key pressed</param>
         private void ControlField(object? sender, KeyEventArgs e)
         {
             MaskedTextBox textbox = (MaskedTextBox)sender!;
@@ -111,6 +124,11 @@ namespace PLCompliant
             }
         }
 
+        /// <summary>
+        /// On click go to first index of an empty octet
+        /// </summary>
+        /// <param name="sender">The text-box the user was writing inside</param>
+        /// <param name="e">A mouse-click</param>
         private void MaskedTextBoxOnClick(object? sender, EventArgs e)
         {
             MaskedTextBox box = (MaskedTextBox)sender!;
@@ -119,7 +137,7 @@ namespace PLCompliant
             // TODO: Make logic about where they click maybe
             int index = box.Text.IndexOf("   ");
 
-            if (index == -1) box.Select(box.Text.LastIndexOf(".") + 1, 0); else box.Select(index, 0);
+            if (index == -1) return; else box.Select(index, 0);
         }
 
         private void IPAddressValidationHandling(object sender, EventArgs e)
@@ -282,15 +300,31 @@ namespace PLCompliant
             }
         }
 
+        /// <summary>
+        /// Fired when user clicks the protocol
+        /// </summary>
+        /// <param name="sender">The Modbus protocol radio button</param>
+        /// <param name="e">Mouse click</param>
         private void ModbusButtonCheck(object sender, EventArgs e)
         {
             CheckIfButtonIsPressed(sender, e);
         }
+
+        /// <summary>
+        /// Fired when user clicks the protocol
+        /// </summary>
+        /// <param name="sender">The STEP7 protocol radio button</param>
+        /// <param name="e">Mouse click</param>
         private void Step7ButtonCheck(object sender, EventArgs e)
         {
             CheckIfButtonIsPressed(sender, e);
         }
 
+        /// <summary>
+        /// Method to check which protocol was checked to set property
+        /// </summary>
+        /// <param name="sender">Either of the protocol radio buttons</param>
+        /// <param name="e">Mouse click</param>
         private void CheckIfButtonIsPressed(object? sender, EventArgs e)
         {
             if (sender == null) return;
@@ -303,6 +337,11 @@ namespace PLCompliant
 
         }
 
+        /// <summary>
+        /// Change the accessible name of CurrentStateLabel to be able to read it in UI tests
+        /// </summary>
+        /// <param name="sender">Any part of the program mutating the text of the label</param>
+        /// <param name="e">Text was changed</param>
         private void CurrentStateLabel_TextChanged(object sender, EventArgs e)
         {
             Label label = (Label)sender;

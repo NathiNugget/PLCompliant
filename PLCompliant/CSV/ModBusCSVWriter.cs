@@ -12,6 +12,7 @@ namespace PLCompliant.CSV
     /// </summary>
     public class ModBusCSVWriter : ICSVWriter
     {
+        #region static fields
         private const int EXPECTED_CHARS_PER_LINE = 80;
         public readonly static string[] HeaderNames =
         {
@@ -20,6 +21,9 @@ namespace PLCompliant.CSV
             "ProductCode" ,
             "FirmwareVersion"
         };
+        #endregion
+
+        #region methods
         /// <inheritdoc/>
         public string GenerateCSVFile(string dirPath, string CSVText)
         {
@@ -47,5 +51,7 @@ namespace PLCompliant.CSV
             }
             return sb.ToString();
         }
+        #endregion
+
     }
 }

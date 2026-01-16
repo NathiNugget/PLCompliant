@@ -1,7 +1,11 @@
 ﻿namespace PLCompliant.Modbus
 {
+    /// <summary>
+    /// This class is a factory making creation of ModBusMessage easier as you don't have to specify all the different bytes to create a read-message
+    /// </summary>
     public class ModBusMessageFactory
     {
+        #region methods
         /// <summary>
         /// Constuction of a ModBusMessage for when reading PLC device information.
         /// </summary>
@@ -33,6 +37,6 @@
             return msg;
 
         }
-
+        #endregion
     }
 }

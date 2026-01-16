@@ -10,7 +10,7 @@
         /// </summary>
         Modbus = 0,
         /// <summary>
-        /// The protocol for Siemens devices. Currently not used since the protocol is proprietary
+        /// The protocol for Siemens devices
         /// </summary>
         Step_7 = 1,
 

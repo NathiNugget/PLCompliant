@@ -6,10 +6,18 @@ using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
+    /// <summary>
+    /// This class is used for handling and parsing responses from STEP7
+    /// </summary>
     public static class STEP7ResponseParsing
     {
-
-
+        #region static methods
+        /// <summary>
+        /// Try handling a responseerror
+        /// </summary>
+        /// <param name="msg">The message read from a PLC</param>
+        /// <param name="errInfo">Info about the error occured or didn't</param>
+        /// <returns></returns>
         public static bool TryHandleReponseError(STEP7Message msg, out STEP7ErrorInfo errInfo)
         {
             if (msg.STEP7Header.MessageType == 0x3 && (msg.STEP7Header.ErrorClass != 0 || msg.STEP7Header.ErrorCode != 0))
@@ -36,7 +44,12 @@ namespace PLCompliant.STEP_7
         }
 
 
-
+        /// <summary>
+        /// Parse a full IsoTcpMessage
+        /// </summary>
+        /// <param name="msg">The full message received from the network</param>
+        /// <param name="address">IP-address of the PLC this response was received from</param>
+        /// <returns>Response data to be written to CSV</returns>
         public static ReadSZLResponseData ParseReadSZLResponse(IsoTcpMessage msg, IPAddress address)
         {
             // TODO map and lay out the parameter (and the entire response) part propertly to be able to detect param errors earlier.
@@ -87,5 +100,6 @@ namespace PLCompliant.STEP_7
             }
             return result;
         }
+        #endregion
     }
 }

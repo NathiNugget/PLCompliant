@@ -8,12 +8,15 @@ namespace PLCompliant.Events
     /// </summary>
     public class UIViableIPScanCompleted : UIRaisedEvent
     {
+        #region constructor
         /// <summary>
         /// Constructor for the finished scan.
         /// </summary>
         /// <param name="argument">Should maybe be discarded</param>
         public UIViableIPScanCompleted(ViableIPsScanCompletedArgs argument) : base(argument) { }
+        #endregion
 
+        #region methods
         /// <summary>
         /// Execution of event
         /// </summary>
@@ -37,5 +40,6 @@ namespace PLCompliant.Events
 
 
         }
+        #endregion
     }
 }

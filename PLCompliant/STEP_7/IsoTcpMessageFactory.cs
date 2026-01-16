@@ -2,8 +2,16 @@
 
 namespace PLCompliant.STEP_7
 {
+    /// <summary>
+    /// This class provides a factory for IsoTCPMessages
+    /// </summary>
     public class IsoTcpMessageFactory
     {
+        #region methods
+        /// <summary>
+        /// Message to initiate connection request on first rack slot
+        /// </summary>
+        /// <returns>IsoTcpMessage with the response</returns>
         public IsoTcpMessage CreateCRConnectRequestOne()
         {
 
@@ -31,6 +39,11 @@ namespace PLCompliant.STEP_7
 
             return msg;
         }
+
+        /// <summary>
+        /// Message to initiate connection request on second rack slot
+        /// </summary>
+        /// <returns>IsoTCPMessage</returns>
         public IsoTcpMessage CreateCRConnectRequestTwo()
         {
             var msg = new IsoTcpMessage(
@@ -62,6 +75,11 @@ namespace PLCompliant.STEP_7
 
 
         }
+
+        /// <summary>
+        /// Create a message to initilize setup the communication protocol
+        /// </summary>
+        /// <returns>IsoTcpMessage ready to send</returns>
         public IsoTcpMessage CreateSetupCommunication()
         {
             var msg = new IsoTcpMessage(
@@ -82,6 +100,11 @@ namespace PLCompliant.STEP_7
 
             return msg;
         }
+
+        /// <summary>
+        /// Create message to Read SZL (read firmware)
+        /// </summary>
+        /// <returns>IsoTcpMessage ready to send</returns>
         public IsoTcpMessage CreateReadSZL()
         {
             var msg = new IsoTcpMessage(
@@ -109,5 +132,6 @@ namespace PLCompliant.STEP_7
             msg.AddData((UInt16)0x1); // SLZ-index
             return msg;
         }
+        #endregion
     }
 }

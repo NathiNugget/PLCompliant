@@ -10,7 +10,10 @@ namespace PLCompliant.Events
     /// </summary>
     public class UIEventQueue : IEventQueue<Form, RaisedEventArgs>
     {
-
+        #region fields
+        /// <summary>
+        /// The queue field
+        /// </summary>
         ConcurrentQueue<IRaisedEvent<Form, RaisedEventArgs>> _queue;
 
 
@@ -19,7 +22,9 @@ namespace PLCompliant.Events
         /// Gets the global instance
         /// </summary>
         public static UIEventQueue Instance { get { return _instance; } }
+        #endregion
 
+        #region constructor
         /// <summary>
         /// Constructor to initialize the queue
         /// </summary>
@@ -27,16 +32,13 @@ namespace PLCompliant.Events
         {
             _queue = new();
         }
+        #endregion
 
-        /// <summary>
-        /// If the queue is empty, this is true
-        /// </summary>
-        public bool Empty { get { return _queue.IsEmpty; } }
-
+        #region methods
         /// <summary>
         /// Pushes an event with a form (context)
         /// </summary>
-        /// <param name="item">Two integers. The first is the count, second is how many have been scanned</param>
+        /// <param name="item">Event to be added</param>
         public void Push(IRaisedEvent<Form, RaisedEventArgs> item)
         {
             _queue.Enqueue(item);
@@ -45,11 +47,20 @@ namespace PLCompliant.Events
         /// <summary>
         /// Tries to pop an event from the queue
         /// </summary>
-        /// <param name="item">Two integers. The first is the count, second is how many have been scanned</param>
-        /// <returns>If true, returns an event and an integer tuple</returns>
+        /// <param name="item">The event to be popped</param>
+        /// <returns>If true, event was popped</returns>
         public bool TryPop([NotNullWhen(true)] out IRaisedEvent<Form, RaisedEventArgs> item)
         {
             return _queue.TryDequeue(out item!);
         }
+        #endregion
+
+        #region properties
+        /// <summary>
+        /// If the queue is empty, this is true
+        /// </summary>
+        public bool Empty { get { return _queue.IsEmpty; } }
+        #endregion
+
     }
 }

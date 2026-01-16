@@ -4,13 +4,24 @@ using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
+    /// <summary>
+    /// This class contains the data-segment of a STEP7Message
+    /// </summary>
     public class STEP7Data : IProtocolData
     {
+        #region fields
         private byte _returnCode;
         private byte _transportType;
         private UInt16 _length;
         private byte[] _data;
+        #endregion
 
+        #region constructor
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="returnCode"></param>
+        /// <param name="transportType"></param>
         public STEP7Data(byte returnCode, byte transportType)
         {
             _returnCode = returnCode;
@@ -18,33 +29,48 @@ namespace PLCompliant.STEP_7
             _length = 0;
             _data = [];
         }
+        #endregion
 
+        #region properties
+        /// <summary>
+        /// Data portion of the data-segment as a byte array
+        /// </summary>
         public byte[] Data
         {
             get { return _data; }
             set { _data = value; }
         }
 
+        /// <summary>
+        /// Length of the data
+        /// </summary>
         public UInt16 Length
         {
             get { return _length; }
             set { _length = value; }
         }
 
-
-
+        /// <summary>
+        /// A byte for the TransportType
+        /// </summary>
         public byte TransportType
         {
             get { return _transportType; }
             set { _transportType = value; }
         }
 
+        /// <summary>
+        /// Byte for the ReturnCode
+        /// </summary>
         public byte ReturnCode
         {
             get { return _returnCode; }
             set { _returnCode = value; }
         }
 
+        /// <summary>
+        /// Size of the fields of the data-segment plus the data itself in bytes
+        /// </summary>
         public int Size
         {
             get
@@ -52,8 +78,14 @@ namespace PLCompliant.STEP_7
                 return Marshal.SizeOf(_returnCode) + Marshal.SizeOf(_transportType) + Marshal.SizeOf(_length) + _data.Length;
             }
         }
+        #endregion
 
-
+        #region methods
+        /// <summary>
+        /// Deserialize data received from the network
+        /// </summary>
+        /// <param name="inputBuffer">The buffer to read from</param>
+        /// <param name="startIndex">The index to read from</param>
         public void Deserialize(byte[] inputBuffer, int startIndex)
         {
             _returnCode = inputBuffer[startIndex];
@@ -66,6 +98,10 @@ namespace PLCompliant.STEP_7
             Array.Copy(inputBuffer, startIndex, _data, 0, _length);
         }
 
+        /// <summary>
+        /// Serialize the data for network transmission
+        /// </summary>
+        /// <returns>The data in a byte array</returns>
         public byte[] Serialize()
         {
             int startIndex = 0;
@@ -85,6 +121,10 @@ namespace PLCompliant.STEP_7
 
         }
 
+        /// <summary>
+        /// Add data and possibly endian-convert to network-order
+        /// </summary>
+        /// <param name="inputData">The number to add</param>
         public void AddData(ushort inputData)
         {
             var oldSize = _data.Length;
@@ -95,6 +135,10 @@ namespace PLCompliant.STEP_7
             _length += (ushort)Marshal.SizeOf(inputData);
         }
 
+        /// <summary>
+        /// Add a byte to data
+        /// </summary>
+        /// <param name="inputData">The byte to add</param>
         public void AddData(byte inputData)
         {
             var newSize = _data.Length + Marshal.SizeOf<byte>();
@@ -103,6 +147,10 @@ namespace PLCompliant.STEP_7
             _length += (ushort)Marshal.SizeOf(inputData);
         }
 
+        /// <summary>
+        /// Add data from a string
+        /// </summary>
+        /// <param name="stringData">Bytes from a UTF8-string</param>
         public void AddData(byte[] stringData)
         {
             if (stringData.Length > byte.MaxValue)
@@ -117,6 +165,7 @@ namespace PLCompliant.STEP_7
             Array.Copy(stringData, 0, _data, oldSize, stringSize);
             _length += (ushort)stringData.Length;
         }
+        #endregion
 
     }
 }

@@ -10,6 +10,7 @@ namespace PLCompliant.Events
     /// </summary>
     public class UpdateEventQueue : IEventQueue<UpdateThreadContext, RaisedEventArgs>
     {
+        #region fields
         ConcurrentQueue<IRaisedEvent<UpdateThreadContext, RaisedEventArgs>> _queue = new ConcurrentQueue<IRaisedEvent<UpdateThreadContext, RaisedEventArgs>>();
 
         private static UpdateEventQueue _instance = new UpdateEventQueue();
@@ -17,10 +18,14 @@ namespace PLCompliant.Events
         /// Gets the global instance
         /// </summary>
         public static UpdateEventQueue Instance { get { return _instance; } }
+        #endregion
 
-
+        #region properties
         /// <inheritdoc/>
         public bool Empty { get { return _queue.IsEmpty; } }
+        #endregion
+
+        #region methods
         /// <inheritdoc/>
         public bool TryPop([NotNullWhen(true)] out IRaisedEvent<UpdateThreadContext, RaisedEventArgs> item)
         {
@@ -31,5 +36,6 @@ namespace PLCompliant.Events
         {
             _queue.Enqueue(item);
         }
+        #endregion
     }
 }

@@ -2,8 +2,18 @@
 
 namespace PLCompliant.Enums
 {
+    /// <summary>
+    /// This class converts various enums and values to strings to be represented to the end-user either in UI or in a log
+    /// </summary>
     static public class EnumToString
     {
+
+        #region static methods
+        /// <summary>
+        /// Represent a STEP7ReturnCode as a string
+        /// </summary>
+        /// <param name="code">Return code</param>
+        /// <returns>Either the code as a string-representation or as an unknown error from the PLC</returns>
         public static string STEP7ReturnCode(STEP7ReturnCode code)
         {
             if (Enum.IsDefined(typeof(STEP7ReturnCode), code))
@@ -16,6 +26,12 @@ namespace PLCompliant.Enums
             }
 
         }
+
+        /// <summary>
+        /// Convert a PLCProtocolType to a string
+        /// </summary>
+        /// <param name="protocolType">Runtime instance of a certain protocol</param>
+        /// <returns>A string representation of the protocol</returns>
         public static string ProtocolType(PLCProtocolType protocolType)
         {
             switch (protocolType)
@@ -28,6 +44,12 @@ namespace PLCompliant.Enums
                     return "??";
             }
         }
+
+        /// <summary>
+        /// Convert Modbus error to human readable text
+        /// </summary>
+        /// <param name="code">The byte value of an error</param>
+        /// <returns>A string representation of the PLC</returns>
         public static string ModBusErrorCode(byte code)
         {
             switch (code)
@@ -56,5 +78,9 @@ namespace PLCompliant.Enums
                     return "Unknown error";
             }
         }
+
+
+        #endregion
+
     }
 }

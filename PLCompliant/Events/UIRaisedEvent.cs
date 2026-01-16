@@ -8,16 +8,8 @@ namespace PLCompliant.Events
     /// </summary>
     public abstract class UIRaisedEvent : IRaisedEvent<Form, RaisedEventArgs>
     {
-        RaisedEventArgs _argument;
-        /// <summary>
-        /// Get the argument for the execution
-        /// </summary>
-        public RaisedEventArgs Argument { get { return _argument; } }
-        /// <summary>
-        /// Where to execute an event
-        /// </summary>
-        /// <param name="context"></param>
-        public abstract void ExecuteEvent(Form context);
+
+        #region constructor
         /// <summary>
         /// Constructor to initialize the argument
         /// </summary>
@@ -26,6 +18,26 @@ namespace PLCompliant.Events
         {
             _argument = argument;
         }
+        #endregion
+
+        #region fields
+        RaisedEventArgs _argument;
+        #endregion
+
+        #region properties
+        /// <summary>
+        /// Get the argument for the execution
+        /// </summary>
+        public RaisedEventArgs Argument { get { return _argument; } }
+        #endregion
+
+        #region methods
+        /// <summary>
+        /// Where to execute an event
+        /// </summary>
+        /// <param name="context"></param>
+        public abstract void ExecuteEvent(Form context);
+        #endregion
 
 
     }

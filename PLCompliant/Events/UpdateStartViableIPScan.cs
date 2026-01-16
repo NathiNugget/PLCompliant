@@ -12,15 +12,18 @@ namespace PLCompliant.Events
     /// </summary>
     public class UpdateStartViableIPScan : UpdateRaisedEvent
     {
+        #region constructor
         /// <inheritdoc/>
         public UpdateStartViableIPScan(StartViableIPsScanArgs args) : base(args)
         {
         }
+        #endregion
 
+        #region methods
         /// <summary>
-        /// Start scan of IPs as well as scanning PLCs
+        /// Start scan of IPs as well as scanning PLCs. Spawn backgroundthreads in order to handle the work
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">The context providing scanner instance</param>
         public override void ExecuteEvent(UpdateThreadContext context)
         {
             var validatedTypes = EventUtilities.ValidateContextAndArgs<UpdateThreadContext, StartViableIPsScanArgs, UpdateThreadContext, RaisedEventArgs>(context, Argument);
@@ -43,5 +46,6 @@ namespace PLCompliant.Events
             });
             scanThread.Start();
         }
+        #endregion
     }
 }

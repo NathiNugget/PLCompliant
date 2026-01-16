@@ -7,23 +7,27 @@ namespace PLCompliant.EventArguments
     /// </summary>
     public class UpdateThreadArgs : RaisedEventArgs
     {
+        #region constructor
         /// <summary>
         /// Constructor for the struct
         /// </summary>
         /// <param name="range">Range of IPv4 addresses</param>
         /// 
-
-
         public UpdateThreadArgs(IPAddressRange range) : base()
         {
             AddressRange = range;
         }
+        #endregion
 
 
-
+        #region properties
         /// <summary>
         /// Adress range
         /// </summary>
         public readonly IPAddressRange AddressRange;
+        #endregion
+
+
+
     }
 }

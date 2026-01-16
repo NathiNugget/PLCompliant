@@ -8,19 +8,26 @@ namespace PLCompliant.Events
     /// </summary>
     public abstract class UpdateRaisedEvent : IRaisedEvent<UpdateThreadContext, RaisedEventArgs>
     {
+        #region fields
         RaisedEventArgs _args;
+        #endregion
+
+        #region methods
         /// <summary>
         /// Constructor to initilize the arguments
         /// </summary>
         /// <param name="args"></param>
+        /// <inheritdoc/>
+        public abstract void ExecuteEvent(UpdateThreadContext context);
         protected UpdateRaisedEvent(RaisedEventArgs args)
         {
             _args = args;
         }
+        #endregion
+
+        #region properties
         /// <inheritdoc/>
         public RaisedEventArgs Argument { get { return _args; } }
-
-        /// <inheritdoc/>
-        public abstract void ExecuteEvent(UpdateThreadContext context);
+        #endregion
     }
 }

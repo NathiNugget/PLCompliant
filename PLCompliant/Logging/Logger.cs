@@ -6,10 +6,15 @@ namespace PLCompliant.Logging
 {
     public class Logger : ILogger
     {
+        #region fields
         public const string FILE_LOGGER_NAME = "FileLogger";
+        private TraceSource _source;
         private static Logger _instance = new Logger();
+        private int NEXT_LOG_MSG_ID = 0;
 
+        #endregion
 
+        #region constructor
         private Logger()
         {
             _source = new("[PLCompliant]", SourceLevels.Information);
@@ -17,13 +22,14 @@ namespace PLCompliant.Logging
             _source.Listeners.Add(new TextWriterTraceListener("./Log.txt", FILE_LOGGER_NAME));
             _source.Listeners.Add(new WindowLogTraceListener());
         }
+        #endregion
 
-        private int NEXT_LOG_MSG_ID = 0;
-
+        #region properties
 
         public static Logger Instance { get { return _instance; } }
-        private TraceSource _source;
+        #endregion
 
+        #region methods
         public void SetLogLevel(SourceLevels level)
         {
             _source.Switch.Level = level;
@@ -47,6 +53,6 @@ namespace PLCompliant.Logging
             _source.Flush();
             Interlocked.Increment(ref NEXT_LOG_MSG_ID);
         }
-
+        #endregion
     }
 }

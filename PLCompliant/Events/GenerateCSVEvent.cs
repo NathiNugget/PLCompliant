@@ -11,9 +11,7 @@ namespace PLCompliant.Events
     /// </summary>
     public class GenerateCSVEvent : UpdateRaisedEvent
     {
-
-
-
+        #region constructor
         /// <summary>
         /// Instantiate CSVEvent
         /// </summary>
@@ -21,8 +19,9 @@ namespace PLCompliant.Events
         {
 
         }
+        #endregion
 
-
+        #region methods
         /// <summary>
         /// Generate a CSV based and raise a SavedFileEvent in order to signal to UI a file has been saved on the chosen path
         /// </summary>
@@ -48,5 +47,6 @@ namespace PLCompliant.Events
 
             UIEventQueue.Instance.Push(new SavedFileEvent(new SavedFileArgs(validatedTypes.Item2.Path, savedAs)));
         }
+        #endregion
     }
 }

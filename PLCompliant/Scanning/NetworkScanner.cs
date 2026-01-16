@@ -19,6 +19,7 @@ namespace PLCompliant.Scanning
     /// </summary>
     public class NetworkScanner
     {
+        #region fields
         const int PINGTIMEOUT = 500;
         bool _abortScan = false;
 
@@ -28,7 +29,9 @@ namespace PLCompliant.Scanning
         ConcurrentBag<IPAddress> _responsivePLCs = new ConcurrentBag<IPAddress>();
         ConcurrentBag<ResponseData> _responses = new ConcurrentBag<ResponseData>();
         IPAddressRange _scanRange;
+        #endregion
 
+        #region constructors
         /// <summary>
         /// Constructor to specify the range to scan
         /// </summary>
@@ -42,8 +45,7 @@ namespace PLCompliant.Scanning
         /// Default constructor
         /// </summary>
         public NetworkScanner() : this(new IPAddressRange(1, 1)) { }
-
-
+        #endregion
 
         #region properties
         /// <summary>
@@ -66,6 +68,7 @@ namespace PLCompliant.Scanning
 
         #endregion
 
+        #region methods
         /// <summary>
         /// Reset ranges and data
         /// </summary>
@@ -379,6 +382,7 @@ namespace PLCompliant.Scanning
 
 
         }
+        #endregion
 
     }
 }

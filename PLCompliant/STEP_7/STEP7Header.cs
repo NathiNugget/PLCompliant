@@ -4,6 +4,9 @@ using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
+    /// <summary>
+    /// This struct contains the fields in a STEP7-header
+    /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 12, CharSet = CharSet.Ansi)]
     public struct STEP7Header : IProtocolHeader
     {
@@ -18,6 +21,7 @@ namespace PLCompliant.STEP_7
         [FieldOffset(10)] private byte _errorClass;
         [FieldOffset(11)] private byte _errorCode;
 
+        #region properties
         public byte ErrorCode
         {
             get { return _errorCode; }
@@ -89,6 +93,15 @@ namespace PLCompliant.STEP_7
                 return size;
             }
         }
+        #endregion
+
+        #region constructor
+        /// <summary>
+        /// Constructor for the struct
+        /// </summary>
+        /// <param name="protocolId"></param>
+        /// <param name="messageType"></param>
+        /// <param name="pduReference"></param>
         public STEP7Header(byte protocolId, byte messageType, UInt16 pduReference)
         {
             _protocolId = protocolId;
@@ -100,13 +113,26 @@ namespace PLCompliant.STEP_7
             _errorCode = 0;
             _reserved = 0;
         }
+        #endregion
 
+        #region methods
+        /// <summary>
+        /// Deserialize the prelude
+        /// </summary>
+        /// <param name="inputBuffer">Buffer to read from</param>
+        /// <param name="startIndex">Index to read from</param>
         public void DeserializePrelude(byte[] inputBuffer, int startIndex)
         {
             _protocolId = inputBuffer[startIndex];
             startIndex += Marshal.SizeOf(_protocolId);
             _messageType = inputBuffer[startIndex];
         }
+
+        /// <summary>
+        /// Deserialize a whole header
+        /// </summary>
+        /// <param name="inputBuffer">Buffer to read from</param>
+        /// <param name="startIndex">Index to read from</param>
         public void Deserialize(byte[] inputBuffer, int startIndex)
         {
             _reserved = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
@@ -128,6 +154,10 @@ namespace PLCompliant.STEP_7
             }
         }
 
+        /// <summary>
+        /// Serialize a header for network transmission
+        /// </summary>
+        /// <returns>Byte array containing the bytes</returns>
         public byte[] Serialize()
         {
             int startIndex = 0;
@@ -165,5 +195,6 @@ namespace PLCompliant.STEP_7
             return outData;
 
         }
+        #endregion
     }
 }

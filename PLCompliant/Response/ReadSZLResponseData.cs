@@ -3,9 +3,13 @@ using System.Text;
 
 namespace PLCompliant.Response
 {
+    /// <summary>
+    /// This stuct provides some functionality inline array would have provided. <br>Supposed to be used for reading the version number of the firmware of a STEP7-response</br>
+    /// </summary>
     public struct OrderNumBuffer
     {
         // POV: You don't have inline arrays (too recent in 2023 ); 
+        #region fields
         public const int SIZE = 20;
         char item1;
         char item2;
@@ -27,6 +31,9 @@ namespace PLCompliant.Response
         char item18;
         char item19;
         char item20;
+        #endregion
+
+        #region methods
         public override readonly string ToString()
         {
             StringBuilder sb = new StringBuilder(SIZE);
@@ -112,16 +119,24 @@ namespace PLCompliant.Response
                 }
             }
         }
+
+        #endregion
     }
+
+    /// <summary>
+    /// This struct represents information about the firmware-version read out from SZLDataItems
+    /// </summary>
     public struct ReadSZLDataItem
     {
+        #region fields
         private UInt16 _index;
         private OrderNumBuffer _orderNum;
         private UInt16 _moduleTypeId;
         private UInt16 _version;
         private UInt16 _pgDescriptionFile;
+        #endregion
 
-
+        #region constructor
         public ReadSZLDataItem(UInt16 index, ref OrderNumBuffer orderNum, UInt16 moduleTypeId, UInt16 version, UInt16 pgDescriptionFile)
         {
             _index = index;
@@ -130,6 +145,9 @@ namespace PLCompliant.Response
             _version = version;
             _pgDescriptionFile = pgDescriptionFile;
         }
+        #endregion
+
+        #region methods
 
         public UInt16 PgDescriptionFile
         {
@@ -164,16 +182,24 @@ namespace PLCompliant.Response
             get { return _index; }
             set { _index = value; }
         }
+        #endregion
 
     }
+
+    /// <summary>
+    /// This class represents the information from the SZL portion of the STEP7-response
+    /// </summary>
     public class ReadSZLResponseData : ResponseData
     {
+        #region fields
         private UInt16 _diagnosticTypeMask;
         private UInt16 _szlIndex;
         private UInt16 _listLength;
         private UInt16 _listCount;
         private List<ReadSZLDataItem> _objects = new List<ReadSZLDataItem>();
+        #endregion
 
+        #region properties
         public List<ReadSZLDataItem> Objects
         {
             get { return _objects; }
@@ -209,7 +235,9 @@ namespace PLCompliant.Response
             get { return _diagnosticTypeMask; }
             set { _diagnosticTypeMask = value; }
         }
+        #endregion
 
+        #region methods
         public override string ToCSV()
         {
             StringBuilder sb = new StringBuilder(40);
@@ -241,5 +269,6 @@ namespace PLCompliant.Response
             return $"{GlobalVars.CSV_SEPARATOR}{GlobalVars.CSV_SEPARATOR}";
 
         }
+        #endregion
     }
 }

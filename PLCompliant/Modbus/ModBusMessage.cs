@@ -8,58 +8,11 @@ namespace PLCompliant.Modbus
     /// </summary>
     public class ModBusMessage : IProtocolMessage
     {
+        #region fields
         const int SOCKETTIMEOUT = 3000;
-        /// <summary>
-        /// Sends a ModBus message to the specified socket, and returns the response
-        /// </summary>
-        /// <param name="messageToSend">The modbus message to send</param>
-        /// <param name="stream">The stream to send it to</param>
-        /// <returns>The response as a ModBusMessage</returns>
-        public static ModBusMessage SendReceive(ModBusMessage messageToSend, NetworkStream stream)
-        {
-            stream.ReadTimeout = SOCKETTIMEOUT;
-            byte[] buffer = messageToSend.Serialize();
-            stream.Write(buffer, 0, buffer.Length);
-            byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
-            int readbytes = 0;
-            byte[] headerbuffer = new byte[messageToSend.Header.Size];
-            bool readingHeader = true;
-            ModBusMessage response = new(new ModBusHeader(), new ModBusData());
-
-            while (true)
-            {
-                if (readingHeader)
-                {
-                    int dataleft = messageToSend.Header.Size - readbytes;
-                    int index = messageToSend.Header.Size - dataleft;
-                    readbytes += stream.Read(headerbuffer, index, dataleft);
-                    if (readbytes == 7)
-                    {
-                        response.DeserializeHeader(headerbuffer);
-                        readingHeader = false;
-                        readbytes = 0;
-                        Array.Resize(ref databuffer, response.Header.length - 1); //Minus 1 because unit id is included. Standard Modbus stuff :/
-                    }
-
-                }
-                else
-                {
-
-                    int dataleft = (response.Header.length - 1) - readbytes;
-                    int index = (response.Header.length - 1) - dataleft;
-                    readbytes += stream.Read(databuffer, index, dataleft);
-                    if (readbytes == response.Header.length - 1)
-                    {
-                        response.DeserializeData(databuffer);
-                        break;
-                    }
-                }
-            }
-            return response;
-
-        }
-
         public static ushort MODBUS_TCP_PORT = 502;
+        #endregion
+
         #region instance fields
 
 
@@ -178,6 +131,59 @@ namespace PLCompliant.Modbus
             if (other is not ModBusMessage) return false;
             ModBusMessage other_msg = (ModBusMessage)other;
             return (Data.Equals(other_msg.Data) && Header.Equals(other_msg.Header));
+
+        }
+        #endregion
+
+        #region static methods
+
+        /// <summary>
+        /// Sends a ModBus message to the specified socket, and returns the response
+        /// </summary>
+        /// <param name="messageToSend">The modbus message to send</param>
+        /// <param name="stream">The stream to send it to</param>
+        /// <returns>The response as a ModBusMessage</returns>
+        public static ModBusMessage SendReceive(ModBusMessage messageToSend, NetworkStream stream)
+        {
+            stream.ReadTimeout = SOCKETTIMEOUT;
+            byte[] buffer = messageToSend.Serialize();
+            stream.Write(buffer, 0, buffer.Length);
+            byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
+            int readbytes = 0;
+            byte[] headerbuffer = new byte[messageToSend.Header.Size];
+            bool readingHeader = true;
+            ModBusMessage response = new(new ModBusHeader(), new ModBusData());
+
+            while (true)
+            {
+                if (readingHeader)
+                {
+                    int dataleft = messageToSend.Header.Size - readbytes;
+                    int index = messageToSend.Header.Size - dataleft;
+                    readbytes += stream.Read(headerbuffer, index, dataleft);
+                    if (readbytes == 7)
+                    {
+                        response.DeserializeHeader(headerbuffer);
+                        readingHeader = false;
+                        readbytes = 0;
+                        Array.Resize(ref databuffer, response.Header.length - 1); //Minus 1 because unit id is included. Standard Modbus stuff :/
+                    }
+
+                }
+                else
+                {
+
+                    int dataleft = (response.Header.length - 1) - readbytes;
+                    int index = (response.Header.length - 1) - dataleft;
+                    readbytes += stream.Read(databuffer, index, dataleft);
+                    if (readbytes == response.Header.length - 1)
+                    {
+                        response.DeserializeData(databuffer);
+                        break;
+                    }
+                }
+            }
+            return response;
 
         }
         #endregion
