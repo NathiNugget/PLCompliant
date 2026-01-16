@@ -369,6 +369,50 @@ namespace PLCompliantTests
             Assert.AreEqual(expected, actual);
         }
 
+        [TestMethod]
+        [DataRow("192.168.124.100", "192.168.130.78")]
+        [DataRow("192.168.130.78", "192.168.140.1")]
+        public void STEP7ScanWithNoPLCsFound(string from, string to)
+        {
+            var from_box = _driver.FindElementByAccessibilityId("FromTextBox");
+            var to_box = _driver.FindElementByAccessibilityId("ToTextBox");
+            var step7_button = _driver.FindElementByAccessibilityId("Step7Button");
+            var startstop_button = _driver.FindElementByAccessibilityId("StartStopButton");
+            var current_state_label = _driver.FindElementByAccessibilityId("CurrentStateLabel");
+            var chosen_path = _driver.FindElementByAccessibilityId("SavePath");
+            var browse_button = _driver.FindElementByAccessibilityId("BrowseButton");
+
+            step7_button.Click();
+            from_box.SendKeys(from);
+            to_box.SendKeys(to);
+            browse_button.Click();
+
+            foreach (var handle in _driver.WindowHandles)
+            {
+                var wd = _driver.SwitchTo().Window(handle);
+
+                WindowsElement desktop_elem = null!;
+                desktop_elem = _driver.FindElementByName("Start på Hurtig adgang – Skrivebord (fastgjort)") ?? _driver.FindElementByName("Start on Quick Access – Desktop (pinned)");
+                desktop_elem.Click();
+                var submit_elem = _driver.FindElementsByName("Select Folder");
+                if (submit_elem.Count < 1)
+                {
+                    submit_elem = _driver.FindElementsByName("Vælg mappe");
+                }
+                submit_elem[1].Click();
+            }
+            startstop_button.Click();
+
+            var ok_button = _driver.FindElementByName("OK");
+            ok_button.Click();
+
+            Thread.Sleep(4000); // Wait for the program to do its thing
+            var warning = _driver.FindElementByName("Ingen PLC Addresser fundet på STEP-7 protokol!");
+            Assert.IsNotNull(warning);
+            ok_button = _driver.FindElementByName("OK");
+            ok_button.Click();
+        }
+
         [TestCleanup]
         public void TearDown()
         {
