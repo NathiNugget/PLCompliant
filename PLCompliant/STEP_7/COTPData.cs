@@ -9,10 +9,6 @@ namespace PLCompliant.STEP_7
 
         private byte[] _data;
 
-        public COTPData(byte pduType)
-        {
-            _data = [];
-        }
         public COTPData()
         {
             _data = [];

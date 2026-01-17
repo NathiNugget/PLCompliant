@@ -19,11 +19,11 @@ namespace PLCompliant.STEP_7
                 errInfo.errValue = msg.STEP7Header.ErrorCode;
                 return true;
             }
-            else if (msg.STEP7Data != null && msg.STEP7Data.ReturnCode != 0xff)
+            else if (msg.STEP7Data != null && msg.STEP7Data.Header.ReturnCode != 0xff)
             {
                 errInfo.errorType = Enums.STEP7ErrorType.DataError;
                 errInfo.errClass = 0;
-                errInfo.errValue = msg.STEP7Data.ReturnCode;
+                errInfo.errValue = msg.STEP7Data.Header.ReturnCode;
                 return true;
             }
             else
@@ -47,43 +47,19 @@ namespace PLCompliant.STEP_7
                 return new ReadSZLResponseData();
             }
 
-            var result = new ReadSZLResponseData();
             int startIndex = 0;
-            result.DiagnosticTypeMask = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex)); // TODO: Double check endianness of this one if its important
-            startIndex += Marshal.SizeOf<UInt16>();
+            ReadOnlySpan<byte> dataSpan = new(msg.STEP7.STEP7Data.Data.Data);
+            var responseHeader = MemoryMarshal.Read<ReadSZLResponseHeader>(dataSpan.Slice(startIndex, Marshal.SizeOf<ReadSZLResponseHeader>()));
 
-            result.SZLIndex = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
-            startIndex += Marshal.SizeOf<UInt16>();
-
-            result.ListLength = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
-            startIndex += Marshal.SizeOf<UInt16>();
-
-            result.ListCount = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
-            startIndex += Marshal.SizeOf<UInt16>();
+            responseHeader.FromNetworkToHost();
+            var result = new ReadSZLResponseData(responseHeader);
 
 
-            for (int i = 0; i < result.ListCount; i++)
+            for (int i = 0; i < result.Header.ListCount; i++)
             {
-                UInt16 index = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
-                startIndex += Marshal.SizeOf<UInt16>();
-
-                char[] orderNum = new char[20];
-
-                // Ugly, one memcpy call could fix all of this, but alas we must stay safe  ):
-                for (int j = 0; j < orderNum.Length; j++)
-                {
-                    orderNum[j] = (char)msg.STEP7.STEP7Data.Data[startIndex + j];
-                }
-                startIndex += OrderNumBuffer.SIZE;
-                UInt16 moduleTypeId = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
-                startIndex += Marshal.SizeOf<UInt16>();
-
-                UInt16 version = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
-                startIndex += Marshal.SizeOf<UInt16>();
-
-                UInt16 pgDescription = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7Data.Data, startIndex));
-                startIndex += Marshal.SizeOf<UInt16>();
-                result.Objects.Add(new ReadSZLDataItem(index, orderNum, moduleTypeId, version, pgDescription));
+                ReadSZLDataItem item = MemoryMarshal.Read<ReadSZLDataItem>(dataSpan.Slice(startIndex, Marshal.SizeOf<ReadSZLDataItem>()));
+                item.FromNetworkToHost();
+                result.Objects.Add(item);
             }
             return result;
         }

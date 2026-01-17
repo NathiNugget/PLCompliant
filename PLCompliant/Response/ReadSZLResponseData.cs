@@ -1,4 +1,6 @@
-﻿using PLCompliant.Utilities;
+﻿using PLCompliant.Interface;
+using PLCompliant.STEP_7;
+using PLCompliant.Utilities;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -114,14 +116,15 @@ namespace PLCompliant.Response
             }
         }
     }
-    public struct ReadSZLDataItem
+    [StructLayout(LayoutKind.Explicit, Size = 28, CharSet = CharSet.Ansi)]
+    public struct ReadSZLDataItem : IEndianConvertable
     {
-        private UInt16 _index;
+        [FieldOffset(0)] private UInt16 _index;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        private char[] _orderNum;
-        private UInt16 _moduleTypeId;
-        private UInt16 _version;
-        private UInt16 _pgDescriptionFile;
+        [FieldOffset(2)] private char[] _orderNum;
+        [FieldOffset(22)] private UInt16 _moduleTypeId;
+        [FieldOffset(24)] private UInt16 _version;
+        [FieldOffset(26)] private UInt16 _pgDescriptionFile;
 
 
         public ReadSZLDataItem(UInt16 index, char[] orderNum, UInt16 moduleTypeId, UInt16 version, UInt16 pgDescriptionFile)
@@ -167,14 +170,36 @@ namespace PLCompliant.Response
             set { _index = value; }
         }
 
+        public void FromHostToNetwork()
+        {
+            _index = EndianConverter.FromHostToNetwork(_index);
+            _moduleTypeId = EndianConverter.FromHostToNetwork(_moduleTypeId);
+            _version = EndianConverter.FromHostToNetwork(_version);
+            _pgDescriptionFile = EndianConverter.FromHostToNetwork(_pgDescriptionFile);
+        }
+
+        public void FromNetworkToHost()
+        {
+            _index = EndianConverter.FromNetworkToHost(_index);
+            _moduleTypeId = EndianConverter.FromNetworkToHost(_moduleTypeId);
+            _version = EndianConverter.FromNetworkToHost(_version);
+            _pgDescriptionFile = EndianConverter.FromNetworkToHost(_pgDescriptionFile);
+        }
     }
     public class ReadSZLResponseData : ResponseData
     {
-        private UInt16 _diagnosticTypeMask;
-        private UInt16 _szlIndex;
-        private UInt16 _listLength;
-        private UInt16 _listCount;
+        private ReadSZLResponseHeader _header = new();
         private List<ReadSZLDataItem> _objects = new List<ReadSZLDataItem>();
+
+
+        public ReadSZLResponseData(ReadSZLResponseHeader header)
+        {
+            _header = header;
+        }
+        public ReadSZLResponseData()
+        {
+
+        }
 
         public List<ReadSZLDataItem> Objects
         {
@@ -185,31 +210,10 @@ namespace PLCompliant.Response
 
 
 
-        public UInt16 ListCount
+        public ReadSZLResponseHeader Header
         {
-            get { return _listCount; }
-            set { _listCount = value; }
-        }
-
-
-        public UInt16 ListLength
-        {
-            get { return _listLength; }
-            set { _listLength = value; }
-        }
-
-
-        public UInt16 SZLIndex
-        {
-            get { return _szlIndex; }
-            set { _szlIndex = value; }
-        }
-
-
-        public UInt16 DiagnosticTypeMask
-        {
-            get { return _diagnosticTypeMask; }
-            set { _diagnosticTypeMask = value; }
+            get { return _header; }
+            set { _header = value; }
         }
 
         public override string ToCSV()

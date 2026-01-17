@@ -12,9 +12,9 @@
         {
             var data = new ModBusData { _functionCode = (byte)ModBusCommandType.read_device_information, _payload = [] };
             var msg = new ModBusMessage(header, data);
-            msg.AddData(0x0E);
-            msg.AddData(productID);
-            msg.AddData(0x0);
+            msg.AddData((byte)0x0E);
+            msg.AddData((byte)productID);
+            msg.AddData((byte)0x0);
             return msg;
 
         }

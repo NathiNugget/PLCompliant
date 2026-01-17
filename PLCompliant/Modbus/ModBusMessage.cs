@@ -138,7 +138,7 @@ namespace PLCompliant.Modbus
             DeserializeData(inputBuffer.Slice(index, _data.Size));
         }
         /// <inheritdoc/>
-        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        public void AddData<T>(T inputData, byte type = 0) where T : unmanaged, IEndianConvertable
         {
             _data.AddData<T>(inputData, type);
             _header.length += (ushort)Marshal.SizeOf<T>();
@@ -146,19 +146,19 @@ namespace PLCompliant.Modbus
             //MemoryMarshal.AsBytes(span);
         }
         /// <inheritdoc/>
-        public void AddData(ushort inputData, byte type)
+        public void AddData(ushort inputData, byte type = 0)
         {
             _data.AddData(inputData, type);
             _header.length += sizeof(ushort);
         }
         /// <inheritdoc/>
-        public void AddData(byte inputData, byte type)
+        public void AddData(byte inputData, byte type = 0)
         {
             _data.AddData(inputData, type);
             _header.length += sizeof(byte);
         }
         /// <inheritdoc/>
-        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        public void AddData(ReadOnlySpan<byte> binaryData, byte type = 0)
         {
             if (binaryData.Length > byte.MaxValue)
             {
@@ -168,7 +168,7 @@ namespace PLCompliant.Modbus
             _header.length += (ushort)binaryData.Length;
         }
         /// <inheritdoc/>
-        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        public T GetData<T>(int index, byte type = 0) where T : unmanaged, IEndianConvertable
         {
             return _data.GetData<T>(index, type);
         }
