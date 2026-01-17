@@ -146,17 +146,14 @@ namespace PLCompliant.Modbus.Tests
             msg.AddData(param_1);
             msg.AddData(param_2);
             msg.AddData(param_3);
-
-            byte[] returnbytes = msg.Serialize();
+            byte[] returnBytes = new byte[msg.Size];
+            msg.Serialize(returnBytes);
             //header
             ModBusMessage response = new(new ModBusHeader(), new ModBusData());
-            byte[] header_bytes = new byte[Marshal.SizeOf<ModBusHeader>()];
-            Array.Copy(returnbytes, 0, header_bytes, 0, header_bytes.Length);
-            response.DeserializeHeader(header_bytes);
+            ReadOnlySpan<byte> returnBytesSpan = new ReadOnlySpan<byte>(returnBytes);
+            response.DeserializeHeader(returnBytesSpan.Slice(0, msg.Header.Size));
             //data
-            byte[] payload_data = new byte[response.Header.length - 1];
-            Array.Copy(returnbytes, Marshal.SizeOf<ModBusHeader>(), payload_data, 0, payload_data.Length);
-            response.DeserializeData(payload_data);
+            response.DeserializeData(returnBytesSpan.Slice(response.Header.Size, response.Header.length - 1));
             Assert.AreEqual(msg, response);
         }
 
@@ -176,8 +173,8 @@ namespace PLCompliant.Modbus.Tests
         {
             ModBusMessage msg = new(new(), new());
             msg.AddData(param_1);
-            int expectedsize = 7 + +1 + 1; //Header + function code + data
-            Assert.AreEqual(expectedsize, msg.TotalSize);
+            int expectedsize = Marshal.SizeOf<ModBusHeader>() + 1 + 1; //Header + function code + data
+            Assert.AreEqual(expectedsize, msg.Size);
         }
 
 

@@ -31,7 +31,7 @@ namespace PLCompliant.Modbus
             unitID = unitid;
             transactionIdentifier = transmodifier;
             protocolIdentifier = protidentifier;
-            length = 2;
+            length = 2; // 1 byte for unitId, and 1 byte for functionId
         }
         /// <summary>
         /// Empty constructor mostly used for tests and other standard initialization

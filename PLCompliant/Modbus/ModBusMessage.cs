@@ -138,34 +138,36 @@ namespace PLCompliant.Modbus
             DeserializeData(inputBuffer.Slice(index, _data.Size));
         }
         /// <inheritdoc/>
-        public void AddData<T>(T inputData, byte type = 0) where T : unmanaged, IEndianConvertable
+        public int AddData<T>(T inputData, byte type = 0) where T : unmanaged, IEndianConvertable
         {
-            _data.AddData<T>(inputData, type);
-            _header.length += (ushort)Marshal.SizeOf<T>();
-            //ReadOnlySpan<T> span = [inputData];
-            //MemoryMarshal.AsBytes(span);
+            int dataAdded = _data.AddData<T>(inputData, type);
+            _header.length += (ushort)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ushort inputData, byte type = 0)
+        public int AddData(ushort inputData, byte type = 0)
         {
-            _data.AddData(inputData, type);
-            _header.length += sizeof(ushort);
+            int dataAdded = _data.AddData(inputData, type);
+            _header.length += (ushort)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(byte inputData, byte type = 0)
+        public int AddData(byte inputData, byte type = 0)
         {
-            _data.AddData(inputData, type);
-            _header.length += sizeof(byte);
+            int dataAdded = _data.AddData(inputData, type);
+            _header.length += (ushort)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ReadOnlySpan<byte> binaryData, byte type = 0)
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type = 0)
         {
             if (binaryData.Length > byte.MaxValue)
             {
                 throw new ArgumentException("Input length was greater than allowed in a byte");
             }
-            _data.AddData(binaryData, type);
-            _header.length += (ushort)binaryData.Length;
+            int dataAdded = _data.AddData(binaryData, type);
+            _header.length += (ushort)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
         public T GetData<T>(int index, byte type = 0) where T : unmanaged, IEndianConvertable

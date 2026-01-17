@@ -45,47 +45,54 @@ namespace PLCompliant.STEP_7
             _data.CopyTo(serializedObj);
         }
         /// <inheritdoc/>
-        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
-            var newSize = _data.Length + Marshal.SizeOf<T>();
+            var dataAdded = Marshal.SizeOf<T>();
+            var newSize = _data.Length + dataAdded;
             Array.Resize(ref _data, newSize);
             inputData.FromHostToNetwork();
             ReadOnlySpan<T> inputSpan = [inputData];
             ReadOnlySpan<byte> outSpan = MemoryMarshal.AsBytes(inputSpan);
             outSpan.CopyTo(_data);
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ushort inputData, byte type)
+        public int AddData(ushort inputData, byte type)
         {
+            var dataAdded = Marshal.SizeOf(inputData);
             var oldSize = _data.Length;
-            var newSize = _data.Length + Marshal.SizeOf<UInt16>();
+            var newSize = _data.Length + inputData;
             Array.Resize(ref _data, newSize);
             ReadOnlySpan<ushort> inputSpan = [EndianConverter.FromHostToNetwork(inputData)];
             ReadOnlySpan<byte> inputSpanAsBytes = MemoryMarshal.AsBytes(inputSpan);
             Span<byte> payloadSpan = _data.AsSpan(oldSize);
             inputSpanAsBytes.CopyTo(payloadSpan);
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(byte inputData, byte type)
+        public int AddData(byte inputData, byte type)
         {
-            var newSize = _data.Length + Marshal.SizeOf<byte>();
+            var dataAdded = Marshal.SizeOf(inputData);
+            var newSize = _data.Length + dataAdded;
             Array.Resize(ref _data, newSize);
             _data[newSize - 1] = inputData;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
             if (binaryData.Length > byte.MaxValue)
             {
                 throw new ArgumentException("Input length was greater than allowed in a byte");
             }
             byte binarySize = (byte)binaryData.Length;
-            if (binarySize == 0) { return; }
+            if (binarySize == 0) { return 0; }
             var oldSize = _data.Length;
             var newSize = _data.Length + binarySize;
             Array.Resize(ref _data, newSize);
             Span<byte> payloadSpan = _data.AsSpan(oldSize);
             binaryData.CopyTo(payloadSpan);
+            return binaryData.Length;
         }
         /// <inheritdoc/>
         public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable

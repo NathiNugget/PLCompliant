@@ -1,4 +1,5 @@
-﻿using PLCompliant.Modbus;
+﻿using PLCompliant.Enums;
+using PLCompliant.Modbus;
 using PLCompliant.STEP_7;
 using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
@@ -12,7 +13,7 @@ namespace PLCompliantTests.STEP7
     {
         public STEP7Message CreateSTEP7Msg()
         {
-            STEP7Message msg = new(new STEP7Header(), new STEP7ParameterData(0), new STEP7DataPayload(0, 0));
+            STEP7Message msg = new();
             return msg;
         }
         [TestMethod()]
@@ -34,9 +35,9 @@ namespace PLCompliantTests.STEP7
 
         public void AddDataTest(ushort param1, byte param2, ushort param3, byte param4)
         {
-            ushort expectedLength = STEP7DataPayload.PRELUDE_SIZE;
             STEP7Message msg = CreateSTEP7Msg();
-            msg.AddData(param1);
+            expectedLengt 
+            msg.AddData(param1, (byte)IsoTcpDataType.STEP7RegularData);
             expectedLength += (ushort)Marshal.SizeOf(param1);
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
 

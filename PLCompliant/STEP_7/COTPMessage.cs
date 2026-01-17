@@ -58,28 +58,32 @@ namespace PLCompliant.STEP_7
             _data.Deserialize(inputBuffer.Slice(index, _data.Size));
         }
         /// <inheritdoc/>
-        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
-            _data.AddData(inputData, type);
-            _header.Length += (byte)Marshal.SizeOf<T>();
+            int dataAdded = _data.AddData(inputData, type);
+            _header.Length += (byte)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ushort inputData, byte type)
+        public int AddData(ushort inputData, byte type)
         {
-            _data.AddData(inputData, type);
-            _header.Length += (byte)Marshal.SizeOf(inputData);
+            int dataAdded = _data.AddData(inputData, type);
+            _header.Length += (byte)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(byte inputData, byte type)
+        public int AddData(byte inputData, byte type)
         {
-            _data.AddData(inputData, type);
-            _header.Length += (byte)Marshal.SizeOf(inputData);
+            int dataAdded = _data.AddData(inputData, type);
+            _header.Length += (byte)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
-            _data.AddData(binaryData, type);
-            _header.Length += (byte)binaryData.Length;
+            int dataAdded = _data.AddData(binaryData, type);
+            _header.Length += (byte)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
         public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable

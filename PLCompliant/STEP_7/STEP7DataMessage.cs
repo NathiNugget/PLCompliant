@@ -52,32 +52,36 @@ namespace PLCompliant.STEP_7
         }
 
         /// <inheritdoc/>
-        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
-            _data.AddData<T>(inputData, type);
-            _header.Length += (ushort)Marshal.SizeOf<T>();
+            int dataAdded = _data.AddData<T>(inputData, type);
+            _header.Length += (ushort)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ushort inputData, byte type)
+        public int AddData(ushort inputData, byte type)
         {
-            _data.AddData(inputData, type);
-            _header.Length += sizeof(ushort);
+            int dataAdded = _data.AddData(inputData, type);
+            _header.Length += (ushort)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(byte inputData, byte type)
+        public int AddData(byte inputData, byte type)
         {
-            _data.AddData(inputData, type);
-            _header.Length += sizeof(byte);
+            int dataAdded =_data.AddData(inputData, type);
+            _header.Length += (ushort)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
             if (binaryData.Length > byte.MaxValue)
             {
                 throw new ArgumentException("Input length was greater than allowed in a byte");
             }
-            _data.AddData(binaryData, type);
-            _header.Length += (ushort)binaryData.Length;
+            int dataAdded = _data.AddData(binaryData, type);
+            _header.Length += (ushort)dataAdded;
+            return dataAdded;
         }
         /// <inheritdoc/>
         public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable

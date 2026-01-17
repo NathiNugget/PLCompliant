@@ -119,68 +119,113 @@ namespace PLCompliant.STEP_7
 
         }
         /// <inheritdoc/>
-        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
+            int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if(flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                _step7ParamData.AddData<T>(inputData, type);
-                _step7Header.ParameterLength += (ushort)Marshal.SizeOf<T>();
+                if(_step7ParamData == null)
+                {
+                    _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
+                }
+                dataAdded = _step7ParamData.AddData<T>(inputData, type);
+                _step7Header.ParameterLength += (ushort)dataAdded;
             }
             else
             {
-                _step7Data.AddData<T>(inputData, type);
-                _step7Header.DataLength += (ushort)Marshal.SizeOf<T>();
+                if (_step7Data == null)
+                {
+                    _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
+                    dataAdded += _step7Data.Size;
+                }
+                dataAdded += _step7Data.AddData<T>(inputData, type);
+                _step7Header.DataLength += (ushort)dataAdded;
             }
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ushort inputData, byte type)
+        public int AddData(ushort inputData, byte type)
         {
+            int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                _step7ParamData.AddData(inputData, type);
-                _step7Header.ParameterLength += (ushort)Marshal.SizeOf(inputData);
+                if (_step7ParamData == null)
+                {
+                    _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
+                }
+                dataAdded = _step7ParamData.AddData(inputData, type);
+                _step7Header.ParameterLength += (ushort)dataAdded;
             }
             else
             {
-                _step7Data.AddData(inputData, type);
-                _step7Header.DataLength += (ushort)Marshal.SizeOf(inputData);
+                if (_step7Data == null)
+                {
+                    _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
+                    dataAdded += _step7Data.Size;
+                }
+                dataAdded += _step7Data.AddData(inputData, type);
+                _step7Header.DataLength += (ushort)dataAdded;
+        
             }
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(byte inputData, byte type)
+        public int AddData(byte inputData, byte type)
         {
+            int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                _step7ParamData.AddData(inputData, type);
-                _step7Header.ParameterLength += (ushort)Marshal.SizeOf(inputData);
+                if (_step7ParamData == null)
+                {
+                    _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
+                }
+                dataAdded = _step7ParamData.AddData(inputData, type);
+                _step7Header.ParameterLength += (ushort)dataAdded;
             }
             else
             {
-                _step7Data.AddData(inputData, type);
-                _step7Header.DataLength += (ushort)Marshal.SizeOf(inputData);
+                if (_step7Data == null)
+                {
+                    _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
+                    dataAdded += _step7Data.Size;
+                }
+                dataAdded += _step7Data.AddData(inputData, type);
+                _step7Header.DataLength += (ushort)dataAdded;
             }
+            return dataAdded;
         }
         /// <inheritdoc/>
-        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
             if (binaryData.Length > byte.MaxValue)
             {
                 throw new ArgumentException("Input length was greater than allowed in a byte");
             }
+            int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                _step7ParamData.AddData(binaryData, type);
-                _step7Header.ParameterLength += (ushort)binaryData.Length;
+                if (_step7ParamData == null)
+                {
+                    _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
+                }
+                dataAdded = _step7ParamData.AddData(binaryData, type);
+                _step7Header.ParameterLength += (ushort)dataAdded;
             }
             else
             {
-                _step7Data.AddData(binaryData, type);
-                _step7Header.DataLength += (ushort)binaryData.Length;
+                if (_step7Data == null)
+                {
+                    _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
+                    dataAdded += _step7Data.Size;
+                }
+                dataAdded += _step7Data.AddData(binaryData, type);
+                _step7Header.DataLength += (ushort)dataAdded;
             }
+            return dataAdded;
         }
         /// <inheritdoc/>
         public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable

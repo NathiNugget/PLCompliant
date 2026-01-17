@@ -165,68 +165,99 @@ namespace PLCompliant.STEP_7
             DeserializeData(inputBuffer.Slice(index, restOfData));
         }
 
-        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
+            int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if(flags.HasFlag(IsoTcpDataType.COTPData))
             {
-                _cotp.AddData<T>(inputData, type);
-                _tpkt.Length += (ushort)Marshal.SizeOf<T>();
+                dataAdded = _cotp.AddData<T>(inputData, type);
             }
             else
             {
-                _step7.AddData<T>(inputData, type);
-                _tpkt.Length += (ushort)Marshal.SizeOf<T>();
+                if (_step7 == null)
+                {
+                    _step7 = new();
+                    dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
+
+                }
+                dataAdded += _step7.AddData<T>(inputData, type);                  
             }
+            _tpkt.Length += (ushort)dataAdded;
+            return dataAdded;
         }
 
-        public void AddData(ushort inputData, byte type)
+        public int AddData(ushort inputData, byte type)
         {
+            int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.COTPData))
             {
-                _cotp.AddData(inputData, type);
-                _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
+                dataAdded = _cotp.AddData(inputData, type);
+                
             }
             else
             {
-                _step7.AddData(inputData, type);
-                _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
+                
+                if (_step7 == null)
+                {
+                    _step7 = new();
+                    dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
+
+                }
+                dataAdded += _step7.AddData(inputData, type);         
             }
+            _tpkt.Length += (ushort)dataAdded;
+            return dataAdded;
         }
 
-        public void AddData(byte inputData, byte type)
+        public int AddData(byte inputData, byte type)
         {
+            int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.COTPData))
             {
-                _cotp.AddData(inputData, type);
-                _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
+                dataAdded = _cotp.AddData(inputData, type);
             }
             else
             {
-                _step7.AddData(inputData, type);
-                _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
+                if (_step7 == null)
+                {
+                    _step7 = new();
+                    dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
+
+                }
+                dataAdded += _step7.AddData(inputData, type);
+                
             }
+            _tpkt.Length += (ushort)dataAdded;
+            return dataAdded;
         }
 
-        public void AddData(ReadOnlySpan<byte> binaryData, byte type)
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
             if (binaryData.Length > byte.MaxValue)
             {
                 throw new ArgumentException("Input length was greater than allowed in a byte");
             }
+            int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.COTPData))
             {
-                _cotp.AddData(binaryData, type);
-                _tpkt.Length += (ushort)binaryData.Length;
+                dataAdded = _cotp.AddData(binaryData, type);
             }
             else
             {
-                _step7.AddData(binaryData, type);
-                _tpkt.Length += (ushort)binaryData.Length;
+                if (_step7 == null)
+                {
+                    _step7 = new();
+                    dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
+
+                }
+                dataAdded += _step7.AddData(binaryData, type);               
             }
+            _tpkt.Length += (ushort)binaryData.Length;
+            return dataAdded;
         }
 
         public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable

@@ -17,25 +17,29 @@ namespace PLCompliant.Interface
         /// <typeparam name="T">An unmanaged type of the data to add</typeparam>
         /// <param name="inputData">The data to add</param>
         /// <param name="type">A byte denoting the type. This may be interpreted by diffrent implementors as meaning diffrent parts of the data segemnt (eg. paramenter-data, and other-data)</param>
-        public void AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable;
+        /// <returns>The amount of data added in bytes</returns>
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable;
         /// <summary>
         /// Adds data from an Uint16 to the objects internal data storage
         /// </summary>
         /// <param name="inputData">The Uint16 to add</param>
         /// <param name="type">A byte denoting the type. This may be interpreted by diffrent implementors as meaning diffrent parts of the data segemnt (eg. paramenter-data, and other-data)</param>
-        public void AddData(UInt16 inputData, byte type);
+        /// <returns>The amount of data added in bytes</returns>
+        public int AddData(UInt16 inputData, byte type);
         /// <summary>
         /// Adds data from an byte to the objects internal data storage
         /// </summary>
         /// <param name="inputData">The byte to add</param>
         /// <param name="type">A byte denoting the type. This may be interpreted by diffrent implementors as meaning diffrent parts of the data segemnt (eg. paramenter-data, and other-data)</param>
-        public void AddData(byte inputData, byte type);
+        /// <returns>The amount of data added in bytes</returns>
+        public int AddData(byte inputData, byte type);
 
         /// <summary>
         /// Adds data from an Span of bytes to the objects internal data storage
         /// </summary>
         /// <param name="binaryData"> a ReadonlySpan of bytes to add</param>
         /// <param name="type">A byte denoting the type. This may be interpreted by diffrent implementors as meaning diffrent parts of the data segemnt (eg. paramenter-data, and other-data)</param>
-        public void AddData(ReadOnlySpan<byte> binaryData, byte type);
+        /// <returns>The amount of data added in bytes</returns>
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type);
     }
 }
