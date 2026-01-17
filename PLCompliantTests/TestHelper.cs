@@ -49,12 +49,8 @@ namespace PLCompliantTests
         public static ReadSZLResponseData CreateExampleReadSZLResponse()
         {
             char[] orderNum = new char[] { '6', 'E', 'S', '7', ' ', '2', '1', '1', '-', '1', 'B', 'E', '4', '0', '-', '0', 'X', 'B', '0', ' ' };
-            ReadSZLResponseData szlResponse = new ReadSZLResponseData();
+            ReadSZLResponseData szlResponse = new ReadSZLResponseData(new(17, 1, 28, 3));
             szlResponse.IPAddr = IPAddress.Parse("192.168.123.99");
-            szlResponse.DiagnosticTypeMask = 17;
-            szlResponse.ListCount = 3;
-            szlResponse.ListLength = 28;
-            szlResponse.SZLIndex = 1;
             szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.Module, orderNum, 0, 14, 8224));
             szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.BasicHardware, orderNum, 0, 14, 8224));
             szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.BasicFirmware, orderNum, 0, 22020, 1281));

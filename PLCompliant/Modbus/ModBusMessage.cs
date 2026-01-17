@@ -128,7 +128,7 @@ namespace PLCompliant.Modbus
         public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
         {
             _data.ResizeStorage(Header.length - 1); // - 1 because it includes function code
-            _data.Deserialize(inputBuffer.Slice(0, _data.Size));
+            _data.Deserialize(inputBuffer.Slice(0, Header.length));
         }
         public void Deserialize(ReadOnlySpan<byte> inputBuffer)
         {

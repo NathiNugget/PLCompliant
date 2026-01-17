@@ -153,7 +153,7 @@ namespace PLCompliant.Modbus.Tests
             ReadOnlySpan<byte> returnBytesSpan = new ReadOnlySpan<byte>(returnBytes);
             response.DeserializeHeader(returnBytesSpan.Slice(0, msg.Header.Size));
             //data
-            response.DeserializeData(returnBytesSpan.Slice(response.Header.Size, response.Header.length - 1));
+            response.DeserializeData(returnBytesSpan.Slice(response.Header.Size));
             Assert.AreEqual(msg, response);
         }
 

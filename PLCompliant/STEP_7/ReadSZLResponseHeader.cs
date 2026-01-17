@@ -13,6 +13,19 @@ namespace PLCompliant.STEP_7
         [FieldOffset(4)] private UInt16 _listLength;
         [FieldOffset(6)] private UInt16 _listCount;
 
+
+        public ReadSZLResponseHeader(UInt16 diagnosticTypeMask, UInt16 szlIndex, UInt16 listLength, UInt16 listCount)
+        {
+            _diagnosticTypeMask = diagnosticTypeMask;
+            _szlIndex = szlIndex;
+            _listLength = listLength;
+            _listCount = listCount;
+        }
+        public ReadSZLResponseHeader()
+        {
+            
+        }
+
         public UInt16 ListCount
         {
             get { return _listCount; }

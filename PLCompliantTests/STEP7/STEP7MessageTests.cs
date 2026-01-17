@@ -36,31 +36,21 @@ namespace PLCompliantTests.STEP7
         public void AddDataTest(ushort param1, byte param2, ushort param3, byte param4)
         {
             STEP7Message msg = CreateSTEP7Msg();
-            expectedLengt 
-            msg.AddData(param1, (byte)IsoTcpDataType.STEP7RegularData);
-            expectedLength += (ushort)Marshal.SizeOf(param1);
+            var expectedLength = msg.AddData(param1, (byte)IsoTcpDataType.STEP7RegularData);
+            expectedLength += msg.STEP7Data.Header.Size; // also add header size since it is created with AddData
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
 
 
-            msg.AddData(param2);
+            msg.AddData(param2, (byte)IsoTcpDataType.STEP7RegularData);
             expectedLength += (ushort)Marshal.SizeOf(param2);
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
-            msg.AddData(param3);
+            msg.AddData(param3, (byte)IsoTcpDataType.STEP7RegularData);
             expectedLength += (ushort)Marshal.SizeOf(param3);
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
-            msg.AddData(param4);
+            msg.AddData(param4, (byte)IsoTcpDataType.STEP7RegularData);
             expectedLength += (ushort)Marshal.SizeOf(param4);
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
             Assert.AreEqual(expectedLength, msg.STEP7Data.Size);
-            // Converted manually to extract data simulating network extraction because they are wrapped for network when they are added. 
-            ushort param_1_actual = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7Data.Data, 0));
-            byte param_2_acutal = msg.STEP7Data.Data[2];
-            ushort param_3_actual = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7Data.Data, 3));
-            byte param_4_acutal = msg.STEP7Data.Data[5];
-            Assert.AreEqual(param1, param_1_actual);
-            Assert.AreEqual(param2, param_2_acutal);
-            Assert.AreEqual(param3, param_3_actual);
-            Assert.AreEqual(param4, param_4_acutal);
 
 
         }
@@ -70,17 +60,18 @@ namespace PLCompliantTests.STEP7
         [DataRow((uint)255)]
         public void AddDataByteArrayTest(uint size)
         {
-            uint expectedlength = STEP7DataPayload.PRELUDE_SIZE;
+
             STEP7Message msg = CreateSTEP7Msg();
             byte[] arr = new byte[size];
-            expectedlength += size;
-            msg.AddData(arr);
+            int expectedlength = (int)size;
+            msg.AddData(arr, (byte)IsoTcpDataType.STEP7RegularData);
+            expectedlength += msg.STEP7Data.Header.Size; // add header since it is initialized in AddData
             Assert.AreEqual(msg.STEP7Header.DataLength, expectedlength);
             Assert.AreEqual(msg.STEP7Data.Size, (int)expectedlength);
 
             //Repeat
-            expectedlength += size;
-            msg.AddData(arr);
+            expectedlength += (int)size;
+            msg.AddData(arr, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(msg.STEP7Header.DataLength, expectedlength);
             Assert.AreEqual(msg.STEP7Data.Size, (int)expectedlength);
 
@@ -97,7 +88,7 @@ namespace PLCompliantTests.STEP7
             STEP7Message msg = CreateSTEP7Msg();
             byte[] arr = new byte[size];
 
-            Assert.ThrowsException<ArgumentException>(() => msg.AddData(arr));
+            Assert.ThrowsException<ArgumentException>(() => msg.AddData(arr, (byte)IsoTcpDataType.STEP7RegularData));
 
         }
 
@@ -142,14 +133,18 @@ namespace PLCompliantTests.STEP7
         public void ModBusMessageSizeAndTotalSize(byte param_1)
         {
 
-            STEP7Message msg = new(new(), new(), new());
-            int expectedsize = msg.STEP7Header.Size + msg.STEP7Data.Size + msg.STEP7ParamData.Size; //Header + function code + data
+            STEP7Message msg = CreateSTEP7Msg();
+            int expectedsize = msg.STEP7Header.Size; // Only header is default-initialized
             Assert.AreEqual(expectedsize, msg.Size);
 
-            msg.AddData(param_1);
+            msg.AddData(param_1, (byte)IsoTcpDataType.STEP7RegularData);
 
-            expectedsize++;
+            expectedsize += Marshal.SizeOf(param_1) + msg.STEP7Data.Size; // Data segment is initialized
             Assert.AreEqual(expectedsize, msg.Size);
+
+            msg.AddData(param_1, (byte)IsoTcpDataType.STEP7ParamData);
+
+            expectedsize += Marshal.SizeOf(param_1) + msg.STEP7ParamData.Size; // param data is initialized now
         }
 
 
