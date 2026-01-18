@@ -21,7 +21,8 @@ namespace PLCompliantTests
         //This method instantiates a ModBusMessage akin to an response from PLC for ReadDeviceIdentification. 
         public static ModBusMessage CreateExampleReadDeviceInformationResponse()
         {
-            ModBusMessage msg = new(new(0, 0, 255), new((byte)ModBusCommandType.read_device_information, []));
+            ModBusMessage msg = new(new(0, 0, 255), new());
+            msg.AddData((byte)ModBusCommandType.read_device_information); // function code
             msg.AddData(0xe);
             msg.AddData(0x2);
             msg.AddData(0x81);

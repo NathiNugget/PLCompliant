@@ -31,14 +31,14 @@ namespace PLCompliant.Modbus
             unitID = unitid;
             transactionIdentifier = transmodifier;
             protocolIdentifier = protidentifier;
-            length = 2; // 1 byte for unitId, and 1 byte for functionId
+            length = 1; // 1 byte for unitId, which is always present in header
         }
         /// <summary>
         /// Empty constructor mostly used for tests and other standard initialization
         /// </summary>
         public ModBusHeader()
         {
-            length = 2;
+            length = 1;// 1 byte for unitId, which is always present in header
         }
 
         #endregion

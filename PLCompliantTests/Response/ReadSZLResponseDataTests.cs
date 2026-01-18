@@ -8,6 +8,7 @@ namespace PLCompliantTests.Response
     public class ReadSZLResponseDataTests
     {
         static string correctCSVOutput = "192.168.123.99;6ES7 211-1BE40-0XB0 ;V4.5.1";
+        static string nonCorrectOutput = "192.168.123.99;6ES7 211-1BE40-0XB0 ;V4.5.0";
         [TestMethod()]
         public void ToCSVTestSucess()
         {
@@ -20,7 +21,7 @@ namespace PLCompliantTests.Response
         public void ToCSVTestFailureNoMatch()
         {
             ReadSZLResponseData response = TestHelper.CreateExampleReadSZLResponse();
-            string expected = correctCSVOutput;
+            string expected = nonCorrectOutput;
             string actual = response.ToCSV();
             Assert.AreNotEqual(expected, actual);
         }

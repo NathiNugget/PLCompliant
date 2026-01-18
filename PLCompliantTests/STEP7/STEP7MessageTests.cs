@@ -37,18 +37,14 @@ namespace PLCompliantTests.STEP7
         {
             STEP7Message msg = CreateSTEP7Msg();
             var expectedLength = msg.AddData(param1, (byte)IsoTcpDataType.STEP7RegularData);
-            expectedLength += msg.STEP7Data.Header.Size; // also add header size since it is created with AddData
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
 
 
-            msg.AddData(param2, (byte)IsoTcpDataType.STEP7RegularData);
-            expectedLength += (ushort)Marshal.SizeOf(param2);
+            expectedLength += msg.AddData(param2, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
-            msg.AddData(param3, (byte)IsoTcpDataType.STEP7RegularData);
-            expectedLength += (ushort)Marshal.SizeOf(param3);
+            expectedLength += msg.AddData(param3, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
-            msg.AddData(param4, (byte)IsoTcpDataType.STEP7RegularData);
-            expectedLength += (ushort)Marshal.SizeOf(param4);
+            expectedLength += msg.AddData(param4, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedLength, msg.STEP7Header.DataLength);
             Assert.AreEqual(expectedLength, msg.STEP7Data.Size);
 
@@ -137,14 +133,13 @@ namespace PLCompliantTests.STEP7
             int expectedsize = msg.STEP7Header.Size; // Only header is default-initialized
             Assert.AreEqual(expectedsize, msg.Size);
 
-            msg.AddData(param_1, (byte)IsoTcpDataType.STEP7RegularData);
+            expectedsize += msg.AddData(param_1, (byte)IsoTcpDataType.STEP7RegularData);
 
-            expectedsize += Marshal.SizeOf(param_1) + msg.STEP7Data.Size; // Data segment is initialized
             Assert.AreEqual(expectedsize, msg.Size);
 
-            msg.AddData(param_1, (byte)IsoTcpDataType.STEP7ParamData);
+            expectedsize += msg.AddData(param_1, (byte)IsoTcpDataType.STEP7ParamData);
 
-            expectedsize += Marshal.SizeOf(param_1) + msg.STEP7ParamData.Size; // param data is initialized now
+
         }
 
 

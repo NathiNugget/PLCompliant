@@ -116,15 +116,14 @@ namespace PLCompliant.Response
             }
         }
     }
-    [StructLayout(LayoutKind.Explicit, Size = 28, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 28, CharSet = CharSet.Ansi)]
     public struct ReadSZLDataItem : IEndianConvertable
     {
-        [FieldOffset(0)] private UInt16 _index;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        [FieldOffset(2)] private char[] _orderNum;
-        [FieldOffset(22)] private UInt16 _moduleTypeId;
-        [FieldOffset(24)] private UInt16 _version;
-        [FieldOffset(26)] private UInt16 _pgDescriptionFile;
+        private UInt16 _index;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] private char[] _orderNum;
+        private UInt16 _moduleTypeId;
+        private UInt16 _version;
+        private UInt16 _pgDescriptionFile;
 
 
         public ReadSZLDataItem(UInt16 index, char[] orderNum, UInt16 moduleTypeId, UInt16 version, UInt16 pgDescriptionFile)

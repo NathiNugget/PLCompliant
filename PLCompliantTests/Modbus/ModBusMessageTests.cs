@@ -30,7 +30,7 @@ namespace PLCompliant.Modbus.Tests
 
         public void AddDataTest(ushort param_1, byte param_2, ushort param_3, byte param_4)
         {
-            ushort expected_length = 2;
+            ushort expected_length = 1;
             ModBusMessage msg = new(new(), new());
             msg.AddData(param_1);
             expected_length += (ushort)Marshal.SizeOf(param_1);
@@ -48,10 +48,10 @@ namespace PLCompliant.Modbus.Tests
             Assert.AreEqual(msg.Header.length, expected_length);
             Assert.AreEqual(msg.Data.Size, expected_length - 1);
             // Converted manually to extract data simulating network extraction because they are wrapped for network when they are added. 
-            ushort param_1_actual = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.Data._payload, 0));
-            byte param_2_acutal = msg.Data._payload[2];
-            ushort param_3_actual = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.Data._payload, 3));
-            byte param_4_acutal = msg.Data._payload[5];
+            ushort param_1_actual = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.Data.Payload, 0));
+            byte param_2_acutal = msg.Data.Payload[2];
+            ushort param_3_actual = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.Data.Payload, 3));
+            byte param_4_acutal = msg.Data.Payload[5];
             Assert.AreEqual(param_1, param_1_actual);
             Assert.AreEqual(param_2, param_2_acutal);
             Assert.AreEqual(param_3, param_3_actual);
@@ -65,7 +65,7 @@ namespace PLCompliant.Modbus.Tests
         [DataRow((uint)255)]
         public void AddDataByteArrayTest(uint size)
         {
-            uint expectedlength = size + 2;
+            uint expectedlength = size + 1; // + 1 due to unitId being part of length, which is always present in header
             ModBusMessage msg = new(new(), new());
             byte[] arr = new byte[size];
             msg.AddData(arr);
@@ -87,7 +87,7 @@ namespace PLCompliant.Modbus.Tests
 
         public void AddDataByteArrayTooLargeTest(uint size)
         {
-            uint expectedlength = size + 2;
+            uint expectedlength = size + 1;
             ModBusMessage msg = new(new(), new());
             byte[] arr = new byte[size];
 
@@ -102,8 +102,9 @@ namespace PLCompliant.Modbus.Tests
         {
 
             ModBusMessageFactory factory = new ModBusMessageFactory();
-            ModBusMessage expected = new(new(), new((byte)ModBusCommandType.read_device_information, Array.Empty<byte>()));
+            ModBusMessage expected = new(new(), new());
             byte productid = 0x2;
+            expected.AddData((byte)ModBusCommandType.read_device_information);
             expected.AddData(0x0E);
             expected.AddData(productid);
             expected.AddData(0x0);
@@ -118,7 +119,8 @@ namespace PLCompliant.Modbus.Tests
 
         public void ModBusMessageEqualsWithNullAndFactory()
         {
-            var data = new ModBusData { _functionCode = (byte)ModBusCommandType.get_slave_id, _payload = [] };
+            var data = new ModBusData { };
+            data.AddData((byte)ModBusCommandType.get_slave_id); // function code
             var expected = new ModBusMessage(new(1, 2, 3), data);
 
             ModBusMessageFactory factory = new();
@@ -173,7 +175,7 @@ namespace PLCompliant.Modbus.Tests
         {
             ModBusMessage msg = new(new(), new());
             msg.AddData(param_1);
-            int expectedsize = Marshal.SizeOf<ModBusHeader>() + 1 + 1; //Header + function code + data
+            int expectedsize = Marshal.SizeOf<ModBusHeader>() + 1; //Header + data
             Assert.AreEqual(expectedsize, msg.Size);
         }
 

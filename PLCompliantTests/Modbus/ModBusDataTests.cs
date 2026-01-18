@@ -26,9 +26,9 @@ namespace PLCompliant.Modbus.Tests
         {
             ModBusMessage firstmsg = new(new(), new());
             ModBusMessage secondmsg = new(new(), new());
-            firstmsg.Data._functionCode = funcCode;
+            firstmsg.AddData(funcCode); // function code
+            secondmsg.AddData(funcCode); // function code
             firstmsg.AddData(param_1);
-            secondmsg.Data._functionCode = funcCode;
             secondmsg.AddData(param_1);
             Assert.AreEqual(firstmsg.Data, secondmsg.Data);
 
@@ -47,9 +47,9 @@ namespace PLCompliant.Modbus.Tests
         {
             ModBusMessage firstmsg = new(new(), new());
             ModBusMessage secondmsg = new(new(), new());
-            firstmsg.Data._functionCode = funcCode;
+            firstmsg.AddData(funcCode); // function code
+            secondmsg.AddData(funcCode); // function code
             firstmsg.AddData(param_1);
-            secondmsg.Data._functionCode = funcCode;
             secondmsg.AddData(param_1);
             Assert.IsTrue(firstmsg.Data.Equals(secondmsg.Data));
 

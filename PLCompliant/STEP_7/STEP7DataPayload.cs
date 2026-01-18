@@ -61,7 +61,7 @@ namespace PLCompliant.STEP_7
         {
             var dataAdded = Marshal.SizeOf(inputData);
             var oldSize = _data.Length;
-            var newSize = _data.Length + inputData;
+            var newSize = _data.Length + dataAdded;
             Array.Resize(ref _data, newSize);
             ReadOnlySpan<ushort> inputSpan = [EndianConverter.FromHostToNetwork(inputData)];
             ReadOnlySpan<byte> inputSpanAsBytes = MemoryMarshal.AsBytes(inputSpan);

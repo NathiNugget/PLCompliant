@@ -10,14 +10,8 @@ namespace PLCompliant.Modbus
     public class ModBusData : IProtocolData
     {
         #region instance fields
-        /// <summary>
-        /// The function code to run on the PLC
-        /// </summary>
-        public byte _functionCode;
-        /// <summary>
-        /// The data to send converted to bytes
-        /// </summary>
-        public byte[] _payload = [];
+      
+        private byte[] _payload = [];
         #endregion
 
         #region constructors
@@ -33,14 +27,20 @@ namespace PLCompliant.Modbus
         /// </summary>
         /// <param name="functionCode">The function code to be run</param>
         /// <param name="payload">The data to be followed by the function code</param>
-        public ModBusData(byte functionCode, byte[] payload)
+        public ModBusData(byte[] payload)
         {
-            _functionCode = functionCode;
             _payload = payload;
-
         }
 
         #endregion
+        /// <summary>
+        /// The function code of the command
+        /// </summary>
+        public byte FunctionCode { get { return _payload[0];  } }
+        /// <summary>
+        /// The data to send converted to bytes
+        /// </summary>
+        public byte[] Payload { get { return _payload; } }
 
         #region methods
 
@@ -53,29 +53,23 @@ namespace PLCompliant.Modbus
         {
             if (other is null || other is not ModBusData) return false;
             ModBusData other_data = (ModBusData)other;
-            return (Size == other_data.Size && _functionCode == other_data._functionCode && _payload.SequenceEqual(other_data._payload));
+            return (Size == other_data.Size && _payload.SequenceEqual(other_data._payload));
         }
         /// <inheritdoc/>
         public void Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            int index = 0;
-            _functionCode = inputBuffer[index];
-            index += sizeof(byte);
-            inputBuffer = inputBuffer.Slice(index, _payload.Length);
+            inputBuffer = inputBuffer.Slice(0, _payload.Length);
             inputBuffer.CopyTo(_payload);
         }
         /// <inheritdoc/>
         public void Serialize(Span<byte> serializedObj)
         {
-            int index = 0;
-            serializedObj[index] = _functionCode;
-            index += sizeof(byte);
-            serializedObj = serializedObj.Slice(index, _payload.Length);
+            serializedObj = serializedObj.Slice(0, _payload.Length);
 
             _payload.CopyTo(serializedObj);
         }
         /// <inheritdoc/>
-        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        public int AddData<T>(T inputData, byte type = 0) where T : unmanaged, IEndianConvertable
         {
             var dataAdded = Marshal.SizeOf<T>();
             var newSize = _payload.Length + dataAdded;
@@ -87,7 +81,7 @@ namespace PLCompliant.Modbus
             return dataAdded;
         }
         /// <inheritdoc/>
-        public int AddData(ushort inputData, byte type)
+        public int AddData(ushort inputData, byte type = 0)
         {
             var dataAdded = Marshal.SizeOf(inputData);
             var oldSize = _payload.Length;
@@ -101,7 +95,7 @@ namespace PLCompliant.Modbus
            
         }
         /// <inheritdoc/>
-        public int AddData(byte inputData, byte type)
+        public int AddData(byte inputData, byte type = 0)
         {
             var dataAdded = Marshal.SizeOf(inputData);
             var newSize = _payload.Length + dataAdded;
@@ -110,7 +104,7 @@ namespace PLCompliant.Modbus
             return dataAdded;
         }
         /// <inheritdoc/>
-        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type = 0)
         {
             if (binaryData.Length > byte.MaxValue)
             {
@@ -126,7 +120,7 @@ namespace PLCompliant.Modbus
             return binaryData.Length;
         }
         /// <inheritdoc/>
-        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        public T GetData<T>(int index, byte type = 0) where T : unmanaged, IEndianConvertable
         {
             T outVar = MemoryMarshal.AsRef<T>(_payload);
             outVar.FromNetworkToHost();
@@ -144,7 +138,7 @@ namespace PLCompliant.Modbus
         /// <summary>
         /// Property to get the Size of the data + function code in bytes
         /// </summary>
-        public int Size { get { return _payload.Length + Marshal.SizeOf(_functionCode); } }
+        public int Size { get { return _payload.Length; } }
         #endregion
     }
 
