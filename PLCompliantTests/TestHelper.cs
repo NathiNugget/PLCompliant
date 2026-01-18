@@ -49,12 +49,12 @@ namespace PLCompliantTests
         //This method instantiates a ReadSZLResponseData akin to an response from PLC. 
         public static ReadSZLResponseData CreateExampleReadSZLResponse()
         {
-            char[] orderNum = new char[] { '6', 'E', 'S', '7', ' ', '2', '1', '1', '-', '1', 'B', 'E', '4', '0', '-', '0', 'X', 'B', '0', ' ' };
+            OrderNumBuffer orderNum = new OrderNumBuffer("6ES7 211-1BE40-0XB0 ");
             ReadSZLResponseData szlResponse = new ReadSZLResponseData(new(17, 1, 28, 3));
             szlResponse.IPAddr = IPAddress.Parse("192.168.123.99");
-            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.Module, orderNum, 0, 14, 8224));
-            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.BasicHardware, orderNum, 0, 14, 8224));
-            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.BasicFirmware, orderNum, 0, 22020, 1281));
+            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.Module, ref orderNum, 0, 14, 8224));
+            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.BasicHardware, ref orderNum, 0, 14, 8224));
+            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.BasicFirmware, ref orderNum, 0, 22020, 1281));
 
 
             return szlResponse;

@@ -42,11 +42,11 @@ namespace PLCompliant.STEP_7
         /// <inheritdoc/>
         public int Size { get { return Marshal.SizeOf<STEP7DataHeader>(); } }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            STEP7DataHeader deserializedHeader = MemoryMarshal.AsRef<STEP7DataHeader>(inputBuffer);
-            deserializedHeader.FromNetworkToHost();
-            this = deserializedHeader;
+            this = MemoryMarshal.AsRef<STEP7DataHeader>(inputBuffer);
+            this.FromNetworkToHost();
+            return this.Size;
         }
         /// <inheritdoc/>
         public void FromHostToNetwork()

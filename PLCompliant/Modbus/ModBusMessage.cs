@@ -93,6 +93,7 @@ namespace PLCompliant.Modbus
         {
             _header = header;
             _data = data;
+            _header.length += (ushort)_data.Size; //increment it as we are initializing ModBusData with potential data in it
         }
 
         /// <summary>
@@ -120,22 +121,22 @@ namespace PLCompliant.Modbus
 
         }
         /// <inheritdoc/>
-        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
+        public int DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
         {
-            _header.Deserialize(inputBuffer.Slice(0, _header.Size));
+            return _header.Deserialize(inputBuffer.Slice(0, _header.Size));
         }
         /// <inheritdoc/>
-        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
+        public int DeserializeData(ReadOnlySpan<byte> inputBuffer)
         {
             _data.ResizeStorage(Header.length - 1); // - 1 because it includes unitId, which is in the header
-            _data.Deserialize(inputBuffer.Slice(0, _data.Size));
+            return _data.Deserialize(inputBuffer.Slice(0, _data.Size));
         }
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             int index = 0;
-            DeserializeHeader(inputBuffer.Slice(index, _header.Size));
-            index += _header.Size;
-            DeserializeData(inputBuffer.Slice(index, _data.Size));
+            index += DeserializeHeader(inputBuffer.Slice(index, _header.Size));
+            index += DeserializeData(inputBuffer.Slice(index, _data.Size));
+            return index;
         }
         /// <inheritdoc/>
         public int AddData<T>(T inputData, byte type = 0) where T : unmanaged, IEndianConvertable

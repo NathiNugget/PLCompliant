@@ -49,13 +49,16 @@ namespace PLCompliant.STEP_7
             index += _header.Size;
             _data.Serialize(serializedObj.Slice(index));
         }
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        /// <inheritdoc/>
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             int index = 0;
             _header.Deserialize(inputBuffer.Slice(index, _header.Size));
             index += _header.Size;
             _data.ResizeStorage(_header.Length);
             _data.Deserialize(inputBuffer.Slice(index, _data.Size));
+            index += _data.Size;
+            return index;
         }
         /// <inheritdoc/>
         public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable

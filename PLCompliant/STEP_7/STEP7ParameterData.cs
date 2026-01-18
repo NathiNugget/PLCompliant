@@ -33,11 +33,11 @@ namespace PLCompliant.STEP_7
             }
         }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            int index = 0;
-            inputBuffer = inputBuffer.Slice(index, _data.Length);
+            inputBuffer = inputBuffer.Slice(0, _data.Length);
             inputBuffer.CopyTo(_data);
+            return _data.Length;
         }
         /// <inheritdoc/>
         public void Serialize(Span<byte> serializedObj)

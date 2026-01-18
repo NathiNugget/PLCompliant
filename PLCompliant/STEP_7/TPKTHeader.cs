@@ -55,10 +55,11 @@ namespace PLCompliant.STEP_7
             MemoryMarshal.AsBytes(span).CopyTo(serializedObj.Slice(0, this.Size));
         }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             this = MemoryMarshal.AsRef<TPKTHeader>(inputBuffer.Slice(0, this.Size));
             this.FromNetworkToHost();
+            return this.Size;
         }
         /// <inheritdoc/>
         public void FromHostToNetwork()

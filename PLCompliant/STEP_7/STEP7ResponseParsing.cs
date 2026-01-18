@@ -50,7 +50,7 @@ namespace PLCompliant.STEP_7
             int startIndex = 0;
             ReadOnlySpan<byte> dataSpan = new(msg.STEP7.STEP7Data.Data.Data);
             var responseHeader = MemoryMarshal.Read<ReadSZLResponseHeader>(dataSpan.Slice(startIndex, Marshal.SizeOf<ReadSZLResponseHeader>()));
-
+            startIndex += Marshal.SizeOf<ReadSZLResponseHeader>();
             responseHeader.FromNetworkToHost();
             var result = new ReadSZLResponseData(responseHeader);
 
@@ -60,6 +60,7 @@ namespace PLCompliant.STEP_7
                 ReadSZLDataItem item = MemoryMarshal.Read<ReadSZLDataItem>(dataSpan.Slice(startIndex, Marshal.SizeOf<ReadSZLDataItem>()));
                 item.FromNetworkToHost();
                 result.Objects.Add(item);
+                startIndex += Marshal.SizeOf<ReadSZLDataItem>();
             }
             return result;
         }

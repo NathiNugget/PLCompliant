@@ -59,10 +59,11 @@ namespace PLCompliant.Modbus
             MemoryMarshal.AsBytes(span).CopyTo(serializedObj);
         }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             this = MemoryMarshal.AsRef<ModBusHeader>(inputBuffer.Slice(0, this.Size));
             this.FromNetworkToHost();
+            return this.Size;
         }
         /// <inheritdoc/>
         public void FromHostToNetwork()

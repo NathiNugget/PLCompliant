@@ -56,10 +56,11 @@ namespace PLCompliant.Modbus
             return (Size == other_data.Size && _payload.SequenceEqual(other_data._payload));
         }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             inputBuffer = inputBuffer.Slice(0, _payload.Length);
             inputBuffer.CopyTo(_payload);
+            return _payload.Length;
         }
         /// <inheritdoc/>
         public void Serialize(Span<byte> serializedObj)

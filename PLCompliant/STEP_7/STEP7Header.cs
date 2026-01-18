@@ -81,8 +81,14 @@ namespace PLCompliant.STEP_7
         {
             get
             {
-                return Marshal.SizeOf(this);
-                
+                if (_messageType == 0x3)
+                {
+                    return Marshal.SizeOf(this);
+                }
+                else
+                {
+                    return NON_ERROR_LENGTH;
+                }
             }
         }
         public STEP7Header(byte protocolId, byte messageType, UInt16 pduReference)
@@ -114,7 +120,7 @@ namespace PLCompliant.STEP_7
             }
         }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             // Deserialize prelude first, as we need to know the messagetype
             int index = 0;
@@ -128,14 +134,16 @@ namespace PLCompliant.STEP_7
             if(_messageType == 0x3)
             {
                 inputBuffer.Slice(index, Size - index).CopyTo(headerSpan.Slice(index, Size - index));
+                index += (Size - index);
             }
             else
             {
                 inputBuffer.Slice(index, NON_ERROR_LENGTH - index).CopyTo(headerSpan.Slice(index, NON_ERROR_LENGTH - index));
+                index += (NON_ERROR_LENGTH - index);
             }
             
-            
             this.FromNetworkToHost();
+            return index;
         }
         /// <inheritdoc/>
         public void FromHostToNetwork()

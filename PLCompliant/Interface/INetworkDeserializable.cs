@@ -18,6 +18,7 @@ namespace PLCompliant.Interface
         /// Deserialization of data from network to be able to extract information
         /// </summary>
         /// <param name="inputBuffer">The serialized data from the network, to be turned into </param>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer);
+        /// <returns>The amount of data which was deseriailized from the buffer in bytes</returns>
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer);
     }
 }

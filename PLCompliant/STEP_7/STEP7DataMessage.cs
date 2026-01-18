@@ -42,13 +42,13 @@ namespace PLCompliant.STEP_7
             index += _data.Size;
         }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             int index = 0;
-            _header.Deserialize(inputBuffer.Slice(index, _header.Size));
-            index += _header.Size;
+            index += _header.Deserialize(inputBuffer.Slice(index, _header.Size));
             _data.ResizeStorage(_header.Length);
-            _data.Deserialize(inputBuffer.Slice(index, _header.Length));
+            index += _data.Deserialize(inputBuffer.Slice(index, _header.Length));
+            return index;
         }
 
         /// <inheritdoc/>

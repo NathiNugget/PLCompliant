@@ -31,9 +31,10 @@ namespace PLCompliant.STEP_7
             serializedObj[0] = _length;
         }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             _length = inputBuffer[0];
+            return Size;
         }
     }
 }

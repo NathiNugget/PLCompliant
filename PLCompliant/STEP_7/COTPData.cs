@@ -85,11 +85,11 @@ namespace PLCompliant.STEP_7
             return binaryData.Length;
         }
         /// <inheritdoc/>
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            int index = 0;
-            inputBuffer = inputBuffer.Slice(index, _data.Length);
+            inputBuffer = inputBuffer.Slice(0, _data.Length);
             inputBuffer.CopyTo(_data);
+            return _data.Length;
         }
         /// <inheritdoc/>
         public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable

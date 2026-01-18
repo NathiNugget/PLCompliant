@@ -6,57 +6,73 @@ using System.Text;
 
 namespace PLCompliant.Response
 {
+    [StructLayout(LayoutKind.Explicit, Size = 20, CharSet = CharSet.Ansi)]
     public struct OrderNumBuffer
     {
         // POV: You don't have inline arrays (too recent in 2023 ); 
         public const int SIZE = 20;
-        char item1;
-        char item2;
-        char item3;
-        char item4;
-        char item5;
-        char item6;
-        char item7;
-        char item8;
-        char item9;
-        char item10;
-        char item11;
-        char item12;
-        char item13;
-        char item14;
-        char item15;
-        char item16;
-        char item17;
-        char item18;
-        char item19;
-        char item20;
+        [FieldOffset(0)] byte item1;
+        [FieldOffset(1)] byte item2;
+        [FieldOffset(2)] byte item3;
+        [FieldOffset(3)] byte item4;
+        [FieldOffset(4)] byte item5;
+        [FieldOffset(5)] byte item6;
+        [FieldOffset(6)] byte item7;
+        [FieldOffset(7)] byte item8;
+        [FieldOffset(8)] byte item9;
+        [FieldOffset(9)] byte item10;
+        [FieldOffset(10)] byte item11;
+        [FieldOffset(11)] byte item12;
+        [FieldOffset(12)] byte item13;
+        [FieldOffset(13)] byte item14;
+        [FieldOffset(14)] byte item15;
+        [FieldOffset(15)] byte item16;
+        [FieldOffset(16)] byte item17;
+        [FieldOffset(17)] byte item18;
+        [FieldOffset(18)] byte item19;
+        [FieldOffset(19)] byte item20;
+
+
+        public OrderNumBuffer(string input)
+        {
+            byte[] stringBytes = Encoding.UTF8.GetBytes(input);
+            if(input.Length != SIZE)
+            {
+                throw new ArgumentException("Length of string must be equal to the buffer size (20)");
+            }
+            for(int i=0; i<SIZE; i++)
+            {
+                this[i] = stringBytes[i];
+            }
+        }
         public override readonly string ToString()
         {
             StringBuilder sb = new StringBuilder(SIZE);
 
-            sb.Append(item1);
-            sb.Append(item2);
-            sb.Append(item3);
-            sb.Append(item4);
-            sb.Append(item5);
-            sb.Append(item6);
-            sb.Append(item7);
-            sb.Append(item8);
-            sb.Append(item9);
-            sb.Append(item10);
-            sb.Append(item11);
-            sb.Append(item12);
-            sb.Append(item13);
-            sb.Append(item14);
-            sb.Append(item15);
-            sb.Append(item16);
-            sb.Append(item17);
-            sb.Append(item18);
-            sb.Append(item19);
-            sb.Append(item20);
+           
+            sb.Append((char)item1);
+            sb.Append((char)item2);
+            sb.Append((char)item3);
+            sb.Append((char)item4);
+            sb.Append((char)item5);
+            sb.Append((char)item6);
+            sb.Append((char)item7);
+            sb.Append((char)item8);
+            sb.Append((char)item9);
+            sb.Append((char)item10);
+            sb.Append((char)item11);
+            sb.Append((char)item12);
+            sb.Append((char)item13);
+            sb.Append((char)item14);
+            sb.Append((char)item15);
+            sb.Append((char)item16);
+            sb.Append((char)item17);
+            sb.Append((char)item18);
+            sb.Append((char)item19);
+            sb.Append((char)item20);
             return sb.ToString();
         }
-        public char this[int index]
+        public byte this[int index]
         {
             get
             {
@@ -116,17 +132,17 @@ namespace PLCompliant.Response
             }
         }
     }
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 28, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Explicit, Size = 28, CharSet = CharSet.Ansi)]
     public struct ReadSZLDataItem : IEndianConvertable
     {
-        private UInt16 _index;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] private char[] _orderNum;
-        private UInt16 _moduleTypeId;
-        private UInt16 _version;
-        private UInt16 _pgDescriptionFile;
+        [FieldOffset(0)] private UInt16 _index;
+        [FieldOffset(2)] private OrderNumBuffer _orderNum;
+        [FieldOffset(22)] private UInt16 _moduleTypeId;
+        [FieldOffset(24)] private UInt16 _version;
+        [FieldOffset(26)] private UInt16 _pgDescriptionFile;
 
 
-        public ReadSZLDataItem(UInt16 index, char[] orderNum, UInt16 moduleTypeId, UInt16 version, UInt16 pgDescriptionFile)
+        public ReadSZLDataItem(UInt16 index, ref OrderNumBuffer orderNum, UInt16 moduleTypeId, UInt16 version, UInt16 pgDescriptionFile)
         {
             _index = index;
             _orderNum = orderNum;
@@ -156,7 +172,7 @@ namespace PLCompliant.Response
         }
 
 
-        public char[] OrderNum
+        public OrderNumBuffer OrderNum
         {
             get { return _orderNum; }
             set { _orderNum = value; }
@@ -222,7 +238,7 @@ namespace PLCompliant.Response
             {
                 if (item.Index == 0x0007)
                 {
-                    string orderNumber = new string(item.OrderNum);
+                    string orderNumber = item.OrderNum.ToString();
                     byte[] versionBytes = BitConverter.GetBytes(item.Version);
                     byte[] releaseBytes = BitConverter.GetBytes(item.PgDescriptionFile);
                     char versionChar = (char)versionBytes[1];

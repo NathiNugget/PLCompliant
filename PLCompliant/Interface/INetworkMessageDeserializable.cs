@@ -19,13 +19,15 @@ namespace PLCompliant.Interface
         /// Deserialization of header segment from network to be able to extract information
         /// </summary>
         /// <param name="inputBuffer">The serialized data from the network, to be turned into </param>
-        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer);
+        /// <returns>The amount of data which was deseriailized from the buffer in bytes</returns>
+        public int DeserializeHeader(ReadOnlySpan<byte> inputBuffer);
 
         /// <summary>
         /// Deserialization of data segment from network to be able to extract information
         /// </summary>
         /// <param name="inputBuffer">The serialized data from the network, to be turned into </param>
-        public void DeserializeData(ReadOnlySpan<byte> inputBuffer);
+        /// <returns>The amount of data which was deseriailized from the buffer in bytes</returns>
+        public int DeserializeData(ReadOnlySpan<byte> inputBuffer);
 
     }
 }

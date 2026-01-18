@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Enums;
+using System.Net;
 
 namespace PLCompliant.STEP_7
 {
@@ -94,7 +95,7 @@ namespace PLCompliant.STEP_7
                 new STEP7Message(
                     new STEP7Header(0x32, 0x7, 0),
                     new STEP7ParameterData(),
-                    new STEP7DataMessage())); 
+                    new STEP7DataMessage(0xff, 0x09))); 
             msg.AddData(0xf0, (byte)IsoTcpDataType.COTPData); // pdu type
             msg.AddData((byte)0x80, (byte)IsoTcpDataType.COTPData); // tpdu number mask
 
@@ -109,10 +110,8 @@ namespace PLCompliant.STEP_7
             msg.AddData((byte)0x1, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // subfunction: read SZL
             msg.AddData((byte)0x0, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // sequence num
 
-            msg.AddData(0xff, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7RegularData)); // return code
-            msg.AddData(0x09, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // transport type
-            msg.AddData((UInt16)0x11, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // SLZ-id bitmask
-            msg.AddData((UInt16)0x1, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // SLZ-index
+            msg.AddData((UInt16)0x11, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7RegularData)); // SLZ-id bitmask
+            msg.AddData((UInt16)0x1, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7RegularData)); // SLZ-index
             return msg;
         }
     }

@@ -109,7 +109,10 @@ namespace PLCompliant.STEP_7
                 return size;
             }
         }
-
+        // NOTE
+        // Using the contructor which passes in a header will make the length of the message in the TPKT header reflect the messagetype in the STEP7Header
+        // However changing it afterwards in a way which changes the STEP7Header size will NOT update the TPKT header size on its own
+        // The default constructor defaults to using messagetype 0, which means it will use the whole header. If the messagetype is changed afterwards, the TPKT header size must be manually updated
         public IsoTcpMessage(TPKTHeader tpkt, COTPMessage cotp, STEP7Message? step7)
         {
             _tpkt = tpkt;
@@ -138,31 +141,32 @@ namespace PLCompliant.STEP_7
             }
         }
 
-        public void DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
+        public int DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
         {
-            _tpkt.Deserialize(inputBuffer.Slice(0, _tpkt.Size));
+            return _tpkt.Deserialize(inputBuffer.Slice(0, _tpkt.Size));
         }
 
-        public void DeserializeData(ReadOnlySpan<byte> inputBuffer)
+        public int DeserializeData(ReadOnlySpan<byte> inputBuffer)
         {
             int index = 0;
-            _cotp.Deserialize(inputBuffer.Slice(index, _cotp.Size));
-            index += _cotp.Size;
+            index += _cotp.Deserialize(inputBuffer.Slice(index));
             int effectiveStep7Size = _tpkt.Length - (_tpkt.Size + _cotp.Size); // Size of step7 segment is equal to the total length from tpkt header, minus the non-step7 stuff
             if (effectiveStep7Size > 0 )
             {
                 // Initialize a step7 instance since there is clearly data that needs a place to be deserialized
                 _step7 = new();
                 _step7.Deserialize(inputBuffer.Slice(index, effectiveStep7Size));
+                index += effectiveStep7Size;
             }
+            return index;
         }
-        public void Deserialize(ReadOnlySpan<byte> inputBuffer)
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             int index = 0;
-            DeserializeHeader(inputBuffer.Slice(index, _tpkt.Size));
-            index += _tpkt.Size;
-            int restOfData = this.Size - _tpkt.Size;
-            DeserializeData(inputBuffer.Slice(index, restOfData));
+            index += DeserializeHeader(inputBuffer.Slice(index, _tpkt.Size));
+            int restOfData = _tpkt.Length - _tpkt.Size; // Length is the total size of the message including itself. Size is the size of the header only
+            index += DeserializeData(inputBuffer.Slice(index, restOfData));
+            return index;
         }
 
         public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
