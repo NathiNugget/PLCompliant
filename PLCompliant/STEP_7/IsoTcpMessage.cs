@@ -1,19 +1,16 @@
 ﻿using PLCompliant.Enums;
 using PLCompliant.Interface;
 using System.Net.Sockets;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PLCompliant.STEP_7
 {
-    /// <summary>
-    /// This is the main container class for a whole packet to communicate with STEP7-PLCs
-    /// </summary>
-    public class IsoTcpMessage : IProtocolMessage
+    public class IsoTcpMessage : IProtocolMessage, INetworkMessageDeserializable
     {
-        #region fields
+
         const int SOCKETTIMEOUT = 3000;
-        const uint DEFUALTBUFFERSIZE = 1024;
-        #endregion
 
         #region static methods
         /// <summary>
@@ -25,174 +22,62 @@ namespace PLCompliant.STEP_7
         public static IsoTcpMessage SendReceive(IsoTcpMessage messageToSend, NetworkStream stream)
         {
             stream.ReadTimeout = SOCKETTIMEOUT;
-            byte[] buffer = messageToSend.Serialize();
+            byte[] buffer = new byte[messageToSend.Size];
+            messageToSend.Serialize(buffer);
             stream.Write(buffer);
-            byte[] databuffer = new byte[DEFUALTBUFFERSIZE]; //Actual size is decided by header. 
             int readbytes = 0;
-            bool Step7Exists = false;
-
-            TPKTHeader TPKTheader = new TPKTHeader();
-            COTPHeader COTPheader = new COTPHeader();
-            COTPData COTPData = new COTPData(0);
-            STEP7Header STEP7Header = new STEP7Header();
-            STEP7ParameterData STEP7ParamData = null!;
-            STEP7Data STEP7Data = null!;
-            byte[] headerbuffer = new byte[TPKTheader.Size];
+            IsoTcpMessage response = new();
+            byte[] receiveBuffer = new byte[response.TPKT.Size];
 
             int TotalMsgSize = 0;
 
             ReceiveState recvState = ReceiveState.ReadingTpktHeader;
 
+            
+
             int dataleft = 0;
             int index = 0;
+            int payloadSize = 0; // Will be set after the header is read
 
             while (recvState != ReceiveState.Finished)
             {
-                switch (recvState)
+                if (recvState == ReceiveState.ReadingTpktHeader)
                 {
-                    case ReceiveState.ReadingTpktHeader:
-                        dataleft = TPKTheader.Size - readbytes;
-                        index = TPKTheader.Size - dataleft;
-                        readbytes += stream.Read(headerbuffer, index, dataleft);
-                        if (readbytes == TPKTheader.Size)
-                        {
-                            TPKTheader.Deserialize(headerbuffer, 0);
-                            recvState = ReceiveState.ReadingCotpHeader;
-                            readbytes = 0;
-                            /*"length" is the field for the lenght of the entire packet, including itself. */
-                            TotalMsgSize = TPKTheader.Length;
-                            // set size to be correct for the next header
-                            Array.Resize(ref headerbuffer, COTPheader.Size);
+                    dataleft = response.TPKT.Size - readbytes;
+                    index = response.TPKT.Size - dataleft;
+                    readbytes += stream.Read(receiveBuffer, index, dataleft);
+                    if (readbytes >= response.TPKT.Size)
+                    {
+                        response.DeserializeHeader(receiveBuffer);
+                        recvState = ReceiveState.ReadingData;
+                        readbytes = 0;
+                        /*"length" is the field for the length of the entire message, including itself. Thus we must subtract the header's size from it to get the payload size */
+                        payloadSize = response.TPKT.Length - response.TPKT.Size;
+                        // set size to be correct for the payload
+                        Array.Resize(ref receiveBuffer, payloadSize);
 
-                        }
-                        break;
-                    case ReceiveState.ReadingCotpHeader:
-                        dataleft = COTPheader.Size - readbytes;
-                        index = COTPheader.Size - dataleft;
-                        readbytes += stream.Read(headerbuffer, index, dataleft);
-                        if (readbytes == COTPheader.Size)
-                        {
-                            COTPheader.Deserialize(headerbuffer, 0);
-                            recvState = ReceiveState.ReadingCotpData;
-                            readbytes = 0;
+                    }
 
-                            Array.Resize(ref databuffer, COTPheader.Length);
-
-                        }
-                        break;
-                    case ReceiveState.ReadingCotpData:
-                        dataleft = databuffer.Length - readbytes;
-                        index = databuffer.Length - dataleft;
-                        readbytes += stream.Read(databuffer, index, dataleft);
-                        if (readbytes == databuffer.Length)
-                        {
-                            COTPData.Deserialize(databuffer, 0);
-                            readbytes = 0;
-                            // check if there are any data left in the message. If there is, attempt to get STEP7 msg
-                            if (TotalMsgSize > COTPData.Size + COTPheader.Size + TPKTheader.Size)
-                            {
-                                Step7Exists = true;
-                                recvState = ReceiveState.ReadingSTEP7HeaderPrelude;
-                                Array.Resize(ref headerbuffer, STEP7Header.PRELUDE_LEN);
-                            }
-                            else
-                            {
-                                recvState = ReceiveState.Finished;
-                            }
-
-                        }
-                        break;
-
-                    case ReceiveState.ReadingSTEP7HeaderPrelude:
-                        dataleft = STEP7Header.PRELUDE_LEN - readbytes;
-                        index = STEP7Header.PRELUDE_LEN - dataleft;
-                        readbytes += stream.Read(headerbuffer, index, dataleft);
-                        if (readbytes == STEP7Header.PRELUDE_LEN)
-                        {
-                            STEP7Header.DeserializePrelude(headerbuffer, 0);
-                            readbytes = 0;
-                            //"length" is the field for the lenght of the entire packet, including itself.
-                            recvState = ReceiveState.ReadingSTEP7Header;
-                            Array.Resize(ref headerbuffer, STEP7Header.Size - STEP7Header.PRELUDE_LEN);
-
-                        }
-                        break;
-                    case ReceiveState.ReadingSTEP7Header:
-                        dataleft = (STEP7Header.Size - STEP7Header.PRELUDE_LEN) - readbytes;
-                        index = (STEP7Header.Size - STEP7Header.PRELUDE_LEN) - dataleft;
-                        readbytes += stream.Read(headerbuffer, index, dataleft);
-                        if (readbytes == (STEP7Header.Size - STEP7Header.PRELUDE_LEN))
-                        {
-                            STEP7Header.Deserialize(headerbuffer, 0);
-                            readbytes = 0;
-                            if (STEP7Header.ParameterLength != 0)
-                            {
-                                recvState = ReceiveState.ReadingSTEP7Parameters;
-                                Array.Resize(ref databuffer, STEP7Header.ParameterLength);
-                            }
-                            else if (STEP7Header.DataLength != 0)
-                            {
-                                recvState = ReceiveState.ReadingSTEP7Data;
-                                Array.Resize(ref databuffer, STEP7Header.DataLength);
-                            }
-                            else
-                            {
-                                recvState = ReceiveState.Finished;
-                            }
-
-                        }
-                        break;
-                    case ReceiveState.ReadingSTEP7Parameters:
-                        dataleft = databuffer.Length - readbytes;
-                        index = databuffer.Length - dataleft;
-                        readbytes += stream.Read(databuffer, index, dataleft);
-                        if (readbytes == databuffer.Length)
-                        {
-                            STEP7ParamData = new(0);
-                            STEP7ParamData.Deserialize(databuffer, 0);
-                            readbytes = 0;
-                            //"length" is the field for the lenght of the entire packet, including itself.
-
-                            if (STEP7Header.DataLength != 0)
-                            {
-                                recvState = ReceiveState.ReadingSTEP7Data;
-                                Array.Resize(ref databuffer, STEP7Header.DataLength);
-                            }
-                            else
-                            {
-                                recvState = ReceiveState.Finished;
-                            }
-
-                        }
-                        break;
-                    case ReceiveState.ReadingSTEP7Data:
-                        dataleft = databuffer.Length - readbytes;
-                        index = databuffer.Length - dataleft;
-                        readbytes += stream.Read(databuffer, index, dataleft);
-                        if (readbytes == databuffer.Length)
-                        {
-                            STEP7Data = new(0, 0);
-                            STEP7Data.Deserialize(databuffer, 0);
-                            readbytes = 0;
-                            recvState = ReceiveState.Finished;
-
-                        }
-                        break;
                 }
+                else if(recvState == ReceiveState.ReadingData) 
+                {
 
+                    dataleft = payloadSize - readbytes;
+                    index = payloadSize - dataleft;
+                    readbytes += stream.Read(receiveBuffer, index, dataleft);
+                    if (readbytes >= payloadSize)
+                    {
+                        
+                        response.DeserializeData(receiveBuffer);
+                        readbytes = 0;
+                        recvState = ReceiveState.Finished;
+
+                    }
+                }
             }
-            if (Step7Exists)
-            {
-                return new IsoTcpMessage(TPKTheader, new COTPMessage(COTPheader, COTPData), new STEP7Message(STEP7Header, STEP7ParamData, STEP7Data));
-            }
-            else
-            {
-                return new IsoTcpMessage(TPKTheader, new COTPMessage(COTPheader, COTPData), null);
-            }
+            return response;
         }
-        #endregion
 
-        #region fields
         private TPKTHeader _tpkt;
         private COTPMessage _cotp;
         private STEP7Message? _step7;
@@ -228,11 +113,6 @@ namespace PLCompliant.STEP_7
             set { _tpkt = value; }
         }
 
-        /// <summary>
-        /// Unused method
-        /// </summary>
-        [Obsolete]
-        public int DataSize => throw new NotImplementedException();
 
         /// <summary>
         /// Get the size of the IsoTCPMessage
@@ -249,15 +129,10 @@ namespace PLCompliant.STEP_7
                 return size;
             }
         }
-        #endregion
-
-        #region constructor
-        /// <summary>
-        /// Constructor for this class
-        /// </summary>
-        /// <param name="tpkt">TPKT header</param>
-        /// <param name="cotp">COTP segment</param>
-        /// <param name="step7">STEP7-segment</param>
+        // NOTE
+        // Using the contructor which passes in a header will make the length of the message in the TPKT header reflect the messagetype in the STEP7Header
+        // However changing it afterwards in a way which changes the STEP7Header size will NOT update the TPKT header size on its own
+        // The default constructor defaults to using messagetype 0, which means it will use the whole header. If the messagetype is changed afterwards, the TPKT header size must be manually updated
         public IsoTcpMessage(TPKTHeader tpkt, COTPMessage cotp, STEP7Message? step7)
         {
             _tpkt = tpkt;
@@ -265,103 +140,163 @@ namespace PLCompliant.STEP_7
             _step7 = step7;
             _tpkt.Length = (ushort)Size;
         }
-        #endregion
-
-        #region methods
-        public void AddParameterData(ushort inputData)
+        public IsoTcpMessage()
         {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _step7.AddParameterData(inputData);
+            _tpkt = new();
+            _cotp = new();
+            _step7 = null;
+            _tpkt.Length = (ushort)Size;
         }
-
-        public void AddParameterData(byte inputData)
+        public void Serialize(Span<byte> serializedObj)
         {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _step7.AddParameterData(inputData);
-        }
-
-        public void AddParameterData(byte[] stringData)
-        {
-            _tpkt.Length += (ushort)stringData.Length;
-            _step7.AddParameterData(stringData);
-        }
-
-        public void AddData(ushort inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _step7.AddData(inputData);
-        }
-
-        public void AddData(byte inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _step7.AddData(inputData);
-        }
-
-        public void AddData(byte[] stringData)
-        {
-            _tpkt.Length += (ushort)stringData.Length;
-            _step7.AddData(stringData);
-        }
-
-
-        public void AddCOTPData(ushort inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _cotp.AddData(inputData);
-        }
-
-        public void AddCOTPData(byte inputData)
-        {
-            _tpkt.Length += (ushort)Marshal.SizeOf(inputData);
-            _cotp.AddData(inputData);
-        }
-
-        public void AddCOTPData(byte[] stringData)
-        {
-            _tpkt.Length += (ushort)stringData.Length;
-            _cotp.AddData(stringData);
-        }
-
-        public void DeserializeData(byte[] inputBuffer, int startIndex)
-        {
-            //TODO: Fix this if we are to use it later, and prehaps consolidate deserializedata and deserializeheader?
-            _cotp.DeserializeHeader(inputBuffer, startIndex);
-            _cotp.DeserializeData(inputBuffer, startIndex);
-            if (_step7 != null)
+            int index = 0;
+            _tpkt.Serialize(serializedObj.Slice(index, _tpkt.Size));
+            index += _tpkt.Size;
+            _cotp.Serialize(serializedObj.Slice(index, _cotp.Size));
+            index += _cotp.Size;
+            if( _step7 != null )
             {
-                _step7.DeserializeHeader(inputBuffer, startIndex);
-                _step7.DeserializeData(inputBuffer, startIndex);
+                _step7.Serialize(serializedObj.Slice(index, _step7.Size));
+                index = _step7.Size;
             }
         }
 
-        public void DeserializeHeader(byte[] inputBuffer, int startIndex)
+        public int DeserializeHeader(ReadOnlySpan<byte> inputBuffer)
         {
-            _tpkt.Deserialize(inputBuffer, startIndex);
-
+            return _tpkt.Deserialize(inputBuffer.Slice(0, _tpkt.Size));
         }
 
-        public byte[] Serialize()
+        public int DeserializeData(ReadOnlySpan<byte> inputBuffer)
         {
-            byte[] outputData = new byte[Size];
-            int startIndex = 0;
-            Array.Copy(_tpkt.Serialize(), 0, outputData, startIndex, _tpkt.Size);
-            startIndex += _tpkt.Size;
-
-            Array.Copy(_cotp.Serialize(), 0, outputData, startIndex, _cotp.Size);
-            startIndex += _cotp.Size;
-
-            if (_step7 != null)
+            int index = 0;
+            index += _cotp.Deserialize(inputBuffer.Slice(index));
+            int effectiveStep7Size = _tpkt.Length - (_tpkt.Size + _cotp.Size); // Size of step7 segment is equal to the total length from tpkt header, minus the non-step7 stuff
+            if (effectiveStep7Size > 0 )
             {
-                Array.Copy(_step7.Serialize(), 0, outputData, startIndex, _step7.Size);
-                startIndex += _step7.Size;
+                // Initialize a step7 instance since there is clearly data that needs a place to be deserialized
+                _step7 = new();
+                _step7.Deserialize(inputBuffer.Slice(index, effectiveStep7Size));
+                index += effectiveStep7Size;
             }
-
-
-            return outputData;
-
-
+            return index;
         }
-        #endregion
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
+        {
+            int index = 0;
+            index += DeserializeHeader(inputBuffer.Slice(index, _tpkt.Size));
+            int restOfData = _tpkt.Length - _tpkt.Size; // Length is the total size of the message including itself. Size is the size of the header only
+            index += DeserializeData(inputBuffer.Slice(index, restOfData));
+            return index;
+        }
+
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        {
+            int dataAdded = 0;
+            var flags = (IsoTcpDataType)type;
+            if(flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                dataAdded = _cotp.AddData<T>(inputData, type);
+            }
+            else
+            {
+                if (_step7 == null)
+                {
+                    _step7 = new();
+                    dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
+
+                }
+                dataAdded += _step7.AddData<T>(inputData, type);                  
+            }
+            _tpkt.Length += (ushort)dataAdded;
+            return dataAdded;
+        }
+
+        public int AddData(ushort inputData, byte type)
+        {
+            int dataAdded = 0;
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                dataAdded = _cotp.AddData(inputData, type);
+                
+            }
+            else
+            {
+                
+                if (_step7 == null)
+                {
+                    _step7 = new();
+                    dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
+
+                }
+                dataAdded += _step7.AddData(inputData, type);         
+            }
+            _tpkt.Length += (ushort)dataAdded;
+            return dataAdded;
+        }
+
+        public int AddData(byte inputData, byte type)
+        {
+            int dataAdded = 0;
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                dataAdded = _cotp.AddData(inputData, type);
+            }
+            else
+            {
+                if (_step7 == null)
+                {
+                    _step7 = new();
+                    dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
+
+                }
+                dataAdded += _step7.AddData(inputData, type);
+                
+            }
+            _tpkt.Length += (ushort)dataAdded;
+            return dataAdded;
+        }
+
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
+        {
+            if (binaryData.Length > byte.MaxValue)
+            {
+                throw new ArgumentException("Input length was greater than allowed in a byte");
+            }
+            int dataAdded = 0;
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                dataAdded = _cotp.AddData(binaryData, type);
+            }
+            else
+            {
+                if (_step7 == null)
+                {
+                    _step7 = new();
+                    dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
+
+                }
+                dataAdded += _step7.AddData(binaryData, type);               
+            }
+            _tpkt.Length += (ushort)binaryData.Length;
+            return dataAdded;
+        }
+
+        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        {
+            var flags = (IsoTcpDataType)type;
+            if(flags.HasFlag(IsoTcpDataType.COTPData))
+            {
+                return _cotp.GetData<T>(index, type);
+            }
+            else
+            {
+                return _step7.GetData<T>(index, type);
+            }
+        }
+
+       
     }
 }

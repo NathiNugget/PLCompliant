@@ -14,11 +14,12 @@
         /// <returns>A ModBusMessage to send the function. It is not yet serialized</returns>
         public ModBusMessage CreateReadDeviceInformation(ModBusHeader header, byte productID = 2)
         {
-            var data = new ModBusData { _functionCode = (byte)ModBusCommandType.read_device_information, _payload = [] };
+            var data = new ModBusData { };
             var msg = new ModBusMessage(header, data);
-            msg.AddData(0x0E);
-            msg.AddData(productID);
-            msg.AddData(0x0);
+            msg.AddData((byte)ModBusCommandType.read_device_information); // function code
+            msg.AddData((byte)0x0E);
+            msg.AddData((byte)productID);
+            msg.AddData((byte)0x0);
             return msg;
 
         }
@@ -32,8 +33,9 @@
         /// <returns>A ModBusMessage to send the function. It is not yet serialized</returns>
         public ModBusMessage CreateGetSlaveID(ModBusHeader header)
         {
-            var data = new ModBusData { _functionCode = (byte)ModBusCommandType.get_slave_id, _payload = [] };
+            var data = new ModBusData {  };
             var msg = new ModBusMessage(header, data);
+            msg.AddData((byte)ModBusCommandType.get_slave_id);
             return msg;
 
         }

@@ -18,7 +18,7 @@ namespace PLCompliant.Modbus
         /// <returns>False if there is an exception, otherwise true</returns>
         public static bool TryHandleReponseError(ModBusMessage msg, out byte errCode)
         {
-            byte functionCode = msg.Data._functionCode;
+            byte functionCode = msg.Data.FunctionCode;
             bool err = (functionCode & 0b1000_0000) != 0;
 
             if (!err)
@@ -26,7 +26,7 @@ namespace PLCompliant.Modbus
                 errCode = 0;
                 return true;
             }
-            errCode = msg.Data._payload[0];
+            errCode = msg.Data.Payload[1];
             //TODO: Write into log perhaps or send an event to UI
             return false;
         }
@@ -41,20 +41,20 @@ namespace PLCompliant.Modbus
         {
             var result = new ReadDeviceInformationData();
             result.IPAddr = address;
-            byte subfunction_code = msg.Data._payload[0];
-            byte productID = msg.Data._payload[1];
-            byte conformity_level = msg.Data._payload[2];
-            byte reserved_1 = msg.Data._payload[3];
-            byte reserved_2 = msg.Data._payload[4];
-            result.noOfObjects = msg.Data._payload[5];
-            int index = 6;
+            byte subfunction_code = msg.Data.Payload[1];
+            byte productID = msg.Data.Payload[2];
+            byte conformity_level = msg.Data.Payload[3];
+            byte reserved_1 = msg.Data.Payload[4];
+            byte reserved_2 = msg.Data.Payload[5];
+            result.noOfObjects = msg.Data.Payload[6];
+            int index = 7;
             for (int i = 0; i < result.noOfObjects; i++)
             {
-                byte id = msg.Data._payload[index];
+                byte id = msg.Data.Payload[index];
                 index++;
-                byte length = msg.Data._payload[index];
+                byte length = msg.Data.Payload[index];
                 index++;
-                string content = Encoding.UTF8.GetString(msg.Data._payload, index, length);
+                string content = Encoding.UTF8.GetString(msg.Data.Payload, index, length);
                 result.Objects.Add(id, content);
                 index += length;
 

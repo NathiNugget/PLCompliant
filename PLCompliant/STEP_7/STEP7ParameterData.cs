@@ -10,22 +10,11 @@ namespace PLCompliant.STEP_7
     /// </summary>
     public class STEP7ParameterData : IProtocolData
     {
-        #region fields
-        private byte _functionCode;
         private byte[] _data;
-        #endregion
-
-        #region constructor
-        /// <summary>
-        /// Constructor for the class
-        /// </summary>
-        /// <param name="functionCode">Function code for the message</param>
-        public STEP7ParameterData(byte functionCode)
+        public STEP7ParameterData()
         {
-            _functionCode = functionCode;
             _data = [];
         }
-        #endregion
 
         #region properties
         /// <summary>
@@ -42,87 +31,92 @@ namespace PLCompliant.STEP_7
         /// </summary>
         public byte FunctionCode
         {
-            get { return _functionCode; }
-            set { _functionCode = value; }
+            get { return _data[0]; }
         }
-
-        /// <summary>
-        /// Size of function code and data in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public int Size
         {
             get
             {
-                return Marshal.SizeOf(_functionCode) + _data.Length;
+                return _data.Length;
             }
         }
-
-        /// <summary>
-        /// Deserialize data from the network
-        /// </summary>
-        /// <param name="inputBuffer">Buffer to read from</param>
-        /// <param name="startIndex">Index to start reading from</param>
-        public void Deserialize(byte[] inputBuffer, int startIndex)
+        /// <inheritdoc/>
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            FunctionCode = inputBuffer[startIndex];
-            startIndex += Marshal.SizeOf(FunctionCode);
-            Array.Resize(ref _data, inputBuffer.Length - startIndex);
-            Array.Copy(inputBuffer, startIndex, _data, 0, _data.Length);
+            inputBuffer = inputBuffer.Slice(0, _data.Length);
+            inputBuffer.CopyTo(_data);
+            return _data.Length;
         }
-
-        /// <summary>
-        /// Serialize data for network transmission
-        /// </summary>
-        /// <returns>Bytes in an array ready to send</returns>
-        public byte[] Serialize()
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
         {
-            byte[] outData = new byte[Size];
-            outData[0] = _functionCode;
-            Array.Copy(_data, 0, outData, 1, _data.Length);
-            return outData;
+            int index = 0;
+            serializedObj = serializedObj.Slice(index, _data.Length);
+
+            _data.CopyTo(serializedObj);
         }
-
-        /// <summary>
-        /// Add data to the params
-        /// </summary>
-        /// <param name="inputData">Data to be added, possibly endian-converted</param>
-        public void AddData(ushort inputData)
+        /// <inheritdoc/>
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
-            var oldSize = _data.Length;
-            var newSize = _data.Length + Marshal.SizeOf<UInt16>();
+            var dataAdded = Marshal.SizeOf<T>();
+            var newSize = _data.Length + dataAdded;
             Array.Resize(ref _data, newSize);
-            byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
-            Array.Copy(bytes, 0, _data, oldSize, bytes.Length);
+            inputData.FromHostToNetwork();
+            ReadOnlySpan<T> inputSpan = [inputData];
+            ReadOnlySpan<byte> outSpan = MemoryMarshal.AsBytes(inputSpan);
+            outSpan.CopyTo(_data);
+            return dataAdded;
         }
-
-        /// <summary>
-        /// Add data to the params
-        /// </summary>
-        /// <param name="inputData">Data to be added</param>
-        public void AddData(byte inputData)
+        /// <inheritdoc/>
+        public int AddData(ushort inputData, byte type)
         {
-            var newSize = _data.Length + Marshal.SizeOf<byte>();
+            var dataAdded = Marshal.SizeOf(inputData);
+            var oldSize = _data.Length;
+            var newSize = _data.Length + dataAdded;
+            Array.Resize(ref _data, newSize);
+            ReadOnlySpan<ushort> inputSpan = [EndianConverter.FromHostToNetwork(inputData)];
+            ReadOnlySpan<byte> inputSpanAsBytes = MemoryMarshal.AsBytes(inputSpan);
+            Span<byte> payloadSpan = _data.AsSpan(oldSize);
+            inputSpanAsBytes.CopyTo(payloadSpan);
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(byte inputData, byte type)
+        {
+            var dataAdded = Marshal.SizeOf(inputData);
+            var newSize = _data.Length + dataAdded;
             Array.Resize(ref _data, newSize);
             _data[newSize - 1] = inputData;
+            return dataAdded;
         }
-
-        /// <summary>
-        /// Add data to the params
-        /// </summary>
-        /// <param name="stringData">Data to be added from an UTF8-string</param>
-        public void AddData(byte[] stringData)
+        /// <inheritdoc/>
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
-            if (stringData.Length > byte.MaxValue)
+            if (binaryData.Length > byte.MaxValue)
             {
                 throw new ArgumentException("Input length was greater than allowed in a byte");
             }
-            byte stringSize = (byte)stringData.Length;
-            if (stringSize == 0) { return; }
-            var oldSize = Data.Length;
-            var newSize = _data.Length + stringSize;
+            byte binarySize = (byte)binaryData.Length;
+            if (binarySize == 0) { return 0; }
+            var oldSize = _data.Length;
+            var newSize = _data.Length + binarySize;
             Array.Resize(ref _data, newSize);
-            Array.Copy(stringData, 0, _data, oldSize, stringSize);
+            Span<byte> payloadSpan = _data.AsSpan(oldSize);
+            binaryData.CopyTo(payloadSpan);
+            return binaryData.Length;
         }
-        #endregion
+        /// <inheritdoc/>
+        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        {
+            T outVar = MemoryMarshal.AsRef<T>(_data);
+            outVar.FromNetworkToHost();
+            return outVar;
+        }
+        /// <inheritdoc/>
+        public void ResizeStorage(int newSize)
+        {
+            Array.Resize(ref _data, newSize);
+        }
     }
 }

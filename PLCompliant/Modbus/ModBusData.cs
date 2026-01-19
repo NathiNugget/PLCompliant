@@ -10,14 +10,8 @@ namespace PLCompliant.Modbus
     public class ModBusData : IProtocolData
     {
         #region instance fields
-        /// <summary>
-        /// The function code to run on the PLC
-        /// </summary>
-        public byte _functionCode;
-        /// <summary>
-        /// The data to send converted to bytes
-        /// </summary>
-        public byte[] _payload = [];
+      
+        private byte[] _payload = [];
         #endregion
 
         #region constructors
@@ -33,80 +27,23 @@ namespace PLCompliant.Modbus
         /// </summary>
         /// <param name="functionCode">The function code to be run</param>
         /// <param name="payload">The data to be followed by the function code</param>
-        public ModBusData(byte functionCode, byte[] payload)
+        public ModBusData(byte[] payload)
         {
-            _functionCode = functionCode;
             _payload = payload;
-
         }
 
         #endregion
+        /// <summary>
+        /// The function code of the command
+        /// </summary>
+        public byte FunctionCode { get { return _payload[0];  } }
+        /// <summary>
+        /// The data to send converted to bytes
+        /// </summary>
+        public byte[] Payload { get { return _payload; } }
 
         #region methods
 
-
-
-        public void AddData(UInt16 inputData)
-        {
-            var oldSize = _payload.Length;
-            var newSize = _payload.Length + Marshal.SizeOf<UInt16>();
-            Array.Resize(ref _payload, newSize);
-            byte[] bytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(inputData));
-            Array.Copy(bytes, 0, _payload, oldSize, bytes.Length);
-        }
-
-
-        /// <inheritdoc/>
-        public void AddData(byte inputData)
-        {
-            var newSize = _payload.Length + Marshal.SizeOf<byte>();
-            Array.Resize(ref _payload, newSize);
-            _payload[newSize - 1] = inputData;
-        }
-
-        /// <inheritdoc/>
-        public void AddData(byte[] stringData)
-        {
-            if (stringData.Length > byte.MaxValue)
-            {
-                throw new ArgumentException("Input length was greater than allowed in a byte");
-            }
-            byte stringSize = (byte)stringData.Length;
-            if (stringSize == 0) { return; }
-            var oldSize = _payload.Length;
-            var newSize = _payload.Length + stringSize;
-            Array.Resize(ref _payload, newSize);
-            Array.Copy(stringData, 0, _payload, oldSize, stringSize);
-        }
-
-
-
-
-
-
-        /// <summary>
-        /// Serialize the function code and data for network transmission
-        /// </summary>
-        /// <returns>Bytes for network transmission</returns>
-        public byte[] Serialize()
-        {
-            byte[] buffer = new byte[Marshal.SizeOf(_functionCode) + _payload.Length];
-            buffer[0] = _functionCode;
-            Array.Copy(_payload, 0, buffer, Marshal.SizeOf(_functionCode), _payload.Length);
-            return buffer;
-        }
-
-        /// <summary>
-        /// Deserialize the data to be human readable
-        /// </summary>
-        /// <param name="inputBuffer">The data in bytes received from the network</param>
-        public void Deserialize(byte[] inputBuffer, int startIndex = 0)
-        {
-            _functionCode = inputBuffer[startIndex];
-            startIndex += sizeof(byte);
-            Array.Resize(ref _payload, inputBuffer.Length - startIndex);
-            Array.Copy(inputBuffer, startIndex, _payload, 0, inputBuffer.Length - startIndex);
-        }
         /// <summary>
         /// Override equals to compare to another data-packet
         /// </summary>
@@ -116,7 +53,84 @@ namespace PLCompliant.Modbus
         {
             if (other is null || other is not ModBusData) return false;
             ModBusData other_data = (ModBusData)other;
-            return (Size == other_data.Size && _functionCode == other_data._functionCode && _payload.SequenceEqual(other_data._payload));
+            return (Size == other_data.Size && _payload.SequenceEqual(other_data._payload));
+        }
+        /// <inheritdoc/>
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
+        {
+            inputBuffer = inputBuffer.Slice(0, _payload.Length);
+            inputBuffer.CopyTo(_payload);
+            return _payload.Length;
+        }
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
+        {
+            serializedObj = serializedObj.Slice(0, _payload.Length);
+
+            _payload.CopyTo(serializedObj);
+        }
+        /// <inheritdoc/>
+        public int AddData<T>(T inputData, byte type = 0) where T : unmanaged, IEndianConvertable
+        {
+            var dataAdded = Marshal.SizeOf<T>();
+            var newSize = _payload.Length + dataAdded;
+            Array.Resize(ref _payload, newSize);
+            inputData.FromHostToNetwork();
+            ReadOnlySpan<T> inputSpan = [inputData];
+            ReadOnlySpan<byte> outSpan = MemoryMarshal.AsBytes(inputSpan);
+            outSpan.CopyTo(_payload);
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(ushort inputData, byte type = 0)
+        {
+            var dataAdded = Marshal.SizeOf(inputData);
+            var oldSize = _payload.Length;
+            var newSize = _payload.Length + dataAdded;
+            Array.Resize(ref _payload, newSize);
+            ReadOnlySpan<ushort> inputSpan = [EndianConverter.FromHostToNetwork(inputData)];
+            ReadOnlySpan<byte> inputSpanAsBytes = MemoryMarshal.AsBytes(inputSpan);
+            Span<byte> payloadSpan = _payload.AsSpan(oldSize);
+            inputSpanAsBytes.CopyTo(payloadSpan);
+            return dataAdded;
+           
+        }
+        /// <inheritdoc/>
+        public int AddData(byte inputData, byte type = 0)
+        {
+            var dataAdded = Marshal.SizeOf(inputData);
+            var newSize = _payload.Length + dataAdded;
+            Array.Resize(ref _payload, newSize);
+            _payload[newSize - 1] = inputData;
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type = 0)
+        {
+            if (binaryData.Length > byte.MaxValue)
+            {
+                throw new ArgumentException("Input length was greater than allowed in a byte");
+            }
+            byte binarySize = (byte)binaryData.Length;
+            if (binarySize == 0) { return 0; }
+            var oldSize = _payload.Length;
+            var newSize = _payload.Length + binarySize;
+            Array.Resize(ref _payload, newSize);
+            Span<byte> payloadSpan = _payload.AsSpan(oldSize);
+            binaryData.CopyTo(payloadSpan);
+            return binaryData.Length;
+        }
+        /// <inheritdoc/>
+        public T GetData<T>(int index, byte type = 0) where T : unmanaged, IEndianConvertable
+        {
+            T outVar = MemoryMarshal.AsRef<T>(_payload);
+            outVar.FromNetworkToHost();
+            return outVar;
+        }
+        /// <inheritdoc/>
+        public void ResizeStorage(int newSize)
+        {
+            Array.Resize(ref _payload, newSize);
         }
 
         #endregion
@@ -125,11 +139,7 @@ namespace PLCompliant.Modbus
         /// <summary>
         /// Property to get the Size of the data + function code in bytes
         /// </summary>
-        public int Size { get { return PayloadSize + Marshal.SizeOf(_functionCode); } }
-        /// <summary>
-        /// 
-        /// </summary>
-        public ushort PayloadSize { get { return (ushort)_payload.Length; } }
+        public int Size { get { return _payload.Length; } }
         #endregion
     }
 

@@ -1,4 +1,6 @@
 ﻿using PLCompliant.Interface;
+using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PLCompliant.STEP_7
 {
@@ -7,10 +9,8 @@ namespace PLCompliant.STEP_7
     /// </summary>
     public class COTPMessage : IProtocolMessage
     {
-        #region fields
         private COTPHeader _header;
         private COTPData _data;
-        #endregion
 
         #region properties
         /// <summary>
@@ -54,79 +54,65 @@ namespace PLCompliant.STEP_7
             _header = header;
             _data = data;
         }
-        #endregion
-
-        /// <summary>
-        /// Unused property
-        /// </summary>
-        [Obsolete]
-        public int DataSize => throw new NotImplementedException();
-
-        /// <summary>
-        /// Add data to the data-portion of the class
-        /// </summary>
-        /// <param name="inputData">Data to be added</param>
-        public void AddData(ushort inputData)
+        public COTPMessage()
         {
-            _data.AddData(inputData);
-            _header.Length = (byte)Data.Size;
-        }
-        /// <summary>
-        /// Add data to the data-portion of the class
-        /// </summary>
-        /// <param name="inputData">Data to be added</param>
-        public void AddData(byte inputData)
-        {
-            _data.AddData(inputData);
-            _header.Length = (byte)Data.Size;
-        }
-        /// <summary>
-        /// Add data to the data-portion of the class
-        /// </summary>
-        /// <param name="stringData">Data to be added from a UTF-8 string</param>
-        public void AddData(byte[] stringData)
-        {
-            _data.AddData(stringData);
-            _header.Length = (byte)Data.Size;
+            _header = new();
+            _data = new();
         }
 
-        /// <summary>
-        /// Deserialize data after receiving from the network
-        /// </summary>
-        /// <param name="inputBuffer">The buffer to deserialize from</param>
-        /// <param name="startIndex">The start-index to read from</param>
-        public void DeserializeData(byte[] inputBuffer, int startIndex)
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
         {
-            _data.Deserialize(inputBuffer, startIndex);
+            int index = 0;
+            _header.Serialize(serializedObj.Slice(index));
+            index += _header.Size;
+            _data.Serialize(serializedObj.Slice(index));
+        }
+        /// <inheritdoc/>
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
+        {
+            int index = 0;
+            _header.Deserialize(inputBuffer.Slice(index, _header.Size));
+            index += _header.Size;
+            _data.ResizeStorage(_header.Length);
+            _data.Deserialize(inputBuffer.Slice(index, _data.Size));
+            index += _data.Size;
+            return index;
+        }
+        /// <inheritdoc/>
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        {
+            int dataAdded = _data.AddData(inputData, type);
+            _header.Length += (byte)dataAdded;
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(ushort inputData, byte type)
+        {
+            int dataAdded = _data.AddData(inputData, type);
+            _header.Length += (byte)dataAdded;
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(byte inputData, byte type)
+        {
+            int dataAdded = _data.AddData(inputData, type);
+            _header.Length += (byte)dataAdded;
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
+        {
+            int dataAdded = _data.AddData(binaryData, type);
+            _header.Length += (byte)dataAdded;
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        {
+            return _data.GetData<T>(index, type);
         }
 
-        /// <summary>
-        /// Deserialize the header received from the network
-        /// </summary>
-        /// <param name="inputBuffer">The buffer to read from</param>
-        /// <param name="startIndex">The index to read from</param>
-        public void DeserializeHeader(byte[] inputBuffer, int startIndex)
-        {
-            _header.Deserialize(inputBuffer, startIndex);
-
-        }
-
-        /// <summary>
-        /// Serialize data and header for network transmission
-        /// </summary>
-        /// <returns>Byte array to send</returns>
-        public byte[] Serialize()
-        {
-            byte[] outputData = new byte[Size];
-            int startIndex = 0;
-            Array.Copy(_header.Serialize(), 0, outputData, startIndex, _header.Size);
-            startIndex += _header.Size;
-            Array.Copy(_data.Serialize(), 0, outputData, startIndex, _data.Size);
-
-
-            return outputData;
-
-
-        }
+        
     }
 }

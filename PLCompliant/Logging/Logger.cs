@@ -1,6 +1,7 @@
 ﻿using PLCompliant.Interface;
 using PLCompliant.Utilities;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace PLCompliant.Logging
 {

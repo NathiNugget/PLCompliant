@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Interface;
+using PLCompliant.Modbus;
 using PLCompliant.Utilities;
 using System.Runtime.InteropServices;
 
@@ -8,7 +9,7 @@ namespace PLCompliant.STEP_7
     /// This struct represents the TPKT-header to build on top of TCP
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 4, CharSet = CharSet.Ansi)]
-    public struct TPKTHeader : IProtocolHeader
+    public struct TPKTHeader : IProtocolHeader, IEndianConvertable
     {
         [FieldOffset(0)] private byte _version;
         [FieldOffset(1)] private byte _reserved;
@@ -46,9 +47,7 @@ namespace PLCompliant.STEP_7
             set { _version = value; }
         }
 
-        /// <summary>
-        /// Size of the struct
-        /// </summary>
+        /// <inheritdoc/>
         public int Size
         {
             get
@@ -69,39 +68,30 @@ namespace PLCompliant.STEP_7
             _length = 0;
             _reserved = 0;
         }
-        #endregion
-
-        #region methods
-        /// <summary>
-        /// Deserialize data received from the network
-        /// </summary>
-        /// <param name="inputBuffer">Buffer to read from</param>
-        /// <param name="startIndex">Index to start reading from</param>
-        public void Deserialize(byte[] inputBuffer, int startIndex)
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
         {
-            _version = inputBuffer[startIndex];
-            startIndex += Marshal.SizeOf(_version);
-            _reserved = inputBuffer[startIndex];
-            startIndex += Marshal.SizeOf(_reserved);
-            _length = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(inputBuffer, startIndex));
+            TPKTHeader headerCpy = this;
+            headerCpy.FromHostToNetwork();
+            ReadOnlySpan<TPKTHeader> span = [headerCpy];
+            MemoryMarshal.AsBytes(span).CopyTo(serializedObj.Slice(0, this.Size));
         }
-
-        /// <summary>
-        /// Serialize data received to be sent on the network
-        /// </summary>
-        /// <returns>A byte array ready to be sent</returns>
-        public byte[] Serialize()
+        /// <inheritdoc/>
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            int startIndex = 0;
-            byte[] outData = new byte[Size];
-            outData[startIndex] = _version;
-            startIndex += Marshal.SizeOf(_version);
-            outData[startIndex] = _reserved;
-            startIndex += Marshal.SizeOf(_reserved);
-            var lengthAsBytes = BitConverter.GetBytes(EndianConverter.FromHostToNetwork(_length));
-            Array.Copy(lengthAsBytes, 0, outData, startIndex, lengthAsBytes.Length);
-            return outData;
+            this = MemoryMarshal.AsRef<TPKTHeader>(inputBuffer.Slice(0, this.Size));
+            this.FromNetworkToHost();
+            return this.Size;
         }
-        #endregion
+        /// <inheritdoc/>
+        public void FromHostToNetwork()
+        {
+            _length = EndianConverter.FromHostToNetwork(_length);
+        }
+        /// <inheritdoc/>
+        public void FromNetworkToHost()
+        {
+            _length = EndianConverter.FromNetworkToHost(_length);
+        }
     }
 }

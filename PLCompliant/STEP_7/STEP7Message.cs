@@ -1,4 +1,6 @@
-﻿using PLCompliant.Interface;
+﻿using PLCompliant.Enums;
+using PLCompliant.Interface;
+using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
@@ -14,33 +16,37 @@ namespace PLCompliant.STEP_7
         public const ushort STEP7_TCP_PORT = 102;
         private STEP7Header _step7Header;
         private STEP7ParameterData? _step7ParamData;
-        private STEP7Data? _step7Data;
-        #endregion
+        private STEP7DataMessage? _step7Data;
 
-        #region constructor
-        public STEP7Message(STEP7Header step7Header, STEP7ParameterData? step7ParamData, STEP7Data? step7Data)
+        public STEP7Message(STEP7Header step7Header, STEP7ParameterData? step7ParamData, STEP7DataMessage? step7Data)
         {
             _step7Header = step7Header;
             _step7Data = step7Data;
             _step7ParamData = step7ParamData;
+            if(_step7ParamData != null )
+            {
+                _step7Header.ParameterLength += (ushort)_step7ParamData.Size;
+            }
+            if(_step7Data != null)
+            {
+                _step7Header.DataLength += (ushort)_step7Data.Size;
+            }
 
         }
-        #endregion
+        public STEP7Message()
+        {
+            _step7Header = new();
+            _step7ParamData = null;
+            _step7ParamData = null;
+        }
 
-        #region properties
-        /// <summary>
-        /// Get and set STEP7-data
-        /// </summary>
-        public STEP7Data STEP7Data
+        public STEP7DataMessage? STEP7Data
         {
             get { return _step7Data; }
             set { _step7Data = value; }
         }
 
-        /// <summary>
-        /// Get and set STEP7-ParamData
-        /// </summary>
-        public STEP7ParameterData STEP7ParamData
+        public STEP7ParameterData? STEP7ParamData
         {
             get { return _step7ParamData; }
             set { _step7ParamData = value; }
@@ -55,9 +61,7 @@ namespace PLCompliant.STEP_7
             set { _step7Header = value; }
         }
 
-        /// <summary>
-        /// Size of the whole header, data and params (if not null)
-        /// </summary>
+        /// <inheritdoc/>
         public int Size
         {
             get
@@ -75,159 +79,176 @@ namespace PLCompliant.STEP_7
 
             }
         }
-
-        /// <summary>
-        /// Unused method
-        /// </summary>
-        [Obsolete]
-        public int DataSize => throw new NotImplementedException();
-        #endregion
-
-        #region methods
-        /// <summary>
-        /// Add data to the data-segment
-        /// </summary>
-        /// <param name="inputData">Data to add, will possibly be endian-converted</param>
-        /// <exception cref="ArgumentNullException">Thrown if the Data-segment is null</exception>
-        public void AddData(ushort inputData)
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
         {
-            if (_step7Data == null)
-            {
-                throw new ArgumentNullException(nameof(inputData));
-            }
-            _step7Data.AddData(inputData);
-            _step7Header.DataLength = (UInt16)_step7Data.Size;
-        }
 
-        /// <summary>
-        /// Add data to the data-segment
-        /// </summary>
-        /// <param name="inputData">Data to add</param>
-        /// <exception cref="ArgumentNullException">Thrown if the Data-segment is null</exception>
-        public void AddData(byte inputData)
-        {
-            if (_step7Data == null)
+            int index = 0;
+            _step7Header.Serialize(serializedObj.Slice(index, _step7Header.Size));
+            // If the messagetype is ACK-DATA, then we expect to receive the two errorcodes aswell. Otherwise we only use NON_ERROR_LENGTH size instead
+            if(_step7Header.MessageType == 0x3)
             {
-                throw new ArgumentNullException(nameof(inputData));
+                index += STEP7Header.NON_ERROR_LENGTH;
             }
-            _step7Data.AddData(inputData);
-            _step7Header.DataLength = (UInt16)_step7Data.Size;
-        }
-
-        /// <summary>
-        /// Add data to the data-segment
-        /// </summary>
-        /// <param name="stringData">Data to add from a UTF8-string</param>
-        /// <exception cref="ArgumentNullException">Thrown if the Data-segment is null</exception>
-        public void AddData(byte[] stringData)
-        {
-            if (_step7Data == null)
+            else
             {
-                throw new ArgumentNullException(nameof(stringData));
-            }
-            _step7Data.AddData(stringData);
-            _step7Header.DataLength = (UInt16)_step7Data.Size;
-        }
-
-
-        /// <summary>
-        /// Add data to ParamData
-        /// </summary>
-        /// <param name="inputData">Data to be added, possibly endian-converted</param>
-        /// <exception cref="ArgumentNullException">Thrown if Param-segment is null</exception>
-        public void AddParameterData(ushort inputData)
-        {
-            if (_step7ParamData == null)
+                index += _step7Header.Size;
+            }      
+            if( _step7ParamData != null)
             {
-                throw new ArgumentNullException(nameof(inputData));
+                _step7ParamData.Serialize(serializedObj.Slice(index, _step7ParamData.Size));
+                index += _step7ParamData.Size;
             }
-            _step7ParamData.AddData(inputData);
-            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
-        }
-
-        /// <summary>
-        /// Add data to ParamData
-        /// </summary>
-        /// <param name="inputData">Data to be added</param>
-        /// <exception cref="ArgumentNullException">Thrown if Param-segment is null</exception>
-        public void AddParameterData(byte inputData)
-        {
-            if (_step7ParamData == null)
+            if( _step7Data != null)
             {
-                throw new ArgumentNullException(nameof(inputData));
+                _step7Data.Serialize(serializedObj.Slice(index, _step7Data.Size));
+                index += _step7Data.Size;
             }
-            _step7ParamData.AddData(inputData);
-            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
-        }
-
-        /// <summary>
-        /// Add data to ParamData
-        /// </summary>
-        /// <param name="stringData">Data to be added from a UTF8-string</param>
-        /// <exception cref="ArgumentNullException">Thrown if Param-segment is null</exception>
-        public void AddParameterData(byte[] stringData)
-        {
-            if (_step7ParamData == null)
-            {
-                throw new ArgumentNullException(nameof(stringData));
-            }
-            _step7ParamData.AddData(stringData);
-            _step7Header.ParameterLength = (UInt16)_step7ParamData.Size;
-        }
-
-        /// <summary>
-        /// Deserialize data from the network
-        /// </summary>
-        /// <param name="inputBuffer">Buffer to read from</param>
-        /// <param name="startIndex">Index to start reading from</param>
-        public void DeserializeData(byte[] inputBuffer, int startIndex)
-        {
-            if (_step7ParamData != null)
-            {
-                _step7ParamData.Deserialize(inputBuffer, startIndex);
-                startIndex += _step7ParamData.Size;
-            }
-            if (_step7Data != null)
-            {
-                _step7Data.Deserialize(inputBuffer, startIndex);
-                startIndex += _step7Data.Size;
-            }
-        }
-
-        /// <summary>
-        /// Deserialize header from network
-        /// </summary>
-        /// <param name="inputBuffer">Buffer to read from</param>
-        /// <param name="startIndex">Index to start reading from</param>
-        public void DeserializeHeader(byte[] inputBuffer, int startIndex)
-        {
-            _step7Header.Deserialize(inputBuffer, startIndex);
 
         }
-
-        /// <summary>
-        /// Serialize data for network transmission
-        /// </summary>
-        /// <returns>Byte array containing the data in bytes</returns>
-        public byte[] Serialize()
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            byte[] outputData = new byte[Size];
-            int startIndex = 0;
-            Array.Copy(_step7Header.Serialize(), 0, outputData, startIndex, _step7Header.Size);
-            startIndex += _step7Header.Size;
+            int index = 0;
+            index += _step7Header.Deserialize(inputBuffer.Slice(index, Marshal.SizeOf<STEP7Header>())); // Marshal.sizeof here because header may not have some fields depending on the messagetype
+            
 
-            if (_step7ParamData != null)
+            if (_step7Header.ParameterLength > 0)
             {
-                Array.Copy(_step7ParamData.Serialize(), 0, outputData, startIndex, _step7ParamData.Size);
-                startIndex += _step7ParamData.Size;
+                _step7ParamData = new();
+                _step7ParamData.ResizeStorage(_step7Header.ParameterLength);
+                index += _step7ParamData.Deserialize(inputBuffer.Slice(index, _step7Header.ParameterLength));
             }
-            if (_step7Data != null)
+            if (_step7Header.DataLength > 0)
             {
-                Array.Copy(_step7Data.Serialize(), 0, outputData, startIndex, _step7Data.Size);
-                startIndex += _step7Data.Size;
+                _step7Data = new();
+                index += _step7Data.Deserialize(inputBuffer.Slice(index, _step7Header.DataLength));
             }
-            return outputData;
+            return index;
+
         }
-        #endregion
+        /// <inheritdoc/>
+        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        {
+            int dataAdded = 0;
+            var flags = (IsoTcpDataType)type;
+            if(flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                if(_step7ParamData == null)
+                {
+                    _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
+                }
+                dataAdded = _step7ParamData.AddData<T>(inputData, type);
+                _step7Header.ParameterLength += (ushort)dataAdded;
+            }
+            else
+            {
+                if (_step7Data == null)
+                {
+                    _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
+                    dataAdded += _step7Data.Size;
+                }
+                dataAdded += _step7Data.AddData<T>(inputData, type);
+                _step7Header.DataLength += (ushort)dataAdded;
+            }
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(ushort inputData, byte type)
+        {
+            int dataAdded = 0;
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                if (_step7ParamData == null)
+                {
+                    _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
+                }
+                dataAdded = _step7ParamData.AddData(inputData, type);
+                _step7Header.ParameterLength += (ushort)dataAdded;
+            }
+            else
+            {
+                if (_step7Data == null)
+                {
+                    _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
+                    dataAdded += _step7Data.Size;
+                }
+                dataAdded += _step7Data.AddData(inputData, type);
+                _step7Header.DataLength += (ushort)dataAdded;
+        
+            }
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(byte inputData, byte type)
+        {
+            int dataAdded = 0;
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                if (_step7ParamData == null)
+                {
+                    _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
+                }
+                dataAdded = _step7ParamData.AddData(inputData, type);
+                _step7Header.ParameterLength += (ushort)dataAdded;
+            }
+            else
+            {
+                if (_step7Data == null)
+                {
+                    _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
+                    dataAdded += _step7Data.Size;
+                }
+                dataAdded += _step7Data.AddData(inputData, type);
+                _step7Header.DataLength += (ushort)dataAdded;
+            }
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
+        {
+            if (binaryData.Length > byte.MaxValue)
+            {
+                throw new ArgumentException("Input length was greater than allowed in a byte");
+            }
+            int dataAdded = 0;
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                if (_step7ParamData == null)
+                {
+                    _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
+                }
+                dataAdded = _step7ParamData.AddData(binaryData, type);
+                _step7Header.ParameterLength += (ushort)dataAdded;
+            }
+            else
+            {
+                if (_step7Data == null)
+                {
+                    _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
+                    dataAdded += _step7Data.Size;
+                }
+                dataAdded += _step7Data.AddData(binaryData, type);
+                _step7Header.DataLength += (ushort)dataAdded;
+            }
+            return dataAdded;
+        }
+        /// <inheritdoc/>
+        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        {
+            var flags = (IsoTcpDataType)type;
+            if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
+            {
+                return _step7ParamData.GetData<T>(index, type);
+            }
+            else
+            {
+                return _step7Data.GetData<T>(index, type);
+            }
+        }
+
+       
     }
 }

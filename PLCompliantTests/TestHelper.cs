@@ -1,8 +1,11 @@
 ﻿using OpenQA.Selenium.Appium.Windows;
 using OpenQA.Selenium.Interactions;
 using PLCompliant;
+using PLCompliant.Enums;
 using PLCompliant.Modbus;
+using PLCompliant.Response;
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Text;
 
 namespace PLCompliantTests
@@ -15,10 +18,11 @@ namespace PLCompliantTests
         public static string getDeviceInfoObject2 = "BMX NOE 0100";
         public static string getDeviceInfoObject3 = "V2.30";
 
-        //This method instantiates a ModBusMessage akin to an response from PLC. 
+        //This method instantiates a ModBusMessage akin to an response from PLC for ReadDeviceIdentification. 
         public static ModBusMessage CreateExampleReadDeviceInformationResponse()
         {
-            ModBusMessage msg = new(new(0, 0, 255), new((byte)ModBusCommandType.read_device_information, []));
+            ModBusMessage msg = new(new(0, 0, 255), new());
+            msg.AddData((byte)ModBusCommandType.read_device_information); // function code
             msg.AddData(0xe);
             msg.AddData(0x2);
             msg.AddData(0x81);
@@ -40,6 +44,36 @@ namespace PLCompliantTests
 
             return msg;
         }
+
+
+        //This method instantiates a ReadSZLResponseData akin to an response from PLC. 
+        public static ReadSZLResponseData CreateExampleReadSZLResponse()
+        {
+            OrderNumBuffer orderNum = new OrderNumBuffer("6ES7 211-1BE40-0XB0 ");
+            ReadSZLResponseData szlResponse = new ReadSZLResponseData(new(17, 1, 28, 3));
+            szlResponse.IPAddr = IPAddress.Parse("192.168.123.99");
+            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.Module, ref orderNum, 0, 14, 8224));
+            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.BasicHardware, ref orderNum, 0, 14, 8224));
+            szlResponse.Objects.Add(new ReadSZLDataItem((ushort)SZLItemIndex.BasicFirmware, ref orderNum, 0, 22020, 1281));
+
+
+            return szlResponse;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public static PLCompliantUI MockUI()
         {

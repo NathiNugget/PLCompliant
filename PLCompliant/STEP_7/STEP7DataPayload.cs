@@ -4,36 +4,22 @@ using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
 {
-    /// <summary>
-    /// This class represents the data portion of a COTP-segment
-    /// </summary>
-    public class COTPData : IProtocolData
+    public class STEP7DataPayload : IProtocolData
     {
-
         private byte[] _data;
 
-        public COTPData(byte pduType)
+        public STEP7DataPayload()
         {
             _data = [];
         }
 
-        #region properties
-        /// <summary>
-        /// Property for the PDU-type
-        /// </summary>
-        public byte PduType
-        {
-            get { return Data[0]; }
-            set { Data[0] = value; }
-        }
-        /// <summary>
-        /// Property for the Data-segment of the class
-        /// </summary>
         public byte[] Data
         {
             get { return _data; }
-            private set { _data = value; }
+            set { _data = value; }
         }
+
+        
         /// <inheritdoc/>
         public int Size
         {
@@ -43,6 +29,21 @@ namespace PLCompliant.STEP_7
             }
         }
 
+        /// <inheritdoc/>
+        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
+        {
+            inputBuffer = inputBuffer.Slice(0, _data.Length); // Optionally, do a size check here?
+            inputBuffer.CopyTo(_data);
+            return _data.Length;
+        }
+        /// <inheritdoc/>
+        public void Serialize(Span<byte> serializedObj)
+        {
+            int index = 0; 
+            serializedObj = serializedObj.Slice(index, _data.Length);
+
+            _data.CopyTo(serializedObj);
+        }
         /// <inheritdoc/>
         public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
@@ -94,13 +95,6 @@ namespace PLCompliant.STEP_7
             return binaryData.Length;
         }
         /// <inheritdoc/>
-        public int Deserialize(ReadOnlySpan<byte> inputBuffer)
-        {
-            inputBuffer = inputBuffer.Slice(0, _data.Length);
-            inputBuffer.CopyTo(_data);
-            return _data.Length;
-        }
-        /// <inheritdoc/>
         public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
         {
             T outVar = MemoryMarshal.AsRef<T>(_data);
@@ -111,15 +105,6 @@ namespace PLCompliant.STEP_7
         public void ResizeStorage(int newSize)
         {
             Array.Resize(ref _data, newSize);
-        }
-
-        /// <inheritdoc/>
-        public void Serialize(Span<byte> serializedObj)
-        {
-            int index = 0;
-            serializedObj = serializedObj.Slice(index, _data.Length);
-
-            _data.CopyTo(serializedObj);
         }
     }
 }

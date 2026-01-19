@@ -252,14 +252,14 @@ namespace PLCompliant.Scanning
                         }
                         else
                         {
-                            if (response.Data._functionCode == (byte)ModBusCommandType.read_device_information)
+                            if (response.Data.FunctionCode == (byte)ModBusCommandType.read_device_information)
                             {
                                 ReadDeviceInformationData output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
                                 return output;
                             }
                             else
                             {
-                                Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, PLC returnerede et ukendt funktionskode: {response.Data._functionCode}", TraceEventType.Error);
+                                Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, PLC returnerede et ukendt funktionskode: {response.Data.FunctionCode}", TraceEventType.Error);
                                 return null;
                             }
                         }
@@ -331,7 +331,7 @@ namespace PLCompliant.Scanning
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.LogMessage($"Fejl ved COTP-forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Warning);
+                    Logger.Instance.LogMessage($"Fejl ved COTP-forbindelse til STEP7-PLC: {ex.Message} på IP: {ip}", TraceEventType.Warning);
                     stream?.Dispose();
                     client?.Close();
                 }
@@ -364,7 +364,7 @@ namespace PLCompliant.Scanning
                 catch (Exception ex)
                 {
 
-                    Logger.Instance.LogMessage($"Netværksfejl ved Setup Communication i forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
+                    Logger.Instance.LogMessage($"Netværksfejl ved Setup Communication i forbindelse til STEP7-PLC: {ex.Message} på IP: {ip}", TraceEventType.Error);
                     return null;
                 }
                 try
@@ -374,10 +374,10 @@ namespace PLCompliant.Scanning
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.LogMessage($"Fejl ved aflæsning af SZL data i forbindelse til STEP7-PLC: {ex.Message} på IP: {(client.Client.RemoteEndPoint as IPEndPoint)?.Address}", TraceEventType.Error);
+                    Logger.Instance.LogMessage($"Fejl ved aflæsning af SZL data i forbindelse til STEP7-PLC: {ex.Message} på IP: {ip}", TraceEventType.Error);
                     return null;
                 }
-                return STEP7ResponseParsing.ParseReadSZLResponse(ReadSZLResponse, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
+                return STEP7ResponseParsing.ParseReadSZLResponse(ReadSZLResponse, ip);
             }
 
 

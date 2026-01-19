@@ -16,7 +16,8 @@ namespace PLCompliant.Modbus.Tests
         [DataRow((byte)0x0)]
         public void HandleResponseFailTest(byte param_1)
         {
-            ModBusMessage exceptionresponse = new(new(), new(((byte)ModBusCommandType.read_device_information | 0b1000_0000), []));
+            ModBusMessage exceptionresponse = new(new(), new());
+            exceptionresponse.AddData((byte)ModBusCommandType.read_device_information | 0b1000_0000); // function data with err
             exceptionresponse.AddData(param_1);
             Assert.IsFalse(ModBusResponseParsing.TryHandleReponseError(exceptionresponse, out byte err));
             Assert.AreEqual(param_1, err);
@@ -28,7 +29,8 @@ namespace PLCompliant.Modbus.Tests
         public void HandleResponseSucceedTest(byte param_1)
         {
             int expected = 0; // We expect error code to be 0 if no expection is thrown within handling method.
-            ModBusMessage exceptionresponse = new(new(), new(((byte)ModBusCommandType.read_device_information), []));
+            ModBusMessage exceptionresponse = new(new(), new());
+            exceptionresponse.AddData((byte)ModBusCommandType.read_device_information);
             exceptionresponse.AddData(param_1);
             Assert.IsTrue(ModBusResponseParsing.TryHandleReponseError(exceptionresponse, out byte err));
             Assert.AreEqual(expected, err);
