@@ -9,7 +9,6 @@ namespace PLCompliant.STEP_7
     /// </summary>
     public class STEP7Message : IProtocolMessage
     {
-        #region fields
         /// <summary>
         /// Port number for STEP7-communication via ISO-over-TCP
         /// </summary>

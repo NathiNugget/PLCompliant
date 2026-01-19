@@ -43,7 +43,6 @@ namespace PLCompliant.STEP_7
         }
         #endregion
 
-        #region constructor
         /// <summary>
         /// 
         /// </summary>

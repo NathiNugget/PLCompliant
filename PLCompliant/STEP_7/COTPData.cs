@@ -12,7 +12,7 @@ namespace PLCompliant.STEP_7
 
         private byte[] _data;
 
-        public COTPData(byte pduType)
+        public COTPData()
         {
             _data = [];
         }
@@ -42,6 +42,7 @@ namespace PLCompliant.STEP_7
                 return _data.Length;
             }
         }
+        #endregion
 
         /// <inheritdoc/>
         public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable

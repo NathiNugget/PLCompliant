@@ -135,13 +135,13 @@ namespace PLCompliant.Response
             }
         }
     }
-    [StructLayout(LayoutKind.Explicit, Size = 28, CharSet = CharSet.Ansi)]
-    public struct ReadSZLDataItem : IEndianConvertable
+
 
     /// <summary>
     /// This struct represents information about the firmware-version read out from SZLDataItems
     /// </summary>
-    public struct ReadSZLDataItem
+    [StructLayout(LayoutKind.Explicit, Size = 28, CharSet = CharSet.Ansi)]
+    public struct ReadSZLDataItem : IEndianConvertable
     {
         [FieldOffset(0)] private UInt16 _index;
         [FieldOffset(2)] private OrderNumBuffer _orderNum;
