@@ -16,7 +16,6 @@ namespace PLCompliant.STEP_7
             _data = [];
         }
 
-        #region properties
         /// <summary>
         /// Data property for the params
         /// </summary>

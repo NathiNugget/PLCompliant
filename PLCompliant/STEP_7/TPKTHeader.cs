@@ -57,7 +57,6 @@ namespace PLCompliant.STEP_7
         }
         #endregion
 
-        #region constructor
         /// <summary>
         /// Constructor for this struct
         /// </summary>

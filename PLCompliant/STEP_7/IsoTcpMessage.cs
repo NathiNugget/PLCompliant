@@ -7,6 +7,9 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PLCompliant.STEP_7
 {
+    /// <summary>
+    /// This is the main container class for a whole packet to communicate with STEP7-PLCs
+    /// </summary>
     public class IsoTcpMessage : IProtocolMessage, INetworkMessageDeserializable
     {
 
@@ -83,7 +86,6 @@ namespace PLCompliant.STEP_7
         private STEP7Message? _step7;
         #endregion
 
-        #region properties
         /// <summary>
         /// Property for the STEP7-segment
         /// </summary>
