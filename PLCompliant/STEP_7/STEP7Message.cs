@@ -7,7 +7,7 @@ namespace PLCompliant.STEP_7
     /// <summary>
     /// This class contains the header and maybe parameter data, maybe data
     /// </summary>
-    public class STEP7Message : IProtocolMessage
+    public class STEP7Message : IProtocolMessage, IEquatable<STEP7Message>
     {
         /// <summary>
         /// Port number for STEP7-communication via ISO-over-TCP
@@ -22,11 +22,11 @@ namespace PLCompliant.STEP_7
             _step7Header = step7Header;
             _step7Data = step7Data;
             _step7ParamData = step7ParamData;
-            if(_step7ParamData != null )
+            if(_step7ParamData is not null )
             {
                 _step7Header.ParameterLength += (ushort)_step7ParamData.Size;
             }
-            if(_step7Data != null)
+            if(_step7Data is not null)
             {
                 _step7Header.DataLength += (ushort)_step7Data.Size;
             }
@@ -93,12 +93,12 @@ namespace PLCompliant.STEP_7
             {
                 index += _step7Header.Size;
             }      
-            if( _step7ParamData != null)
+            if( _step7ParamData is not null)
             {
                 _step7ParamData.Serialize(serializedObj.Slice(index, _step7ParamData.Size));
                 index += _step7ParamData.Size;
             }
-            if( _step7Data != null)
+            if( _step7Data is not null)
             {
                 _step7Data.Serialize(serializedObj.Slice(index, _step7Data.Size));
                 index += _step7Data.Size;
@@ -132,7 +132,7 @@ namespace PLCompliant.STEP_7
             var flags = (IsoTcpDataType)type;
             if(flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                if(_step7ParamData == null)
+                if(_step7ParamData is null)
                 {
                     _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
                 }
@@ -141,7 +141,7 @@ namespace PLCompliant.STEP_7
             }
             else
             {
-                if (_step7Data == null)
+                if (_step7Data is null)
                 {
                     _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
                     dataAdded += _step7Data.Size;
@@ -158,7 +158,7 @@ namespace PLCompliant.STEP_7
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                if (_step7ParamData == null)
+                if (_step7ParamData is null)
                 {
                     _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
                 }
@@ -167,7 +167,7 @@ namespace PLCompliant.STEP_7
             }
             else
             {
-                if (_step7Data == null)
+                if (_step7Data is null)
                 {
                     _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
                     dataAdded += _step7Data.Size;
@@ -185,7 +185,7 @@ namespace PLCompliant.STEP_7
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                if (_step7ParamData == null)
+                if (_step7ParamData is null)
                 {
                     _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
                 }
@@ -194,7 +194,7 @@ namespace PLCompliant.STEP_7
             }
             else
             {
-                if (_step7Data == null)
+                if (_step7Data is null)
                 {
                     _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
                     dataAdded += _step7Data.Size;
@@ -215,7 +215,7 @@ namespace PLCompliant.STEP_7
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))
             {
-                if (_step7ParamData == null)
+                if (_step7ParamData is null)
                 {
                     _step7ParamData = new(); // No need to increment dataAdded, as the step7 param data is initialized with only a empty array
                 }
@@ -224,7 +224,7 @@ namespace PLCompliant.STEP_7
             }
             else
             {
-                if (_step7Data == null)
+                if (_step7Data is null)
                 {
                     _step7Data = new(); // This one does need to be incremented since step7data has its own header which is initialized with it
                     dataAdded += _step7Data.Size;
@@ -247,7 +247,50 @@ namespace PLCompliant.STEP_7
                 return _step7Data.GetData<T>(index, type);
             }
         }
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as STEP7Message);
+        }
+        public bool Equals(STEP7Message? obj)
+        {
+            bool bothDataNull = false;
+            bool bothParamNull = false;
+            if (obj is null) return false;
+            if(STEP7Data is null || obj.STEP7Data is null)
+            {
+                if(STEP7Data is null && obj.STEP7Data is null)
+                {
+                    bothDataNull = true;
+                }
+                else
+                {
+                    return false;
+                }
+                
+            }
+            if (STEP7ParamData is null || obj.STEP7ParamData is null)
+            {
+                if (STEP7ParamData is null && obj.STEP7ParamData is null)
+                {
+                    bothParamNull = true;
+                }
+                else
+                {
+                    return false;
+                }
 
-       
+            }
+            return STEP7Header.Equals(obj.STEP7Header) && (bothDataNull || STEP7Data.Equals(obj.STEP7Data)) && (bothParamNull || STEP7ParamData.Equals(obj.STEP7ParamData));
+
+        }
+
+        public static bool operator ==(STEP7Message left, STEP7Message right)
+        {
+            return object.Equals(left, right);
+
+        }
+        public static bool operator !=(STEP7Message left, STEP7Message right) { return !(left == right); }
+
+
     }
 }

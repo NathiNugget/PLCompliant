@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Interface;
+using PLCompliant.Utilities;
 using System.Runtime.InteropServices;
 namespace PLCompliant.STEP_7
 {
@@ -6,7 +7,7 @@ namespace PLCompliant.STEP_7
     /// This struct represents the header of a COTP-packet 
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 1, CharSet = CharSet.Ansi)]
-    public struct COTPHeader : IProtocolHeader
+    public struct COTPHeader : IProtocolHeader, IEquatable<COTPHeader>
     {
         [FieldOffset(0)] private byte _length;
 
@@ -39,5 +40,32 @@ namespace PLCompliant.STEP_7
             _length = inputBuffer[0];
             return Size;
         }
+
+
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) return false;
+            if (obj is not COTPHeader) return false;
+            COTPHeader castedObj = (COTPHeader)obj;
+            return Equals(this, castedObj);
+
+        }
+
+        public bool Equals(COTPHeader other)
+        {
+            return MemoryUtilities.CompareMemory(ref this, ref other);
+        }
+
+        public static bool operator ==(COTPHeader left, COTPHeader right)
+        {
+            return left.Equals(right);
+
+        }
+        public static bool operator !=(COTPHeader left, COTPHeader right) { return !(left == right); }
+
+
+
+
     }
 }

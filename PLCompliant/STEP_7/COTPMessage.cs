@@ -7,7 +7,7 @@ namespace PLCompliant.STEP_7
     /// <summary>
     /// This class contains header and data for the COTP-segment
     /// </summary>
-    public class COTPMessage : IProtocolMessage
+    public class COTPMessage : IProtocolMessage, IEquatable<COTPMessage>
     {
         private COTPHeader _header;
         private COTPData _data;
@@ -52,6 +52,7 @@ namespace PLCompliant.STEP_7
         {
             _header = header;
             _data = data;
+            _header.Length += (byte)_data.Size;
         }
         public COTPMessage()
         {
@@ -112,6 +113,30 @@ namespace PLCompliant.STEP_7
             return _data.GetData<T>(index, type);
         }
 
-        
+
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as COTPMessage);
+        }
+        public bool Equals(COTPMessage? obj)
+        {
+
+            if (obj is null) return false;
+            return _header.Equals(obj._header) && _data.Equals(obj._data);
+
+        }
+
+        public static bool operator ==(COTPMessage left, COTPMessage right)
+        {
+            return object.Equals(left, right);
+
+        }
+        public static bool operator !=(COTPMessage left, COTPMessage right) { return !(left == right); }
+
+
+
+
+
     }
 }

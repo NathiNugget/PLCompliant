@@ -8,7 +8,7 @@ namespace PLCompliant.STEP_7
     /// <summary>
     /// This class represents data for the parameters of a STEP7-message
     /// </summary>
-    public class STEP7ParameterData : IProtocolData
+    public class STEP7ParameterData : IProtocolData, IEquatable<STEP7ParameterData>
     {
         private byte[] _data;
         public STEP7ParameterData()
@@ -59,12 +59,13 @@ namespace PLCompliant.STEP_7
         public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
         {
             var dataAdded = Marshal.SizeOf<T>();
-            var newSize = _data.Length + dataAdded;
+            var oldSize = _data.Length;
+            var newSize = oldSize + dataAdded;
             Array.Resize(ref _data, newSize);
             inputData.FromHostToNetwork();
             ReadOnlySpan<T> inputSpan = [inputData];
             ReadOnlySpan<byte> outSpan = MemoryMarshal.AsBytes(inputSpan);
-            outSpan.CopyTo(_data);
+            outSpan.CopyTo(_data.AsSpan(oldSize));
             return dataAdded;
         }
         /// <inheritdoc/>
@@ -108,7 +109,7 @@ namespace PLCompliant.STEP_7
         /// <inheritdoc/>
         public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
         {
-            T outVar = MemoryMarshal.AsRef<T>(_data);
+            T outVar = MemoryMarshal.AsRef<T>(_data.AsSpan(index));
             outVar.FromNetworkToHost();
             return outVar;
         }
@@ -117,5 +118,25 @@ namespace PLCompliant.STEP_7
         {
             Array.Resize(ref _data, newSize);
         }
+
+        public bool Equals(STEP7ParameterData? obj)
+        {
+            if (obj is null) return false;
+            return Data.SequenceEqual(obj.Data);
+
+        }
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as STEP7ParameterData);
+        }
+
+        public static bool operator ==(STEP7ParameterData left, STEP7ParameterData right)
+        {
+            return object.Equals(left, right);
+
+        }
+        public static bool operator !=(STEP7ParameterData left, STEP7ParameterData right) { return !(left == right); }
+
+
     }
 }

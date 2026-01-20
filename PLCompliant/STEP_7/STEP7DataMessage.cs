@@ -2,11 +2,10 @@
 
 using PLCompliant.Interface;
 using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PLCompliant.STEP_7
 {
-    public class STEP7DataMessage : IProtocolMessage
+    public class STEP7DataMessage : IProtocolMessage, IEquatable<STEP7DataMessage>
     {
         public STEP7DataMessage(byte returnCode, byte transportType)
         {
@@ -89,6 +88,24 @@ namespace PLCompliant.STEP_7
             return _data.GetData<T>(index, type);
         }
 
-       
+
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as STEP7DataMessage);
+
+        }
+
+        public bool Equals(STEP7DataMessage? other)
+        {
+            if (other is null) return false;
+            return _header.Equals(other._header) && _data.Equals(other._data); 
+        }
+
+        public static bool operator ==(STEP7DataMessage left, STEP7DataMessage right)
+        {
+            return object.Equals(left, right);
+        }
+        public static bool operator !=(STEP7DataMessage left, STEP7DataMessage right) { return !(left == right); }
     }
 }

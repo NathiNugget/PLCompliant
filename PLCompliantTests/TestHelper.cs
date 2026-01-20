@@ -2,14 +2,39 @@
 using OpenQA.Selenium.Interactions;
 using PLCompliant;
 using PLCompliant.Enums;
+using PLCompliant.Interface;
 using PLCompliant.Modbus;
 using PLCompliant.Response;
+using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PLCompliantTests
 {
+
+    [StructLayout(LayoutKind.Explicit, Size = 6, CharSet = CharSet.Ansi)]
+    struct TestStruct : IEndianConvertable
+    {
+        [FieldOffset(0)] public byte b1;
+        [FieldOffset(1)] public byte b2;
+        [FieldOffset(2)] public UInt16 b3;
+        [FieldOffset(4)] public UInt16 b4;
+
+        public void FromHostToNetwork()
+        {
+            b3 = EndianConverter.FromHostToNetwork(b3);
+            b4 = EndianConverter.FromHostToNetwork(b4);
+        }
+
+        public void FromNetworkToHost()
+        {
+            b3 = EndianConverter.FromNetworkToHost(b3);
+            b4 = EndianConverter.FromNetworkToHost(b4);
+        }
+    }
+
     [ExcludeFromCodeCoverage]
     public static class TestHelper
     {

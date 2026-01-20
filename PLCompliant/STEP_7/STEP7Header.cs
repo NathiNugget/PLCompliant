@@ -1,5 +1,6 @@
 ﻿using PLCompliant.Interface;
 using PLCompliant.Utilities;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace PLCompliant.STEP_7
@@ -8,7 +9,7 @@ namespace PLCompliant.STEP_7
     /// This struct contains the fields in a STEP7-header
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 12, CharSet = CharSet.Ansi)]
-    public struct STEP7Header : IProtocolHeader, IEndianConvertable
+    public struct STEP7Header : IProtocolHeader, IEndianConvertable, IEquatable<STEP7Header>
     {
         public const byte PRELUDE_LEN = 2;
         public const byte NON_ERROR_LENGTH = 10;
@@ -164,5 +165,30 @@ namespace PLCompliant.STEP_7
             _parameterLength = EndianConverter.FromNetworkToHost(_parameterLength);
             _dataLength = EndianConverter.FromNetworkToHost(_dataLength);
         }
+
+
+
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) return false;
+            if (obj is not STEP7Header) return false;
+            STEP7Header castedObj = (STEP7Header)obj;
+            return Equals(this, castedObj);
+
+        }
+
+        public bool Equals(STEP7Header other)
+        {
+            return MemoryUtilities.CompareMemory(ref this, ref other);
+        }
+
+        public static bool operator ==(STEP7Header left, STEP7Header right)
+        {
+            return left.Equals(right);
+
+        }
+        public static bool operator !=(STEP7Header left, STEP7Header right) { return !(left == right); }
+
     }
 }
