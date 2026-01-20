@@ -1,6 +1,7 @@
 ﻿using PLCompliant.Interface;
 using PLCompliant.Utilities;
 using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PLCompliant.STEP_7
 {
@@ -98,7 +99,7 @@ namespace PLCompliant.STEP_7
         /// <inheritdoc/>
         public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            inputBuffer = inputBuffer.Slice(0, _data.Length);
+            ResizeStorage(inputBuffer.Length);
             inputBuffer.CopyTo(_data);
             return _data.Length;
         }

@@ -1,20 +1,21 @@
-﻿using PLCompliant.Enums;
+﻿
+using PLCompliant.Enums;
 using PLCompliant.STEP_7;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-
 
 namespace PLCompliantTests.STEP7
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
-    public class COTPMessageTests
+    public class STEP7DataMessageTests
     {
+
         [TestMethod()]
-        public void COTPMessageDefaultCTOR()
+        public void STEP7DataMessageDefaultCTOR()
         {
             // Data segment should be default-initiailized and not be null
-            COTPMessage msg = new();
+            STEP7DataMessage msg = new();
             Assert.IsNotNull(msg);
             Assert.IsNotNull(msg.Data);
             Assert.IsNotNull(msg.Data.Data);
@@ -22,15 +23,18 @@ namespace PLCompliantTests.STEP7
             Assert.AreEqual(msg.Data.Size, msg.Header.Length);
         }
         [TestMethod()]
-        public void COTPessageOtherCTOR()
+        public void STEP7DataMessageOtherCTOR()
         {
-
-            COTPMessage msg = new(new(), new());
+            byte returnCode = 99;
+            byte transportType = 94;
+            STEP7DataMessage msg = new(returnCode, transportType);
             Assert.IsNotNull(msg);
             Assert.IsNotNull(msg.Data);
             Assert.IsNotNull(msg.Data.Data);
 
             Assert.AreEqual(msg.Data.Size, msg.Header.Length);
+            Assert.AreEqual(msg.Header.ReturnCode, returnCode);
+            Assert.AreEqual(msg.Header.TransportType, transportType);
 
 
         }
@@ -46,16 +50,18 @@ namespace PLCompliantTests.STEP7
 
         public void AddDataTest(ushort param1, byte param2, ushort param3, byte param4)
         {
-            COTPMessage msg = new();
-            var expectedLength = msg.AddData(param1, (byte)IsoTcpDataType.COTPData);
+            STEP7DataMessage msg = new();
+            var expectedLength = msg.AddData(param1, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedLength, msg.Header.Length);
 
 
-            expectedLength += msg.AddData(param2, (byte)IsoTcpDataType.COTPData);
+            expectedLength += msg.AddData(param2, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedLength, msg.Header.Length);
-            expectedLength += msg.AddData(param3, (byte)IsoTcpDataType.COTPData);
+            Assert.AreEqual(expectedLength, msg.Data.Size);
+            expectedLength += msg.AddData(param3, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedLength, msg.Header.Length);
-            expectedLength += msg.AddData(param4, (byte)IsoTcpDataType.COTPData);
+            Assert.AreEqual(expectedLength, msg.Data.Size);
+            expectedLength += msg.AddData(param4, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedLength, msg.Header.Length);
             Assert.AreEqual(expectedLength, msg.Data.Size);
             Assert.AreEqual(param4, msg.Data.Data[msg.Data.Data.Length - 1]); // check that the last item added was infact the value we added
@@ -67,12 +73,12 @@ namespace PLCompliantTests.STEP7
         [TestMethod]
         [DataRow((uint)0)]
         [DataRow((uint)123)]
-        [DataRow((uint)255)]
+        [DataRow((uint)UInt16.MaxValue)]
         public void AddDataByteArrayTest(uint size)
         {
-            // The length field in COTPHeader is a 8-bit int, so no more than 255 bytes of data can be in there at any point
+            // The length field in STEP7DataHeader is a 16-bit int, so no more than UInt16 bytes of data can be in there at any point
 
-            COTPMessage msg = new();
+            STEP7DataMessage msg = new();
             byte[] arr = new byte[size];
             if (size > 0)
             {
@@ -80,7 +86,7 @@ namespace PLCompliantTests.STEP7
                 arr[0] = 45;
             }
             int expectedlength = (int)size;
-            msg.AddData(arr, (byte)IsoTcpDataType.COTPData);
+            msg.AddData(arr, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedlength, msg.Header.Length);
             Assert.AreEqual(expectedlength + msg.Header.Size, msg.Size); // expected length from data + header should equal the whole message size
             if (size > 0)
@@ -92,28 +98,28 @@ namespace PLCompliantTests.STEP7
         }
 
         [TestMethod]
-        [DataRow((uint)256)]
+        [DataRow((uint)UInt16.MaxValue + 1)]
         [DataRow((uint)500000)]
 
         public void AddDataByteArrayTooLargeTest(uint size)
         {
             uint expectedlength = size;
-            COTPMessage msg = new();
+            STEP7DataMessage msg = new();
             byte[] arr = new byte[size];
 
-            Assert.ThrowsException<ArgumentException>(() => msg.AddData(arr, (byte)IsoTcpDataType.COTPData));
+            Assert.ThrowsException<ArgumentException>(() => msg.AddData(arr, (byte)IsoTcpDataType.STEP7RegularData));
 
         }
         [TestMethod]
         public void AddDataStructTest()
         {
             TestStruct s1 = new TestStruct();
-            COTPMessage msg = new();
-            var expectedLength = msg.AddData(s1, (byte)IsoTcpDataType.COTPData);
+            STEP7DataMessage msg = new();
+            var expectedLength = msg.AddData(s1, (byte)IsoTcpDataType.STEP7RegularData);
             Assert.AreEqual(expectedLength, msg.Header.Length);
             Assert.AreEqual(expectedLength, msg.Data.Size);
 
-            int addedData = msg.AddData(s1, (byte)IsoTcpDataType.COTPData);
+            int addedData = msg.AddData(s1, (byte)IsoTcpDataType.STEP7RegularData);
 
             Assert.AreEqual(addedData, Marshal.SizeOf(s1));
 
@@ -136,12 +142,12 @@ namespace PLCompliantTests.STEP7
             s2.b3 = 121;
             s2.b2 = 7;
             s2.b1 = 8;
-            COTPMessage msg = new();
+            STEP7DataMessage msg = new();
 
-            var expectedLength = msg.AddData(s1, (byte)IsoTcpDataType.COTPData);
-            expectedLength += msg.AddData(s2, (byte)IsoTcpDataType.COTPData);
-            TestStruct output1 = msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.COTPData);
-            TestStruct output2 = msg.GetData<TestStruct>(Marshal.SizeOf<TestStruct>(), (byte)IsoTcpDataType.COTPData);
+            var expectedLength = msg.AddData(s1, (byte)IsoTcpDataType.STEP7RegularData);
+            expectedLength += msg.AddData(s2, (byte)IsoTcpDataType.STEP7RegularData);
+            TestStruct output1 = msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.STEP7RegularData);
+            TestStruct output2 = msg.GetData<TestStruct>(Marshal.SizeOf<TestStruct>(), (byte)IsoTcpDataType.STEP7RegularData);
 
 
             Assert.AreEqual(s1, output1);
@@ -152,40 +158,40 @@ namespace PLCompliantTests.STEP7
         [TestMethod]
         public void GetDataStructTestFailNotEnoughData()
         {
-            COTPMessage msg = new();
+            STEP7DataMessage msg = new();
             // Data segment is initialized with the message, so it should throw argument out of range exception
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.COTPData));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.STEP7RegularData));
             // add some data, but not enough to grab TestStruct
-            msg.AddData(12345, (byte)IsoTcpDataType.COTPData);
+            msg.AddData(12345, (byte)IsoTcpDataType.STEP7RegularData);
             // If there is data, but there isnt enough, throw out of range exception
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.COTPData));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.STEP7RegularData));
         }
 
 
 
         [TestMethod()]
-        [DataRow(byte.MinValue, (ushort)12456)]
-        [DataRow(byte.MinValue, (ushort)12456)]
-        [DataRow(byte.MaxValue, (ushort)0)]
-        [DataRow( (byte)0, (ushort)10094)]
-        [DataRow((byte)10, (ushort)5)]
-        [DataRow(byte.MinValue, ushort.MaxValue)]
-        [DataRow(byte.MaxValue, ushort.MinValue)]
+        [DataRow((byte)5, (byte)6, (byte)198, ushort.MinValue)]
+        [DataRow( byte.MaxValue, byte.MaxValue, (byte)10, ushort.MaxValue)]
+        [DataRow( (byte)5, byte.MinValue, (byte)124, ushort.MinValue)]
+        [DataRow( byte.MinValue, (byte)6, (byte)0, (ushort)19999)]
+        [DataRow((byte)5, (byte)6, byte.MaxValue, (ushort)0)]
+        [DataRow( (byte)5, (byte)6, byte.MinValue, ushort.MaxValue)]
+        [DataRow( (byte)5, (byte)6, (byte)5, ushort.MinValue)]
 
-        public void SerializeDeserializeTest(byte dataParam1, ushort dataParam2)
+        public void SerializeDeserializeTest(byte returnCode, byte transportType, byte dataParam1, ushort dataParam2)
         {
             TestStruct s1 = new TestStruct { b1 = 1, b2 = 123, b3 = 102, b4 = 0 };
-            COTPMessage msg = new();
-            msg.AddData(dataParam1, (byte)IsoTcpDataType.COTPData);
-            msg.AddData(dataParam2, (byte)IsoTcpDataType.COTPData);
-            msg.AddData(dataParam1, (byte)IsoTcpDataType.COTPData);
-            msg.AddData(dataParam2, (byte)IsoTcpDataType.COTPData);
-            msg.AddData(s1, (byte)IsoTcpDataType.COTPData);
+            STEP7DataMessage msg = new(returnCode, transportType);
+            msg.AddData(dataParam1, (byte)IsoTcpDataType.STEP7RegularData);
+            msg.AddData(dataParam2, (byte)IsoTcpDataType.STEP7RegularData);
+            msg.AddData(dataParam1, (byte)IsoTcpDataType.STEP7RegularData);
+            msg.AddData(dataParam2, (byte)IsoTcpDataType.STEP7RegularData);
+            msg.AddData(s1, (byte)IsoTcpDataType.STEP7RegularData);
 
             byte[] returnBytes = new byte[msg.Size];
             msg.Serialize(returnBytes);
 
-            COTPMessage response = new();
+            STEP7DataMessage response = new();
             ReadOnlySpan<byte> returnBytesSpan = new ReadOnlySpan<byte>(returnBytes);
             response.Deserialize(returnBytesSpan);
             Assert.AreEqual(msg, response);
@@ -198,20 +204,19 @@ namespace PLCompliantTests.STEP7
         public void COTPMessageSize(byte param_1)
         {
 
-            COTPMessage msg = new();
+            STEP7DataMessage msg = new();
             int expectedsize = msg.Header.Size; // Only header is default-initialized
             Assert.AreEqual(expectedsize, msg.Size);
 
-            expectedsize += msg.AddData(param_1, (byte)IsoTcpDataType.COTPData);
+            expectedsize += msg.AddData(param_1, (byte)IsoTcpDataType.STEP7RegularData);
 
             Assert.AreEqual(expectedsize, msg.Size);
 
-            expectedsize += msg.AddData(param_1, (byte)IsoTcpDataType.COTPData);
+            expectedsize += msg.AddData(param_1, (byte)IsoTcpDataType.STEP7RegularData);
 
             Assert.AreEqual(expectedsize, msg.Size);
 
 
         }
-
     }
 }

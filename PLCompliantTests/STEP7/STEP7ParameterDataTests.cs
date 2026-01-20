@@ -1,27 +1,31 @@
-﻿
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PLCompliant.Enums;
+﻿using PLCompliant.Enums;
 using PLCompliant.STEP_7;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PLCompliantTests.STEP7
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
-    public class COTPDataTests
+    public class STEP7ParameterDataTests
     {
+
         [TestMethod()]
-        public void COTPDataDefaultCTOR()
+        public void STEP7ParameterDataDefaultCTOR()
         {
             // Data segment should be default-initiailized and not be null
-            COTPData msg = new();
+            STEP7ParameterData msg = new();
             Assert.IsNotNull(msg);
             Assert.IsNotNull(msg.Data);
 
             Assert.AreEqual(msg.Size, msg.Data.Length);
         }
-      
+
 
         [TestMethod()]
         [DataRow(ushort.MinValue, byte.MinValue, ushort.MinValue, byte.MinValue)]
@@ -34,19 +38,19 @@ namespace PLCompliantTests.STEP7
 
         public void AddDataTest(ushort param1, byte param2, ushort param3, byte param4)
         {
-            COTPData msg = new();
-            var expectedLength = msg.AddData(param1, (byte)IsoTcpDataType.COTPData);
+            STEP7ParameterData msg = new();
+            var expectedLength = msg.AddData(param1);
             Assert.AreEqual(expectedLength, msg.Data.Length);
             Assert.AreEqual(expectedLength, msg.Size);
 
 
-            expectedLength += msg.AddData(param2, (byte)IsoTcpDataType.COTPData);
+            expectedLength += msg.AddData(param2);
             Assert.AreEqual(expectedLength, msg.Data.Length);
             Assert.AreEqual(expectedLength, msg.Size);
-            expectedLength += msg.AddData(param3, (byte)IsoTcpDataType.COTPData);
+            expectedLength += msg.AddData(param3);
             Assert.AreEqual(expectedLength, msg.Data.Length);
             Assert.AreEqual(expectedLength, msg.Size);
-            expectedLength += msg.AddData(param4, (byte)IsoTcpDataType.COTPData);
+            expectedLength += msg.AddData(param4);
             Assert.AreEqual(expectedLength, msg.Data.Length);
             Assert.AreEqual(expectedLength, msg.Size);
 
@@ -57,11 +61,11 @@ namespace PLCompliantTests.STEP7
         [TestMethod]
         [DataRow((uint)0)]
         [DataRow((uint)123)]
-        [DataRow((uint)255)]
+        [DataRow(UInt16.MaxValue)]
         public void AddDataByteArrayTest(uint size)
         {
 
-            COTPData msg = new();
+            STEP7ParameterData msg = new();
             byte[] arr = new byte[size];
             if (size > 0)
             {
@@ -69,7 +73,7 @@ namespace PLCompliantTests.STEP7
                 arr[0] = 45;
             }
             int expectedlength = (int)size;
-            msg.AddData(arr, (byte)IsoTcpDataType.COTPData);
+            msg.AddData(arr);
             Assert.AreEqual(expectedlength, msg.Data.Length);
             Assert.AreEqual(expectedlength, msg.Size);
             if (size > 0)
@@ -81,28 +85,28 @@ namespace PLCompliantTests.STEP7
         }
 
         [TestMethod]
-        [DataRow((uint)256)]
+        [DataRow((uint)UInt16.MaxValue + 1)]
         [DataRow((uint)500000)]
 
         public void AddDataByteArrayTooLargeTest(uint size)
         {
             uint expectedlength = size;
-            COTPData msg = new();
+            STEP7ParameterData msg = new();
             byte[] arr = new byte[size];
 
-            Assert.ThrowsException<ArgumentException>(() => msg.AddData(arr, (byte)IsoTcpDataType.COTPData));
+            Assert.ThrowsException<ArgumentException>(() => msg.AddData(arr));
 
         }
         [TestMethod]
         public void AddDataStructTest()
         {
             TestStruct s1 = new TestStruct();
-            COTPData msg = new();
-            var expectedLength = msg.AddData(s1, (byte)IsoTcpDataType.COTPData);
+            STEP7ParameterData msg = new();
+            var expectedLength = msg.AddData(s1);
             Assert.AreEqual(expectedLength, msg.Data.Length);
             Assert.AreEqual(expectedLength, msg.Size);
 
-            int addedData = msg.AddData(s1, (byte)IsoTcpDataType.COTPData);
+            int addedData = msg.AddData(s1);
 
             Assert.AreEqual(addedData, Marshal.SizeOf(s1));
 
@@ -125,12 +129,12 @@ namespace PLCompliantTests.STEP7
             s2.b3 = 121;
             s2.b2 = 7;
             s2.b1 = 8;
-            COTPData msg = new();
+            STEP7ParameterData msg = new();
 
-            var expectedLength = msg.AddData(s1, (byte)IsoTcpDataType.COTPData);
-            expectedLength += msg.AddData(s2, (byte)IsoTcpDataType.COTPData);
-            TestStruct output1 = msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.COTPData);
-            TestStruct output2 = msg.GetData<TestStruct>(Marshal.SizeOf<TestStruct>(), (byte)IsoTcpDataType.COTPData);
+            var expectedLength = msg.AddData(s1);
+            expectedLength += msg.AddData(s2);
+            TestStruct output1 = msg.GetData<TestStruct>(0);
+            TestStruct output2 = msg.GetData<TestStruct>(Marshal.SizeOf<TestStruct>());
 
 
             Assert.AreEqual(s1, output1);
@@ -141,19 +145,19 @@ namespace PLCompliantTests.STEP7
         [TestMethod]
         public void GetDataStructTestFailNotEnoughData()
         {
-            COTPData msg = new();
+            STEP7ParameterData msg = new();
             // Data segment is initialized, so it should throw argument out of range exception
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.COTPData));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => msg.GetData<TestStruct>(0));
             // add some data, but not enough to grab TestStruct
-            msg.AddData(12345, (byte)IsoTcpDataType.COTPData);
+            msg.AddData(12345);
             // If there is data, but there isnt enough, throw out of range exception
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => msg.GetData<TestStruct>(0, (byte)IsoTcpDataType.COTPData));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => msg.GetData<TestStruct>(0));
         }
 
 
 
         [TestMethod()]
-        [DataRow(byte.MinValue, (ushort)12456)]
+        [DataRow( byte.MinValue, (ushort)12456)]
         [DataRow( byte.MinValue, (ushort)12456)]
         [DataRow( byte.MaxValue, (ushort)0)]
         [DataRow((byte)0, (ushort)10094)]
@@ -164,17 +168,17 @@ namespace PLCompliantTests.STEP7
         public void SerializeDeserializeTest(byte dataParam1, ushort dataParam2)
         {
             TestStruct s1 = new TestStruct { b1 = 1, b2 = 123, b3 = 102, b4 = 0 };
-            COTPData msg = new();
-            msg.AddData(dataParam1, (byte)IsoTcpDataType.COTPData);
-            msg.AddData(dataParam2, (byte)IsoTcpDataType.COTPData);
-            msg.AddData(dataParam1, (byte)IsoTcpDataType.COTPData);
-            msg.AddData(dataParam2, (byte)IsoTcpDataType.COTPData);
-            msg.AddData(s1, (byte)IsoTcpDataType.COTPData);
+            STEP7ParameterData msg = new();
+            msg.AddData(dataParam1);
+            msg.AddData(dataParam2);
+            msg.AddData(dataParam1);
+            msg.AddData(dataParam2);
+            msg.AddData(s1);
 
             byte[] returnBytes = new byte[msg.Size];
             msg.Serialize(returnBytes);
 
-            COTPData response = new();
+            STEP7ParameterData response = new();
             ReadOnlySpan<byte> returnBytesSpan = new ReadOnlySpan<byte>(returnBytes);
             response.Deserialize(returnBytesSpan);
             Assert.AreEqual(msg, response);
@@ -184,23 +188,24 @@ namespace PLCompliantTests.STEP7
         [DataRow(byte.MaxValue)]
         [DataRow((byte)(byte.MaxValue / 2))]
         [DataRow(byte.MinValue)]
-        public void COTPDataSize(byte param_1)
+        public void STEP7ParameterDataSize(byte param_1)
         {
 
-            COTPData msg = new();
+            STEP7ParameterData msg = new();
             int expectedsize = 0; // should start with 0 length on default init
             Assert.AreEqual(expectedsize, msg.Size);
 
-            expectedsize += msg.AddData(param_1, (byte)IsoTcpDataType.COTPData);
+            expectedsize += msg.AddData(param_1);
 
             Assert.AreEqual(expectedsize, msg.Size);
 
-            expectedsize += msg.AddData(param_1, (byte)IsoTcpDataType.COTPData);
+            expectedsize += msg.AddData(param_1);
 
             Assert.AreEqual(expectedsize, msg.Size);
 
 
         }
+
 
 
     }

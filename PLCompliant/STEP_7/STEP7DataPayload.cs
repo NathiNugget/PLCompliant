@@ -82,11 +82,11 @@ namespace PLCompliant.STEP_7
         /// <inheritdoc/>
         public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
-            if (binaryData.Length > byte.MaxValue)
+            if (binaryData.Length > UInt16.MaxValue)
             {
                 throw new ArgumentException("Input length was greater than allowed in a byte");
             }
-            byte binarySize = (byte)binaryData.Length;
+            UInt16 binarySize = (UInt16)binaryData.Length;
             if (binarySize == 0) { return 0; }
             var oldSize = _data.Length;
             var newSize = _data.Length + binarySize;

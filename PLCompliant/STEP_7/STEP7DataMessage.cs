@@ -74,9 +74,9 @@ namespace PLCompliant.STEP_7
         /// <inheritdoc/>
         public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
-            if (binaryData.Length > byte.MaxValue)
+            if (binaryData.Length > UInt16.MaxValue)
             {
-                throw new ArgumentException("Input length was greater than allowed in a byte");
+                throw new ArgumentException("Input length was greater than allowed in a UInt16");
             }
             int dataAdded = _data.AddData(binaryData, type);
             _header.Length += (ushort)dataAdded;

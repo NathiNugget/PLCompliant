@@ -114,7 +114,6 @@ namespace PLCompliant.STEP_7
             if (_step7Header.ParameterLength > 0)
             {
                 _step7ParamData = new();
-                _step7ParamData.ResizeStorage(_step7Header.ParameterLength);
                 index += _step7ParamData.Deserialize(inputBuffer.Slice(index, _step7Header.ParameterLength));
             }
             if (_step7Header.DataLength > 0)

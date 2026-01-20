@@ -258,6 +258,7 @@ namespace PLCompliantTests.STEP7
 
         public void SerializeDeserializeTest(byte protocolId, byte messageType, byte pduReference, byte returnCode, byte transportType, byte dataParam1, ushort dataParam2, byte parameterParam1, ushort parameterParam2)
         {
+            TestStruct s1 = new TestStruct { b1 = 1, b2 = 123, b3 = 102, b4 = 0 };
             STEP7Header header = new(protocolId, messageType, pduReference);
             STEP7ParameterData paramData = new();
             STEP7DataMessage dataSegment = new(returnCode, transportType);
@@ -266,6 +267,9 @@ namespace PLCompliantTests.STEP7
             msg.AddData(dataParam2, (byte)IsoTcpDataType.STEP7RegularData);
             msg.AddData(parameterParam1, (byte)IsoTcpDataType.STEP7ParamData);
             msg.AddData(parameterParam2, (byte)IsoTcpDataType.STEP7ParamData);
+
+            msg.AddData(s1, (byte)IsoTcpDataType.STEP7RegularData);
+            msg.AddData(s1, (byte)IsoTcpDataType.STEP7ParamData);
 
             byte[] returnBytes = new byte[msg.Size];
             msg.Serialize(returnBytes);

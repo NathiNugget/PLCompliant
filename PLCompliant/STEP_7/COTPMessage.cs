@@ -72,11 +72,8 @@ namespace PLCompliant.STEP_7
         public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
             int index = 0;
-            _header.Deserialize(inputBuffer.Slice(index, _header.Size));
-            index += _header.Size;
-            _data.ResizeStorage(_header.Length);
-            _data.Deserialize(inputBuffer.Slice(index, _data.Size));
-            index += _data.Size;
+            index += _header.Deserialize(inputBuffer.Slice(index, _header.Size));
+            index += _data.Deserialize(inputBuffer.Slice(index, _header.Length));
             return index;
         }
         /// <inheritdoc/>

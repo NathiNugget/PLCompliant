@@ -43,7 +43,7 @@ namespace PLCompliant.STEP_7
         /// <inheritdoc/>
         public int Deserialize(ReadOnlySpan<byte> inputBuffer)
         {
-            inputBuffer = inputBuffer.Slice(0, _data.Length);
+            ResizeStorage(inputBuffer.Length);
             inputBuffer.CopyTo(_data);
             return _data.Length;
         }
@@ -56,7 +56,7 @@ namespace PLCompliant.STEP_7
             _data.CopyTo(serializedObj);
         }
         /// <inheritdoc/>
-        public int AddData<T>(T inputData, byte type) where T : unmanaged, IEndianConvertable
+        public int AddData<T>(T inputData, byte type = 0) where T : unmanaged, IEndianConvertable
         {
             var dataAdded = Marshal.SizeOf<T>();
             var oldSize = _data.Length;
@@ -69,7 +69,7 @@ namespace PLCompliant.STEP_7
             return dataAdded;
         }
         /// <inheritdoc/>
-        public int AddData(ushort inputData, byte type)
+        public int AddData(ushort inputData, byte type = 0)
         {
             var dataAdded = Marshal.SizeOf(inputData);
             var oldSize = _data.Length;
@@ -82,7 +82,7 @@ namespace PLCompliant.STEP_7
             return dataAdded;
         }
         /// <inheritdoc/>
-        public int AddData(byte inputData, byte type)
+        public int AddData(byte inputData, byte type = 0)
         {
             var dataAdded = Marshal.SizeOf(inputData);
             var newSize = _data.Length + dataAdded;
@@ -91,13 +91,13 @@ namespace PLCompliant.STEP_7
             return dataAdded;
         }
         /// <inheritdoc/>
-        public int AddData(ReadOnlySpan<byte> binaryData, byte type)
+        public int AddData(ReadOnlySpan<byte> binaryData, byte type = 0)
         {
-            if (binaryData.Length > byte.MaxValue)
+            if (binaryData.Length > UInt16.MaxValue)
             {
-                throw new ArgumentException("Input length was greater than allowed in a byte");
+                throw new ArgumentException("Input length was greater than allowed in a UInt16");
             }
-            byte binarySize = (byte)binaryData.Length;
+            UInt16 binarySize = (UInt16)binaryData.Length;
             if (binarySize == 0) { return 0; }
             var oldSize = _data.Length;
             var newSize = _data.Length + binarySize;
@@ -107,7 +107,7 @@ namespace PLCompliant.STEP_7
             return binaryData.Length;
         }
         /// <inheritdoc/>
-        public T GetData<T>(int index, byte type) where T : unmanaged, IEndianConvertable
+        public T GetData<T>(int index, byte type = 0) where T : unmanaged, IEndianConvertable
         {
             T outVar = MemoryMarshal.AsRef<T>(_data.AsSpan(index));
             outVar.FromNetworkToHost();
