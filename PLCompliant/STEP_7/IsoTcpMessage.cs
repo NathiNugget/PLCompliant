@@ -10,7 +10,7 @@ namespace PLCompliant.STEP_7
     /// <summary>
     /// This is the main container class for a whole packet to communicate with STEP7-PLCs
     /// </summary>
-    public class IsoTcpMessage : IProtocolMessage, INetworkMessageDeserializable
+    public class IsoTcpMessage : IProtocolMessage, INetworkMessageDeserializable, IEquatable<IsoTcpMessage>
     {
 
         const int SOCKETTIMEOUT = 3000;
@@ -201,7 +201,7 @@ namespace PLCompliant.STEP_7
             }
             else
             {
-                if (_step7 == null)
+                if (_step7 is null)
                 {
                     _step7 = new();
                     dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
@@ -225,7 +225,7 @@ namespace PLCompliant.STEP_7
             else
             {
                 
-                if (_step7 == null)
+                if (_step7 is null)
                 {
                     _step7 = new();
                     dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
@@ -247,7 +247,7 @@ namespace PLCompliant.STEP_7
             }
             else
             {
-                if (_step7 == null)
+                if (_step7 is null)
                 {
                     _step7 = new();
                     dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
@@ -262,10 +262,6 @@ namespace PLCompliant.STEP_7
 
         public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
-            if (binaryData.Length > byte.MaxValue)
-            {
-                throw new ArgumentException("Input length was greater than allowed in a byte");
-            }
             int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.COTPData))
@@ -274,7 +270,7 @@ namespace PLCompliant.STEP_7
             }
             else
             {
-                if (_step7 == null)
+                if (_step7 is null)
                 {
                     _step7 = new();
                     dataAdded += _step7.Size; // Some things like header is auto initialized with the message, so we must include it
@@ -282,7 +278,7 @@ namespace PLCompliant.STEP_7
                 }
                 dataAdded += _step7.AddData(binaryData, type);               
             }
-            _tpkt.Length += (ushort)binaryData.Length;
+            _tpkt.Length += (ushort)dataAdded;
             return dataAdded;
         }
 
@@ -299,6 +295,55 @@ namespace PLCompliant.STEP_7
             }
         }
 
-       
+
+
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as IsoTcpMessage);
+        }
+        public bool Equals(IsoTcpMessage? obj)
+        {
+            bool bothSTEP7Null = false;
+            if (obj is null) return false;
+            if (_step7 is null || obj._step7 is null)
+            {
+                if (_step7 is null && obj._step7 is null)
+                {
+                    bothSTEP7Null = true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            return _cotp.Equals(obj._cotp) && (bothSTEP7Null || _step7.Equals(obj._step7));
+
+        }
+
+        public static bool operator ==(IsoTcpMessage left, IsoTcpMessage right)
+        {
+            return object.Equals(left, right);
+
+        }
+        public static bool operator !=(IsoTcpMessage left, IsoTcpMessage right) { return !(left == right); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }

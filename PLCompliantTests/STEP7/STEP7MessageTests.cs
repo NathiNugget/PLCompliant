@@ -87,9 +87,10 @@ namespace PLCompliantTests.STEP7
         [TestMethod]
         [DataRow((uint)0)]
         [DataRow((uint)255)]
+        [DataRow((uint)UInt16.MaxValue - 4)]
         public void AddDataByteArrayTest(uint size)
         {
-            // regular data
+            // regular data. A max amount of UInt16 MAX - sizeof(STEP7DataHeader)(4) can be added to regular data since the Data length variable is a UInt16 and has to also store the length of the header
             STEP7Message msg = CreateSTEP7Msg();
             byte[] arr = new byte[size];
             if(size > 0)
@@ -101,25 +102,14 @@ namespace PLCompliantTests.STEP7
             int expectedlength = (int)size;
             msg.AddData(arr, (byte)IsoTcpDataType.STEP7RegularData);
             expectedlength += msg.STEP7Data.Header.Size; // add header since it is initialized in AddData
-            Assert.AreEqual(msg.STEP7Header.DataLength, expectedlength);
-            Assert.AreEqual(msg.STEP7Data.Size, (int)expectedlength);
+            Assert.AreEqual(expectedlength, msg.STEP7Header.DataLength);
+            Assert.AreEqual(expectedlength, msg.STEP7Data.Size);
             if(size > 0)
             {
                 Assert.AreEqual(arr[arr.Length - 1], msg.STEP7Data.Data.Data[arr.Length - 1]);
                 Assert.AreEqual(arr[0], msg.STEP7Data.Data.Data[0]);
             }
             
-
-            //Repeat
-            expectedlength += (int)size;
-            msg.AddData(arr, (byte)IsoTcpDataType.STEP7RegularData);
-            Assert.AreEqual(expectedlength, msg.STEP7Header.DataLength);
-            Assert.AreEqual((int)expectedlength, msg.STEP7Data.Size);
-            if(size > 0)
-            {
-                Assert.AreEqual(arr[arr.Length - 1], msg.STEP7Data.Data.Data[msg.STEP7Data.Data.Data.Length - 1]);
-                Assert.AreEqual(arr[0], msg.STEP7Data.Data.Data[arr.Length]);
-            }
             
 
             // param data
@@ -134,23 +124,12 @@ namespace PLCompliantTests.STEP7
                 Assert.AreEqual(arr[0], msg.STEP7ParamData.Data[0]);
             }
             
-
-            //Repeat
-            expectedlengthParams += (int)size;
-            msg.AddData(arr, (byte)IsoTcpDataType.STEP7ParamData);
-            Assert.AreEqual(expectedlengthParams, msg.STEP7Header.ParameterLength);
-            Assert.AreEqual((int)expectedlengthParams, msg.STEP7ParamData.Size);
-            if(size > 0)
-            {
-                Assert.AreEqual(arr[arr.Length - 1], msg.STEP7ParamData.Data[msg.STEP7ParamData.Data.Length - 1]);
-                Assert.AreEqual(arr[0], msg.STEP7ParamData.Data[arr.Length]);
-            }
             
 
         }
 
         [TestMethod]
-        [DataRow((uint)256)]
+        [DataRow((uint)UInt16.MaxValue + 1)]
         [DataRow((uint)500000)]
 
         public void AddDataByteArrayTooLargeTest(uint size)

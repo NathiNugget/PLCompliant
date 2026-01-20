@@ -206,10 +206,6 @@ namespace PLCompliant.STEP_7
         /// <inheritdoc/>
         public int AddData(ReadOnlySpan<byte> binaryData, byte type)
         {
-            if (binaryData.Length > byte.MaxValue)
-            {
-                throw new ArgumentException("Input length was greater than allowed in a byte");
-            }
             int dataAdded = 0;
             var flags = (IsoTcpDataType)type;
             if (flags.HasFlag(IsoTcpDataType.STEP7ParamData))

@@ -15,8 +15,8 @@ namespace PLCompliantTests.STEP7
     {
 
         [TestMethod()]
-        [DataRow(UInt16.MaxValue)]
-        [DataRow((UInt16)0x54)]
+        [DataRow(UInt16.MaxValue, byte.MaxValue, (byte)1)]
+        [DataRow((UInt16)0x54, (byte)245, (byte)123)]
         [DataRow(UInt16.MinValue, (byte)12, byte.MaxValue)]
         [DataRow((UInt16)0x1, byte.MaxValue, byte.MinValue)]
 
@@ -34,9 +34,9 @@ namespace PLCompliantTests.STEP7
         }
 
         [TestMethod]
-        public void COTPHeaderSize()
+        public void STEP7DataHeaderSize()
         {
-            COTPHeader msg = new();
+            STEP7DataHeader msg = new();
             int expectedsize = Marshal.SizeOf(msg);
             Assert.AreEqual(expectedsize, msg.Size);
 
