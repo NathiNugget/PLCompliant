@@ -232,7 +232,7 @@ namespace PLCompliant.Scanning
                     {
                         _responsivePLCs.Add(ip);
                         ModBusMessageFactory factory = new ModBusMessageFactory();
-                        ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
+                        ModBusMessage msg = factory.CreateReadDeviceInformation(0, 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
                         ModBusMessage response = null;
                         // new try catch cause there isn't supposed to be a socketexception here. Log it.
                         try

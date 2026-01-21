@@ -109,7 +109,7 @@ namespace PLCompliant.Modbus.Tests
             expected.AddData(productid);
             expected.AddData(0x0);
 
-            ModBusMessage actual = factory.CreateReadDeviceInformation(new(), productid);
+            ModBusMessage actual = factory.CreateReadDeviceInformation(0, productid);
             Assert.AreEqual(expected, actual);
 
 
