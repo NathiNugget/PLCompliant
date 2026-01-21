@@ -1,4 +1,7 @@
 ﻿using PLCompliant.Interface;
+using PLCompliant.Scanning;
+using System.IO;
+using System.Linq.Expressions;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
@@ -7,7 +10,7 @@ namespace PLCompliant.Modbus
     /// <summary>
     /// This class represents a full Modbus packet wrapped in TCP, so it has to contains all the header fields as well as the data that follows
     /// </summary>
-    public class ModBusMessage : IProtocolMessage, INetworkMessageDeserializable
+    public class ModBusMessage : IProtocolTopMessage
     {
         const int SOCKETTIMEOUT = 3000;
         /// <summary>
@@ -16,48 +19,55 @@ namespace PLCompliant.Modbus
         /// <param name="messageToSend">The modbus message to send</param>
         /// <param name="stream">The stream to send it to</param>
         /// <returns>The response as a ModBusMessage</returns>
-        public static ModBusMessage SendReceive(ModBusMessage messageToSend, NetworkStream stream)
+        public static void SendReceive(ModBusMessage messageToSend, SocketReadWriteWrapper socket, Action<ModBusMessage> func)
         {
-            stream.ReadTimeout = SOCKETTIMEOUT;
-            byte[] buffer = new byte[messageToSend.Size];
-            messageToSend.Serialize(buffer);
-            stream.Write(buffer, 0, buffer.Length);
-            byte[] databuffer = new byte[1024]; //Default size, actual size is decided by header. 
-            int readbytes = 0;
-            byte[] headerbuffer = new byte[messageToSend.Header.Size];
-            bool readingHeader = true;
-            ModBusMessage response = new(new ModBusHeader(), new ModBusData());
-
-            while (true)
+            if(socket.ShouldSend)
             {
-                if (readingHeader)
+                Span<byte> spanBuffer = socket.SendBuffer.AsSpan(socket.CurrentMsgBytesSend, messageToSend.Size - socket.CurrentMsgBytesSend);
+                messageToSend.Serialize(spanBuffer);
+                socket.CurrentMsgBytesSend += socket.Socket.Send(spanBuffer);
+                if(socket.CurrentMsgBytesSend >= messageToSend.Size)
                 {
-                    int dataleft = messageToSend.Header.Size - readbytes;
-                    int index = messageToSend.Header.Size - dataleft;
-                    readbytes += stream.Read(headerbuffer, index, dataleft);
-                    if (readbytes == response.Header.Size)
+                    socket.CurrentMsgBytesSend = 0;
+                    socket.ShouldReceive = true;
+                    socket.ShouldSend = false;
+                    socket.ReceivingHeader = true;
+                }
+            }
+            else if(socket.ShouldReceive)
+            {
+                ModBusMessage recvMsgBuffer = (ModBusMessage)socket.ReceiveMessage;
+                if(socket.ReceivingHeader)
+                {
+                    Span<byte> headerRecvBuffer = socket.ReceiveBuffer.AsSpan(socket.CurrentMsgBytesReceived, messageToSend.Header.Size - socket.CurrentMsgBytesReceived);
+                    socket.CurrentMsgBytesReceived += socket.Socket.Receive(headerRecvBuffer);
+                    if(socket.CurrentMsgBytesReceived >= messageToSend.Header.Size)
                     {
-                        response.DeserializeHeader(headerbuffer);
-                        readingHeader = false;
-                        readbytes = 0;
-                        Array.Resize(ref databuffer, response.Header.length - 1); //Minus 1 because unit id is included. Standard Modbus stuff :/
+                        socket.CurrentMsgBytesReceived = 0;
+                        socket.ReceivingHeader = false;
+                        recvMsgBuffer.DeserializeHeader(headerRecvBuffer);
                     }
 
                 }
                 else
                 {
-
-                    int dataleft = (response.Header.length - 1) - readbytes;
-                    int index = (response.Header.length - 1) - dataleft;
-                    readbytes += stream.Read(databuffer, index, dataleft);
-                    if (readbytes == response.Header.length - 1)
+                    int dataSize = recvMsgBuffer.Header.length - 1; // - 1 to exclude UnidID which is part of the header
+                    Span<byte> dataRecvBuffer = socket.ReceiveBuffer.AsSpan(socket.CurrentMsgBytesReceived, dataSize - socket.CurrentMsgBytesReceived);
+                    socket.CurrentMsgBytesReceived += socket.Socket.Receive(dataRecvBuffer);
+                    if (socket.CurrentMsgBytesReceived >= dataSize)
                     {
-                        response.DeserializeData(databuffer);
-                        break;
+                        socket.CurrentMsgBytesReceived = 0;
+                        socket.ReceivingHeader = true;
+                        socket.ShouldReceive = false;
+                        socket.ShouldSend = true;
+                        recvMsgBuffer.DeserializeData(dataRecvBuffer);
+                        func(recvMsgBuffer);
+                        recvMsgBuffer = new(); // reset message buffer
                     }
                 }
+                
             }
-            return response;
+            
 
         }
 

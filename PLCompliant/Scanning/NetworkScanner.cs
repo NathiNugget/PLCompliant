@@ -1,6 +1,7 @@
 ﻿using PLCompliant.Enums;
 using PLCompliant.EventArguments;
 using PLCompliant.Events;
+using PLCompliant.Interface;
 using PLCompliant.Logging;
 using PLCompliant.Modbus;
 using PLCompliant.Response;
@@ -8,12 +9,39 @@ using PLCompliant.STEP_7;
 using PLCompliant.Utilities;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
 namespace PLCompliant.Scanning
 {
+    public class SocketAndIP
+    {
+        public Socket Socket { get; set; }
+        public IPAddress Address { get; set; }
+    }
+    public class SocketReadWriteWrapper
+    {
+        public SocketReadWriteWrapper(Socket socket, IPAddress ip, IProtocolTopMessage messageBuffer)
+        {
+            Socket = socket;
+            IP = ip;
+            ReceiveMessage = messageBuffer;
+        }
+
+        public Socket Socket { get; set; }
+        public bool ShouldSend { get; set; } = true;
+        public bool ShouldReceive { get; set; } = false;
+        public int CurrentMsgBytesSend { get; set; } = 0;
+        public int CurrentMsgBytesReceived { get; set; } = 0;
+        public bool ReceivingHeader { get; set; } = true;
+        public IProtocolTopMessage ReceiveMessage { get; set; }
+        public byte[] ReceiveBuffer { get; set; } = new byte[16384];
+        public byte[] SendBuffer { get; set; } = new byte[16384];
+        public IPAddress IP { get; set; }
+
+    }
     /// <summary>
     /// Class responsible for scanning IPs and checking if those IPs are open to the specified protocol
     /// </summary>
@@ -118,76 +146,59 @@ namespace PLCompliant.Scanning
                     List<Thread> threads = new List<Thread>();
                     int ipspinged = 1;
 
-                    foreach (var chunk in _scanRange.Chunk(1000)) // 1000 seems best
+                    List<SocketAndIP> connectingSockets = new();
+                    List<SocketReadWriteWrapper> connectedSockets = new();
+
+
+                    foreach (IPAddress ip in _scanRange)
                     {
-                        if (_abortScan)
+                        Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                        socket.Blocking = false;
+                        try
                         {
-                            return ScanResult.Aborted;
+                            socket.Connect(ip, 502);
                         }
-                        foreach (IPAddress ip in chunk)
+                        catch (SocketException e)
                         {
-                            threads.Add(ThreadUtilities.CreateBackgroundThread(() =>
+                            // 10035 == WSAEWOULDBLOCK
+                            if (e.NativeErrorCode.Equals(10035))
                             {
-                                if (_abortScan)
-                                {
-                                    return;
-                                }
-                                try
-                                {
-                                    using (Ping ping = new Ping())
-                                    {
-                                        PingReply reply = ping.Send(ip, PINGTIMEOUT);
-                                        if (reply.Status == IPStatus.Success)
-                                        {
-
-                                            switch (protocol)
-                                            {
-                                                case PLCProtocolType.Modbus:
-                                                    ReadDeviceInformationData? response = StartModbusIdentification(ip);
-                                                    if (response != null)
-                                                    {
-                                                        response.IPAddr = ip;
-                                                        _responses.Add(response);
-
-                                                    }
-                                                    break;
-                                                case PLCProtocolType.Step_7:
-                                                    ReadSZLResponseData? step7Response = StartSTEP7Identification(ip);
-                                                    if (step7Response != null)
-                                                    {
-                                                        step7Response.IPAddr = ip;
-                                                        _responses.Add(step7Response);
-
-                                                    }
-                                                    break;
-
-                                                default:
-                                                    break;
-
-                                            }
-                                        }
-                                    }
-                                }
-                                catch (PingException) { }
-                                catch (IOException) { }
-                                Interlocked.Increment(ref ipspinged);
-                                if (!_abortScan) // To prevent erraneous update of state label in UI. 
-                                {
-                                    UIEventQueue.Instance.Push(new UIViableIPScanCompleted(new ViableIPsScanCompletedArgs((int)_scanRange.Count, ipspinged)));
-
-                                }
-                            }));
-
+                                connectingSockets.Add(new() { Socket = socket, Address = ip });
+                            }
+                            continue;
                         }
-                        foreach (Thread t in threads)
+                        connectingSockets.Add(new() { Socket = socket, Address = ip });
+                    }
+                    DateTime connectionTimeout = DateTime.Now + TimeSpan.FromSeconds(2);
+                    while (true)
+                    {
+                        DateTime timeOut = DateTime.Now;
+                        // Timeout of 2 seconds to connect
+                        if (connectionTimeout > DateTime.Now)
                         {
-                            t.Start();
+                            for (int i = 0; i < connectingSockets.Count; i++)
+                            {
+                                if (connectingSockets[i] is null)
+                                {
+                                    continue;
+                                }
+                                bool connected = connectingSockets[i].Socket.Poll(1, SelectMode.SelectWrite);
+                                if (connected)
+                                {
+                                    connectedSockets.Add(new(connectingSockets[i].Socket, connectingSockets[i].Address, new ModBusMessage()));
+                                    connectingSockets[i] = null;
+                                }
+                            }
                         }
-                        threads.ForEach(t => t.Join());
-                        threads.Clear();
-                        if (_abortScan)
+                        // start doing stuff with connected sockets    
+                        for (int i = 0; i < connectedSockets.Count; i++)
                         {
-                            return ScanResult.Aborted;
+                            var output = StartModbusIdentification(connectedSockets[i]);
+                            if(output is not null)
+                            {
+                                _responses.Add(output);
+                            }
+                                
                         }
                     }
                 }
@@ -220,52 +231,52 @@ namespace PLCompliant.Scanning
             }
             return ScanResult.Finished;
         }
-        private ReadDeviceInformationData? StartModbusIdentification(IPAddress ip)
+        private ReadDeviceInformationData? StartModbusIdentification(SocketReadWriteWrapper socket)
         {
             try
             {
 
-                using (TcpClient client = new TcpClient(ip.ToString(), ModBusMessage.MODBUS_TCP_PORT))
-                using (NetworkStream stream = client.GetStream())
+
+
+                ModBusMessageFactory factory = new ModBusMessageFactory();
+                ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
+                ReadDeviceInformationData? output = null;
+                // new try catch cause there isn't supposed to be a socketexception here. Log it.
+                try
                 {
-                    if (client.Connected)
+                    ModBusMessage.SendReceive(msg, socket, (response) =>
                     {
-                        _responsivePLCs.Add(ip);
-                        ModBusMessageFactory factory = new ModBusMessageFactory();
-                        ModBusMessage msg = factory.CreateReadDeviceInformation(new(), 0x2); //"Product ID" for some reason in the specification has implications as to how many fields are read about the device information
-                        ModBusMessage response = null;
-                        // new try catch cause there isn't supposed to be a socketexception here. Log it.
-                        try
-                        {
-                            response = ModBusMessage.SendReceive(msg, stream);
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Instance.LogMessage($"Netværksfejl til Modbus PLC med IP-Addresse {client.Client.RemoteEndPoint?.ToString()}: {ex.Message}", TraceEventType.Error);
-                            return null;
-                        }
                         bool noError = ModBusResponseParsing.TryHandleReponseError(response, out byte errCode);
                         if (!noError)
                         {
-                            Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, fejlkode {errCode}: {EnumToString.ModBusErrorCode(errCode)}", TraceEventType.Error);
-                            return null;
+                            Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {socket.IP}, fejlkode {errCode}: {EnumToString.ModBusErrorCode(errCode)}", TraceEventType.Error);
+                            return;
                         }
                         else
                         {
                             if (response.Data.FunctionCode == (byte)ModBusCommandType.read_device_information)
                             {
-                                ReadDeviceInformationData output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, (client.Client.RemoteEndPoint as IPEndPoint)?.Address);
-                                return output;
+                                output = ModBusResponseParsing.ParseReadDeviceInformationResponse(response, socket.IP);
+                                return;
                             }
                             else
                             {
-                                Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, PLC returnerede et ukendt funktionskode: {response.Data.FunctionCode}", TraceEventType.Error);
-                                return null;
+                                Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {socket.IP}, PLC returnerede et ukendt funktionskode: {response.Data.FunctionCode}", TraceEventType.Error);
+                                output = null;
+                                return;
                             }
                         }
-                    }
-                    else return null;
+                    });
+                    return output;
                 }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogMessage($"Netværksfejl til Modbus PLC med IP-Addresse {socket.IP}", TraceEventType.Error);
+                    return null;
+                }
+
+
+
             }
             catch (SocketException)
             {
@@ -386,4 +397,5 @@ namespace PLCompliant.Scanning
 
     }
 }
+
 
