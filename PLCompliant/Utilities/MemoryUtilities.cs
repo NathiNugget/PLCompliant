@@ -15,7 +15,7 @@ namespace PLCompliant.Utilities
             var leftSpan = MemoryMarshal.CreateReadOnlySpan(ref left, 1);
             var rightSpan = MemoryMarshal.CreateReadOnlySpan(ref right, 1);
             ReadOnlySpan<byte> leftBytesSpan = MemoryMarshal.Cast<T, byte>(leftSpan);
-            ReadOnlySpan<byte> rightBytesSpan = MemoryMarshal.Cast<T, byte>(leftSpan);
+            ReadOnlySpan<byte> rightBytesSpan = MemoryMarshal.Cast<T, byte>(rightSpan);
             return rightBytesSpan.SequenceEqual(leftBytesSpan);
         }
     }
