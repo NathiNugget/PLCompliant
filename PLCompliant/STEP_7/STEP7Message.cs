@@ -242,6 +242,17 @@ namespace PLCompliant.STEP_7
                 return _step7Data.GetData<T>(index, type);
             }
         }
+
+
+        /// <summary>
+        /// Sets the pdu reference counter to a new value in the connected header
+        /// </summary>
+        /// <param name="newCount">The new count</param>
+        public void SetPduReferenceCounter(ushort newCount)
+        {
+            _step7Header.PduReference = newCount;
+        }
+
         public override bool Equals(object? obj)
         {
             return Equals(obj as STEP7Message);

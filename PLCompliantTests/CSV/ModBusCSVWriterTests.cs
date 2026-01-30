@@ -48,5 +48,14 @@ public class ModBusCSVWriterTests
         expected.AppendLine($"{ip_2};{obj2_1};{obj2_2};{obj2_3}");
         expected.AppendLine($"{ip_1};{obj1_1};{obj1_2};{obj1_3}");
         Assert.AreEqual(expected.ToString(), csv);
+
+        // test file writing
+        var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        string fileName = writer.GenerateCSVFile(path, csv);
+
+        string actual = File.ReadAllText($"{path}\\{fileName}");
+        File.Delete($"{path}\\{fileName}");
+        Assert.AreEqual(expected.ToString(), actual);
     }
+   
 }

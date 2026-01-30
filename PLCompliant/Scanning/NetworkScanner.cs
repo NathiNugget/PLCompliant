@@ -299,11 +299,10 @@ namespace PLCompliant.Scanning
         }
         private ReadSZLResponseData? StartSTEP7Identification(IPAddress ip)
         {
-            List<IsoTcpMessage> messages = new List<IsoTcpMessage>();
-
+            ushort pduReferenceCounter = 0;
             IsoTcpMessageFactory factory = new IsoTcpMessageFactory();
-            messages.Add(factory.CreateCRConnectRequestOne());
-            messages.Add(factory.CreateCRConnectRequestTwo());
+            List<IsoTcpMessage> messages = new() { factory.CreateCRConnectRequestOne(), factory.CreateCRConnectRequestTwo(), factory.CreateCRConnectRequestThree(), factory.CreateCRConnectRequestFour() };
+
             TcpClient client = null;
             NetworkStream stream = null;
             bool connected = false;
@@ -323,6 +322,8 @@ namespace PLCompliant.Scanning
                 }
                 try
                 {
+                    connectionMsg.SetPduReferenceCounter(pduReferenceCounter);
+                    pduReferenceCounter++;
                     var responseMsg = TryCOTPConnect(connectionMsg, ip, stream);
                     if (responseMsg != null)
                     {
@@ -350,7 +351,8 @@ namespace PLCompliant.Scanning
                 IsoTcpMessage ReadSZLResponse = null;
                 try
                 {
-
+                    setupCommMsg.SetPduReferenceCounter(pduReferenceCounter);
+                    pduReferenceCounter++;
                     setupCommResponse = IsoTcpMessage.SendReceive(setupCommMsg, stream);
                     STEP7ErrorInfo err = new STEP7ErrorInfo();
                     bool isError = STEP7ResponseParsing.TryHandleReponseError(setupCommResponse.STEP7, out err);
@@ -370,6 +372,8 @@ namespace PLCompliant.Scanning
                 try
                 {
                     IsoTcpMessage ReadSZLDataMsg = factory.CreateReadSZL();
+                    ReadSZLDataMsg.SetPduReferenceCounter(pduReferenceCounter);
+                    pduReferenceCounter++;
                     ReadSZLResponse = IsoTcpMessage.SendReceive(ReadSZLDataMsg, stream);
                 }
                 catch (Exception ex)

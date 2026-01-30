@@ -1,9 +1,6 @@
 ﻿using PLCompliant.Enums;
 using PLCompliant.Interface;
 using System.Net.Sockets;
-using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PLCompliant.STEP_7
 {
@@ -294,10 +291,14 @@ namespace PLCompliant.STEP_7
                 return _step7.GetData<T>(index, type);
             }
         }
-
-
-
-
+        /// <summary>
+        /// Sets the pdu reference counter to a new value in the STEP7 segment, if such a segment exists
+        /// </summary>
+        /// <param name="newCount">The new count</param>
+        public void SetPduReferenceCounter(ushort newCount)
+        {
+            _step7?.SetPduReferenceCounter(newCount);
+        }
         public override bool Equals(object? obj)
         {
             return Equals(obj as IsoTcpMessage);

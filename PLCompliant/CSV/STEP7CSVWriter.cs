@@ -17,7 +17,7 @@ namespace PLCompliant.CSV
         /// <summary>
         /// Headers to be inserted at the top of the generated CSV file
         /// </summary>
-        static readonly string[] HeaderNames = {
+        public static readonly string[] HeaderNames = {
            "IP-Address",
             "OrderNumber" ,
             "FirmwareVersion"
