@@ -4,7 +4,7 @@ using PLCompliant.Utilities;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
-namespace PLCompliantTests;
+namespace PLCompliantTests.Scanning;
 
 [TestClass]
 [ExcludeFromCodeCoverage]

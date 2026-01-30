@@ -74,6 +74,7 @@ namespace PLCompliant.Scanning
         /// </summary>
         public void Reset()
         {
+            _responses.Clear();
             _responsivePLCs.Clear();
             _scanRange.Reset();
         }
@@ -134,41 +135,35 @@ namespace PLCompliant.Scanning
                                 }
                                 try
                                 {
-                                    using (Ping ping = new Ping())
+                                    
+                                    switch (protocol)
                                     {
-                                        PingReply reply = ping.Send(ip, PINGTIMEOUT);
-                                        if (reply.Status == IPStatus.Success)
-                                        {
-
-                                            switch (protocol)
+                                        case PLCProtocolType.Modbus:
+                                            ReadDeviceInformationData? response = StartModbusIdentification(ip);
+                                            if (response != null)
                                             {
-                                                case PLCProtocolType.Modbus:
-                                                    ReadDeviceInformationData? response = StartModbusIdentification(ip);
-                                                    if (response != null)
-                                                    {
-                                                        response.IPAddr = ip;
-                                                        _responses.Add(response);
-
-                                                    }
-                                                    break;
-                                                case PLCProtocolType.Step_7:
-                                                    ReadSZLResponseData? step7Response = StartSTEP7Identification(ip);
-                                                    if (step7Response != null)
-                                                    {
-                                                        step7Response.IPAddr = ip;
-                                                        _responses.Add(step7Response);
-
-                                                    }
-                                                    break;
-
-                                                default:
-                                                    break;
+                                                response.IPAddr = ip;
+                                                _responses.Add(response);
 
                                             }
-                                        }
+                                            break;
+                                        case PLCProtocolType.Step_7:
+                                            ReadSZLResponseData? step7Response = StartSTEP7Identification(ip);
+                                            if (step7Response != null)
+                                            {
+                                                step7Response.IPAddr = ip;
+                                                _responses.Add(step7Response);
+
+                                            }
+                                            break;
+
+                                        default:
+                                            break;
+
                                     }
+                                        
+                                    
                                 }
-                                catch (PingException) { }
                                 catch (IOException) { }
                                 Interlocked.Increment(ref ipspinged);
                                 if (!_abortScan) // To prevent erraneous update of state label in UI. 
@@ -224,8 +219,15 @@ namespace PLCompliant.Scanning
         {
             try
             {
-
-                using (TcpClient client = new TcpClient(ip.ToString(), ModBusMessage.MODBUS_TCP_PORT))
+                TcpClient client = new();
+                bool connected = client.ConnectAsync(ip.ToString(), ModBusMessage.MODBUS_TCP_PORT).Wait(200);
+                if(!connected)
+                {
+                    Logger.Instance.LogMessage($"Forsøg på at forbinde til IP {ip} på Modbus timed out", TraceEventType.Verbose);
+                    client.Dispose();
+                    return null;
+                }
+                using (client)
                 using (NetworkStream stream = client.GetStream())
                 {
                     if (client.Connected)
@@ -275,6 +277,10 @@ namespace PLCompliant.Scanning
             {
                 return null;
             }
+            catch (AggregateException)
+            {
+                return null;
+            }
         }
 
 
@@ -305,14 +311,22 @@ namespace PLCompliant.Scanning
 
             TcpClient client = null;
             NetworkStream stream = null;
-            bool connected = false;
+            bool ipAdded = false;
             foreach (var connectionMsg in messages)
             {
                 try
                 {
-                    client = new TcpClient(ip.ToString(), STEP7Message.STEP7_TCP_PORT);
+                    client = new();
+                    bool connected = client.ConnectAsync(ip.ToString(), STEP7Message.STEP7_TCP_PORT).Wait(200);
+                    if (!connected)
+                    {
+                        Logger.Instance.LogMessage($"Forsøg på at forbinde til IP {ip} på STEP7 timed out", TraceEventType.Verbose);
+                        stream?.Dispose();
+                        client?.Close();
+                        return null;
+                    }
                     stream = client.GetStream();
-                    TryAddPLC(ip, ref connected);
+                    TryAddPLC(ip, ref ipAdded);
                 }
                 catch
                 {

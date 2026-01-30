@@ -5,7 +5,7 @@ using PLCompliant.Scanning;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
-namespace PLCompliantTests;
+namespace PLCompliantTests.Scanning;
 [ExcludeFromCodeCoverage]
 [TestClass]
 public class NetworkScannerTests
