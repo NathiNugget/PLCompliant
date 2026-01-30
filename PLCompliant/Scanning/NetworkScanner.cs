@@ -193,6 +193,7 @@ namespace PLCompliant.Scanning
                 }
                 else
                 {
+                    // TODO: Replace with log_scan_already_in_progress
                     Logger.Instance.LogMessage("Et scan prøvede at blive startet imens et scan allerede var i gang", TraceEventType.Warning);
                     return ScanResult.LockTaken;
                 }
@@ -204,6 +205,7 @@ namespace PLCompliant.Scanning
                 {
                     if (_responsivePLCs.IsEmpty)
                     {
+                        // TODO: Replace with log_no_plcs_found_on_protocol
                         UIEventQueue.Instance.Push(new PopupWindowEvent(new PopupWindowArgs($"Ingen PLC Addresser fundet på {EnumToString.ProtocolType(protocol)} protokol!", PopupWindowType.WarningWindow)));
                         Logger.Instance.LogMessage($"Ingen PLC IP-Addresser fundet i scan på protocol: {EnumToString.ProtocolType(protocol)}", TraceEventType.Warning);
                     }
@@ -211,6 +213,7 @@ namespace PLCompliant.Scanning
                     {
                         foreach (IPAddress ip in _responsivePLCs)
                         {
+                            // TODO: Replace with log_ip_address_found_in_scan
                             Logger.Instance.LogMessage($"PLC IP-Addresse fundet i scan: {ip.ToString()} til protocol: {EnumToString.ProtocolType(protocol)}", TraceEventType.Information);
                         }
                     }
@@ -241,13 +244,15 @@ namespace PLCompliant.Scanning
                         }
                         catch (Exception ex)
                         {
+                            // TODO: Replace with log_network_exception_while_connecting_to_modbus_with_ip_address
                             Logger.Instance.LogMessage($"Netværksfejl til Modbus PLC med IP-Addresse {client.Client.RemoteEndPoint?.ToString()}: {ex.Message}", TraceEventType.Error);
                             return null;
                         }
                         bool noError = ModBusResponseParsing.TryHandleReponseError(response, out byte errCode);
                         if (!noError)
                         {
-                            Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, fejlkode {errCode}: {EnumToString.ModBusErrorCode(errCode)}", TraceEventType.Error);
+                            // TODO: Replace with log_modbus_response_contains_error_code_on_ip as well log_ip_not_found and log_error_code_word
+                            Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {client?.Client?.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, fejlkode {errCode}: {EnumToString.ModBusErrorCode(errCode)}", TraceEventType.Error);
                             return null;
                         }
                         else
@@ -259,6 +264,7 @@ namespace PLCompliant.Scanning
                             }
                             else
                             {
+                                // TODO: Replace with log_error_on_modbus_with_ip and log_ip_not_found and log_unknown_function_code
                                 Logger.Instance.LogMessage($"Fejl ved forbindelse til Modbus PLC på IP: {client.Client.RemoteEndPoint?.ToString() ?? "IP ikke fundet"}, PLC returnerede et ukendt funktionskode: {response.Data.FunctionCode}", TraceEventType.Error);
                                 return null;
                             }
@@ -331,6 +337,7 @@ namespace PLCompliant.Scanning
                 }
                 catch (Exception ex)
                 {
+                    // TODO: Replace with log_COTP_exception_on_IP
                     Logger.Instance.LogMessage($"Fejl ved COTP-forbindelse til STEP7-PLC: {ex.Message} på IP: {ip}", TraceEventType.Warning);
                     stream?.Dispose();
                     client?.Close();
@@ -339,6 +346,7 @@ namespace PLCompliant.Scanning
             // If no COTP connections was accepted
             if (client == null || stream == null)
             {
+                // TODO: Replace with log_no_COTP_worked_on_ip and skipping_word
                 Logger.Instance.LogMessage($"Ingen COTP forbindelser virkede på IP {ip}, skipping", TraceEventType.Error);
                 return null;
             }
@@ -356,6 +364,7 @@ namespace PLCompliant.Scanning
                     bool isError = STEP7ResponseParsing.TryHandleReponseError(setupCommResponse.STEP7, out err);
                     if (isError)
                     {
+                        // TODO: Replace with log_failure_while_setting_up and error_class_word and error_code_word
                         Logger.Instance.LogMessage($"Fejl ved i svar fra Setup Communication. Fejlklasse: {err.errClass}, Fejlkode: {err.errValue}", TraceEventType.Error);
                         return null;
                     }
@@ -363,7 +372,7 @@ namespace PLCompliant.Scanning
                 }
                 catch (Exception ex)
                 {
-
+                    // TODO: Replace with log_network_failure_while_setting_up_step7_on_IP
                     Logger.Instance.LogMessage($"Netværksfejl ved Setup Communication i forbindelse til STEP7-PLC: {ex.Message} på IP: {ip}", TraceEventType.Error);
                     return null;
                 }
@@ -374,6 +383,7 @@ namespace PLCompliant.Scanning
                 }
                 catch (Exception ex)
                 {
+                    // TODO: Replace with log_reading_szl_failure_on_ip
                     Logger.Instance.LogMessage($"Fejl ved aflæsning af SZL data i forbindelse til STEP7-PLC: {ex.Message} på IP: {ip}", TraceEventType.Error);
                     return null;
                 }

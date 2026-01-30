@@ -27,7 +27,6 @@ namespace PLCompliant.Modbus
                 return true;
             }
             errCode = msg.Data.Payload[1];
-            //TODO: Write into log perhaps or send an event to UI
             return false;
         }
 

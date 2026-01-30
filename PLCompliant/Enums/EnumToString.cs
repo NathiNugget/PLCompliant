@@ -41,7 +41,7 @@ namespace PLCompliant.Enums
                 case PLCProtocolType.Step_7:
                     return "STEP-7";
                 default:
-                    return "??";
+                    return "??"; // TODO: Replace with unknown_word
             }
         }
 

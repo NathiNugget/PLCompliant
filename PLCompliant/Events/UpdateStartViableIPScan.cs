@@ -36,7 +36,7 @@ namespace PLCompliant.Events
 
             Thread scanThread = ThreadUtilities.CreateBackgroundThread(() =>
             {
-                Logger.Instance.LogMessage($"PLC scan startet på protokol {EnumToString.ProtocolType(args.Protocol)}", TraceEventType.Information);
+                Logger.Instance.LogMessage($"PLC scan startet på protokol: {EnumToString.ProtocolType(args.Protocol)}", TraceEventType.Information); // TODO: Replace with log_start_scan_on_protocol_text
                 StartViableIPScanBeginCallback callback = new StartViableIPScanBeginCallback(null!);
                 UIEventQueue.Instance.Push(callback);
                 var scanResult = context.scanner.FindIPs(args.Protocol);

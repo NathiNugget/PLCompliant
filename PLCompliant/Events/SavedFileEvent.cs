@@ -30,7 +30,7 @@ namespace PLCompliant.Events
             var validatedTypes = EventUtilities.ValidateContextAndArgs<PLCompliantUI, SavedFileArgs, Form, RaisedEventArgs>(context, Argument);
             PLCompliantUI form = validatedTypes.Item1;
             SavedFileArgs args = validatedTypes.Item2;
-            form.CurrentStateLabel.Text = $"Resultat gemt i {args.Path}, fil navngivet {args.Filename}";
+            form.CurrentStateLabel.Text = $"Resultat gemt i {args.Path}, fil navngivet {args.Filename}"; // Replace with result_saved_at_and_file_named. Remember to use interpretation symbols
 
         }
         #endregion

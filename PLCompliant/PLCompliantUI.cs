@@ -151,6 +151,7 @@ namespace PLCompliant
             }
         }
 
+        // TODO: Replace with illegal_ip_address_tooltip_header and illegal_ip_address_tooltip_text
         private void ShowWarning(IWin32Window sender, string title = "Ugyldig IP-addresse", string msg = "Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være tal før og efter hvert punktum")
         {
             Tooltip.ToolTipTitle = title;
@@ -162,6 +163,7 @@ namespace PLCompliant
             // If IP addresses cannot be validated
             if (!ValidateRange(FromTextBox, ToTextBox, out IPAddress? from, out IPAddress? to))
             {
+                // TODO: Replace with start_button_invalid_inputs_tooltip_header and start_button_invalid_inputs_tooltip_text
                 ShowWarning(StartStopButton, "Ugyldig indtastning", "Du skal skrive to gyldige IPv4-addresser");
 
             }
@@ -188,13 +190,14 @@ namespace PLCompliant
                     {
                         if (addrRange.Count > 1000)
                         {
+                            // TODO: Replace with dialog_over_1000_addresses and dialog_press_ok_if_you_with_to_start
                             DialogResult shouldContinue = ShowPopup("Du har valgt mere end 1000 addresser\rTryk Ok hvis du vil starte", PopupWindowType.WarningWindow, MessageBoxButtons.OKCancel);
                             if (shouldContinue == DialogResult.Cancel)
                             {
                                 return;
                             }
                         }
-                        CurrentStateLabel.Text = "Starter scan...";
+                        CurrentStateLabel.Text = "Starter scan..."; // TODO: Replace with starting_scan_text
                         UpdateEventQueue.Instance.Push(new UpdateStartViableIPScan(new StartViableIPsScanArgs(addrRange, Protocol)));
                         CurrentStateLabel.Visible = true;
 
@@ -203,7 +206,7 @@ namespace PLCompliant
 
                     else
                     {
-                        CurrentStateLabel.Text = "Stopper scan...";
+                        CurrentStateLabel.Text = "Stopper scan..."; // TODO: Replace with stopping_scan_text
                         UpdateEventQueue.Instance.Push(new StopScanEvent(null!));
 
                     }

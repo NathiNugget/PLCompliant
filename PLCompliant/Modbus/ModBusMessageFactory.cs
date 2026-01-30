@@ -24,21 +24,7 @@
 
         }
 
-        //TODO: Implement or remove this!
-        /// <summary>
-        /// Construction of a ModBusMessage with the function code to read the slave ID. This is not currently working 
-        /// 
-        /// </summary>
-        /// <param name="header">The header for the packet</param>
-        /// <returns>A ModBusMessage to send the function. It is not yet serialized</returns>
-        public ModBusMessage CreateGetSlaveID(ModBusHeader header)
-        {
-            var data = new ModBusData {  };
-            var msg = new ModBusMessage(header, data);
-            msg.AddData((byte)ModBusCommandType.get_slave_id);
-            return msg;
 
-        }
         #endregion
     }
 }

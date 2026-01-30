@@ -1,0 +1,55 @@
+Word_or_expression_to_be_translated	Value_for_the_word_or_translation
+select_protocol_header	Vælg protokol
+modbus_protocol_info	Modbus TCP Port 502
+step7_protocol_info	Siemens Step7 Port 102
+insert_ip_range_header	Indtast IP-rækkevidde
+from_word	Fra
+to_word	Til
+log_header	Log
+browse_word	Browse
+select_file_path_header	Vælg hvor CSV skal gemmes
+program_status_header	Programstatus
+program_status_awaiting_user_input	Afventer brugerens instruks
+start_button_text	Start
+stop_button_text	Stop
+no_plcs_found_text	Ingen PLC'er fundet
+starting_scan_text	Starter scan...
+stopping_scan_text	Stopper scan...
+illegal_ip_address_tooltip_header	Ugyldig IP-addresse
+illegal_ip_address_tooltip_text	Du har indtastet en ikke-valid IP-addresse. Tal må ikke over 255, og der skal være tal før og efter hvert punktum
+illegal_write_access_tooltip_header	Ugyldig skrive rettighed
+illegal_write_acecss_tooltip_text	Du har valgt en en mappe hvor programmet ikke kan skrive til. Vælg venligst en anden mappe
+start_button_invalid_inputs_tooltip_header	Ugyldig indtastning
+start_button_invalid_inputs_tooltip_text	Du skal skrive to gyldige IPv4-addresser
+modbus_csv_ip_address_header	IP-Address
+modbus_csv_vendorname_header	VendorName
+modbus_csv_productcode_header	ProductCode
+modbus_csv_firmwareversion_header	FirmwareVersion
+step7_csv_ip_address_header	IP-Address
+step7_csv_ordernumber_header	OrderNumber
+step7_csv_firmwareversion_header	FirmwareVersion
+unknown_word	Ukendt
+scanning_is_done_text	Scanning er færdig
+log_start_scan_on_protocol_text	PLC scan startet på protokol:
+log_scan_already_in_progress	Et scan prøvede at blive startet imens et scan allerede var i gang
+log_no_plcs_found_on_protocol	Ingen PLC Addresser fundet på XXX protokol!
+log_ip_address_found_in_scan	PLC IP-Addresse fundet i scan: XXX til protokol:
+log_network_exception_while_connecting_to_modbus_with_ip_address	Netværksfejl til Modbus PLC med IP-Addresse XXX: YYY
+log_modbus_response_contains_error_code_on_ip	Fejl ved forbindelse til Modbus PLC på IP:
+log_ip_not_found	IP ikke fundet
+log_error_code_word	Fejlkode
+log_error_on_modbus_with_ip	Fejl ved forbindelse til Modbus PLC på IP
+log_unknown_function_code	PLC returnerede et ukendt funktionskode:
+log_COTP_exception_on_IP	Fejl ved COTP-forbindelse til STEP7-PLC: XXX på IP: YYY
+log_no_COTP_worked_on_ip	Ingen COTP forbindelser virkede på IP XXX
+skipping_word skipper
+log_network_failure_while_setting_up_step7_on_IP	Netværksfejl ved Setup Communication i forbindelse til STEP7-PLC: XXX på IP: YYY
+log_reading_szl_failure_on_ip	Fejl ved aflæsning af SZL data i forbindelse til STEP7-PLC: XXX på IP: YYY
+log_parameter_failure while connecting to step7_plc_on_ip
+date_format	dd-MM-yyyy
+not_starting_scan_already_in_progress	Starter ikke scanning pga. en scanning er allerede igang
+plcs_found_but_no_useful_data	PLC'er fundet, men 0 returnerede brugbar data. Check log for detaljer
+result_saved_at_and_file_named	Resultat gemt i XXX, fil navngivet YYY
+dialog_over_1000_addresses	Du har valgt mere end 1000 addresser
+dialog_press_ok_if_you_with_to_start	Tryk Ok hvis du vil starte
+scanning_addresses_text	Scanner XXX IP-adresser

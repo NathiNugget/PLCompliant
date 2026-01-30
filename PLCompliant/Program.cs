@@ -1,12 +1,15 @@
 using PLCompliant.Config;
 using PLCompliant.Events;
 using PLCompliant.Utilities;
+
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+
 
 namespace PLCompliant
 {
     [ExcludeFromCodeCoverage]
-    internal static class Program
+    internal static class Programx
     {
         /// <summary>
         ///  The main entry point for the application.
@@ -16,6 +19,21 @@ namespace PLCompliant
         {
 
             ConfigLoader.LoadConfigFile("./config.xml");
+
+            foreach (var file in Directory.GetFiles("./Locales/"))
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    StringBuilder sb = new StringBuilder(4000);
+                    reader.ReadLine();
+                    while (!reader.EndOfStream)
+                    {
+                        sb.AppendLine(reader.ReadLine());
+                    }
+                    string s = sb.ToString();
+
+                }
+            }
 
             UpdateThreadContext context = new UpdateThreadContext();
 

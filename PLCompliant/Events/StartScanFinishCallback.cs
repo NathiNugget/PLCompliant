@@ -33,10 +33,11 @@ namespace PLCompliant.Events
             var form = validatedVals.Item1;
             if (args.Result == ScanResult.LockTaken)
             {
+                // TODO: Replace with not_starting_scan_already_in_progress
                 form.CurrentStateLabel.Text = "Starter ikke scanning pga. en scanning er allerede igang";
             }
             else if (!args.Responses.Any())
-            {
+            { // TODO: Replace with plcs_found_but and returned_useful_data
                 form.CurrentStateLabel.Text = $"{args.ResponsivePLCs.Count()} PLC'er fundet, men 0 returnerede brugbar data. Check log for detaljer";
             }
             else

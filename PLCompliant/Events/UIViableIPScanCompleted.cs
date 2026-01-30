@@ -30,11 +30,11 @@ namespace PLCompliant.Events
             int ipsleft = args.To - args.Current;
             if (ipsleft != 0)
             {
-                form.CurrentStateLabel.Text = $"Scanner {ipsleft} IP-addresser";
+                form.CurrentStateLabel.Text = $"Scanner {ipsleft} IP-addresser"; // TODO: Replace with translation key and value - use scanning_addresses_text
             }
             else
             {
-                form.CurrentStateLabel.Text = $"Scanning er færdig";
+                form.CurrentStateLabel.Text = $"Scanning er færdig"; // TODO: Replace with scanning_is_done_text
             }
 
 

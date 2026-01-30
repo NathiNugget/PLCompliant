@@ -115,23 +115,7 @@ namespace PLCompliant.Modbus.Tests
 
         }
 
-        [TestMethod]
 
-        public void ModBusMessageEqualsWithNullAndFactory()
-        {
-            var data = new ModBusData { };
-            data.AddData((byte)ModBusCommandType.get_slave_id); // function code
-            var expected = new ModBusMessage(new(1, 2, 3), data);
-
-            ModBusMessageFactory factory = new();
-            ModBusMessage actual = factory.CreateGetSlaveID(new(1, 2, 3));
-
-
-
-
-            Assert.AreEqual(expected, actual);
-
-        }
 
         [TestMethod()]
         [DataRow((ushort)1, (ushort)0xFF, (byte)0xA, (byte)0xA, (ushort)3, (byte)5, (ushort)6)]

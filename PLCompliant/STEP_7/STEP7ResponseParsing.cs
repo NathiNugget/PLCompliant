@@ -56,6 +56,7 @@ namespace PLCompliant.STEP_7
             UInt16 paramErr = EndianConverter.FromNetworkToHost(BitConverter.ToUInt16(msg.STEP7.STEP7ParamData.Data, msg.STEP7.STEP7ParamData.Data.Length - 2));
             if (paramErr != 0)
             {
+                // TODO: Replace with log_parameter_failure while connecting to step7_plc_on_ip and log_error_code_word
                 Logger.Instance.LogMessage($"Parameter fejl i forbindelse til STEP7-PLC: Fejlkode {paramErr}", System.Diagnostics.TraceEventType.Error);
                 return new ReadSZLResponseData();
             }

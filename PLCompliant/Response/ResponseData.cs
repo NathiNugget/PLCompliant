@@ -12,13 +12,13 @@ namespace PLCompliant.Response
         /// Unused for now, but meant to be used to make up headers
         /// </summary>
         /// 
-        //TODO: Find out if this should be moved to GLOBALS!
+
         public readonly static string[] HeaderNames =
         {
-            "IP-Address",
-            "VendorName" ,
-            "ProductCode" ,
-            "FirmwareVersion"
+            "IP-Address", // TODO: Replace with modbus_csv_ip_address_header
+            "VendorName" , //TODO: Replace with modbus_csv_vendorname_header
+            "ProductCode" , //TODO: Replace with modbus_csv_productcode_header
+            "FirmwareVersion" //TODO: Replace with modbus_csv_firmwareversion_header
         };
 
         #endregion
