@@ -20,7 +20,7 @@ Please try out any of available options below:
 >* off
 
 ## Downloading and running the application
-If you'd rather just attempt running it for yourself, please download [release 1.1](https://github.com/NathiNugget/PLCompliant/releases/download/1.1/bin.zip) and run either the Release or Debug build inside, the choice is yours :)  
+If you'd rather just attempt running it for yourself, please download [release 1.1](https://github.com/NathiNugget/PLCompliant/releases/download/1.1/PLCompliant_v1.1.zip) and run either the Release or Debug build inside, the choice is yours :)  
 
 ### Debug-build
 >Please run **PLCompliant-exe** inside `bin\Debug\net9.0-windows` if you want debug-flags.
