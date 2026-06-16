@@ -3,17 +3,22 @@ using PLCompliant.Modbus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PLCompliant.RequestModels
 {
+    /// <summary>
+    /// Represents a Read Device Identification command request for Modbus
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, Size = 4, CharSet = CharSet.Ansi)]
     public struct ReadDeviceIdentificationRequest : IConvertible<ModBusMessage, ushort> , IEndianConvertable
     {
-        private byte _functionCode;
-        private byte _subfunctionCode;
-        private byte _productId;
-        private byte _objectIdentifier;
+        [FieldOffset(0)] private byte _functionCode;
+        [FieldOffset(1)] private byte _subfunctionCode;
+        [FieldOffset(2)] private byte _productId;
+        [FieldOffset(3)] private byte _objectIdentifier;
 
 
         /// <summary>

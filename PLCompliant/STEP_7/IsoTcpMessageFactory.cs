@@ -1,4 +1,5 @@
 ﻿using PLCompliant.Enums;
+using PLCompliant.RequestModels;
 using System.Net;
 
 namespace PLCompliant.STEP_7
@@ -16,28 +17,9 @@ namespace PLCompliant.STEP_7
         public IsoTcpMessage CreateCRConnectRequestOne()
         {
 
+            CRConnectRequest request = new() {PDUType = 0xe0, DestinationReference = 0x0, SourceReference = 0x5, ClassBits = 0x0, SourceTSAP = 0x0100, DestinationTSAP = 0x0200, TPDUSize = (byte)CotpTpduSize.Octets1024 };
+            var msg = request.Convert(0);
 
-            var msg = new IsoTcpMessage(
-                new TPKTHeader(0x3),
-                new COTPMessage(
-                    new COTPHeader(),
-                    new COTPData()),
-                null);
-            msg.AddData(0xe0, (byte)IsoTcpDataType.COTPData); // pdu type
-            msg.AddData((UInt16)0x0000, (byte)IsoTcpDataType.COTPData); // destination reference
-            msg.AddData((UInt16)0x0005, (byte)IsoTcpDataType.COTPData); // source reference
-            msg.AddData((byte)0x0, (byte)IsoTcpDataType.COTPData); // class bits
-            msg.AddData((byte)0xc1, (byte)IsoTcpDataType.COTPData); // parameter code 1
-            msg.AddData((byte)0x2, (byte)IsoTcpDataType.COTPData); // param length 1
-            msg.AddData((UInt16)0x100, (byte)IsoTcpDataType.COTPData); // param data 1
-
-            msg.AddData((byte)0xc2, (byte)IsoTcpDataType.COTPData); // parameter code 2
-            msg.AddData((byte)0x2, (byte)IsoTcpDataType.COTPData); // param length 2
-            msg.AddData((UInt16)0x200, (byte)IsoTcpDataType.COTPData); // param data 2
-
-            msg.AddData((byte)0xc0, (byte)IsoTcpDataType.COTPData); // parameter code 2
-            msg.AddData((byte)0x1, (byte)IsoTcpDataType.COTPData); // param length 2
-            msg.AddData((byte)CotpTpduSize.Octets1024, (byte)IsoTcpDataType.COTPData); // param data 2 we choose 1024 cos we observed it would work in wireshark with our test device
 
             return msg;
         }
@@ -48,29 +30,9 @@ namespace PLCompliant.STEP_7
         /// <returns>IsoTCPMessage</returns>
         public IsoTcpMessage CreateCRConnectRequestTwo()
         {
-            var msg = new IsoTcpMessage(
-                new TPKTHeader(0x3),
-                new COTPMessage(
-                    new COTPHeader(),
-                    new COTPData()),
-                null);
-            msg.AddData(0xe0, (byte)IsoTcpDataType.COTPData); //pdu type
-            msg.AddData((UInt16)0x0000, (byte)IsoTcpDataType.COTPData); // destination reference
-            msg.AddData((UInt16)0x00014, (byte)IsoTcpDataType.COTPData); // source reference
-            msg.AddData((byte)0x0, (byte)IsoTcpDataType.COTPData); // class bits
-            msg.AddData((byte)0xc1, (byte)IsoTcpDataType.COTPData); // parameter code 1
-            msg.AddData((byte)0x2, (byte)IsoTcpDataType.COTPData); // param length 1
-            msg.AddData((UInt16)0x100, (byte)IsoTcpDataType.COTPData); // param data 1
 
-            msg.AddData((byte)0xc2, (byte)IsoTcpDataType.COTPData); // parameter code 2
-            msg.AddData((byte)0x2, (byte)IsoTcpDataType.COTPData); // param length 2
-            msg.AddData((UInt16)0x102, (byte)IsoTcpDataType.COTPData); // param data 2
-
-            msg.AddData((byte)0xc0, (byte)IsoTcpDataType.COTPData); // parameter code 3
-            msg.AddData((byte)0x1, (byte)IsoTcpDataType.COTPData); // param length 3
-            msg.AddData((byte)CotpTpduSize.Octets1024, (byte)IsoTcpDataType.COTPData); // param data 3 we choose 1024 cos we observed it would work in wireshark with our test device
-
-
+            CRConnectRequest request = new() { PDUType = 0xe0, DestinationReference = 0x0, SourceReference = 0x14, ClassBits = 0x0, SourceTSAP = 0x0100, DestinationTSAP = 0x0102, TPDUSize = (byte)CotpTpduSize.Octets1024 };
+            var msg = request.Convert(0);
 
             return msg;
 
@@ -84,23 +46,8 @@ namespace PLCompliant.STEP_7
         /// <returns>IsoTcpMessage ready to send</returns>
         public IsoTcpMessage CreateSetupCommunication()
         {
-            var msg = new IsoTcpMessage(
-                new TPKTHeader(0x3),
-                new COTPMessage(
-                    new COTPHeader(),
-                    new COTPData()),
-                new STEP7Message(
-                    new STEP7Header(0x32, 0x1, 0),
-                    new STEP7ParameterData(),
-                    null));
-            msg.AddData(0xf0, (byte)IsoTcpDataType.COTPData); // pdu type
-            msg.AddData((byte)0x80, (byte)IsoTcpDataType.COTPData); 
-            msg.AddData(0xf0, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // function code
-            msg.AddData((byte)0x0, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // add reserved field
-            msg.AddData((UInt16)0x1, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // Max AMQ (parallel jobs with ack) calling
-            msg.AddData((UInt16)0x1, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // Max AMQ (parallel jobs with ack) called
-            msg.AddData((UInt16)0x1e0, (byte)(IsoTcpDataType.STEP7Data | IsoTcpDataType.STEP7ParamData)); // PDU length
-
+            SetupCommunicationRequest request = new() { MaxAMQCalling = 1, MaxAMQCalled = 1, PDULength = 480 }; // pdu length HEX: 0x1e0
+            var msg = request.Convert(0);
             return msg;
         }
 
